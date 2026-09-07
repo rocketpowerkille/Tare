@@ -42,3 +42,19 @@ Future provider and protocol adapters belong behind `sources` and a future
 `adapters` module. They must preserve provenance and error semantics before being
 allowed to feed a live snapshot schema. Do not extend the current synthetic
 provenance enum without implementing its evidence requirements.
+
+## Future monitoring language boundary
+
+The resolver, provider clients, protocol adapters, verification, API, MCP server,
+web application, and monitoring consumer remain TypeScript. Standardized
+Subgraph mappings use AssemblyScript and do not require Rust.
+
+Rust may appear only in `graph/substreams/` if Tare must author a custom
+Substreams block-extraction module. That module compiles to WebAssembly and emits
+validated, versioned change messages to the TypeScript monitoring service. Using
+an existing Substreams package does not add a Rust requirement to Tare.
+
+The custom module is gated on successful live Graph-to-resolver-to-RPC
+verification and proof that existing packages cannot supply the required events.
+See [Language strategy and Rust boundary](LANGUAGE_STRATEGY.md) for the complete
+decision and component matrix.

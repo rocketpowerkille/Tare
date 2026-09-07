@@ -118,8 +118,11 @@ docs/                     Phase plan, architecture, accounting policy
 The directories are logical modules under one TypeScript package and one lockfile,
 not separately published workspace packages. This keeps phase one small while
 preserving boundaries for future adapters, verification, API, MCP, and web apps.
-Rust can be introduced behind an adapter later if measured workloads justify it.
+The project remains TypeScript-first. Rust is permitted only for an approved,
+isolated custom Substreams module after the live resolver and RPC verification
+path works end to end; it is not a general replacement path for core components.
 
 See [phase-one steps and exit criteria](docs/PHASE_1.md),
 [architecture](docs/ARCHITECTURE.md), [accounting](docs/ACCOUNTING.md),
+[language strategy and Rust boundary](docs/LANGUAGE_STRATEGY.md),
 [scope](SCOPE.md), and [field notes](FIELD_NOTES.md).

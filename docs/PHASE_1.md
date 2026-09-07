@@ -29,6 +29,12 @@ narrow live feature: an explicit, read-only, block-pinned native EVM balance que
 Phase one does not require the user to supply a real address. The wallet workflow is
 tested using a clearly synthetic identity, and no user profile is created by default.
 
+Phase one is entirely TypeScript and has no Rust requirement. Rust must not be
+introduced during the live-source and resolver work that immediately follows this
+phase. It becomes an option only for a later custom Substreams module after live
+Graph-to-resolver-to-RPC verification succeeds. See
+[Language strategy and Rust boundary](LANGUAGE_STRATEGY.md).
+
 ## Subsequent work — deferred
 
 After this milestone, revisit live-source feasibility, protocol allocation adapters,
