@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import { ZodError } from 'zod/v4';
 import { loadSnapshot } from '../../../packages/sources/src/snapshot.js';
+import { getNativeBalance } from '../../../packages/sources/src/rpc.js';
 import { resolveSnapshot } from '../../../packages/resolver/src/index.js';
 import { renderReceipt, serializeReceipt, writeReceipt } from '../../../packages/receipts/src/index.js';
 import { addWallet, getWallet, listWallets, removeWallet } from '../../../packages/wallet/src/index.js';
@@ -17,11 +18,14 @@ const help = `Tare 0.1.0 — offline exposure CLI
   tare wallet add <name> --address <0x...> --chain-id <number>
   tare wallet list
   tare wallet show <name>
+  tare wallet balance <name> --rpc-url <https://...> [--symbol <symbol>]
+       [--decimals <0..36>] [--timeout-ms <100..60000>] [--json]
   tare wallet remove <name>
 
 Wallet commands accept --home <directory>; resolve --wallet does too.
 Default profile directory: TARE_HOME or .tare in the current directory.
-Watch-only profiles store public addresses only. No chain connections or signing.
+Watch-only profiles store public addresses only. Balance reads are opt-in and never sign.
+RPC URLs may also be supplied through TARE_RPC_URL instead of --rpc-url.
 Snapshots and demos are synthetic, not live or independently verified evidence.
 Exit codes: 0 success; 1 invalid input/I/O; 2 partial resolution.
 Output files are created exclusively; existing files are never overwritten.`;
@@ -36,6 +40,12 @@ function integer(value: string | undefined, label: string): number {
   if (!Number.isSafeInteger(parsed)) throw new Error(`${label} exceeds the safe integer range`);
   return parsed;
 }
+function nonnegativeInteger(value: string | undefined, label: string): number {
+  if (value === undefined || !/^(0|[1-9][0-9]*)$/.test(value)) throw new Error(`${label} must be a nonnegative integer`);
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed)) throw new Error(`${label} exceeds the safe integer range`);
+  return parsed;
+}
 async function main(): Promise<number> {
   const { values, positionals } = parseArgs({
     allowPositionals: true, strict: true,
@@ -43,6 +53,8 @@ async function main(): Promise<number> {
       help: { type: 'boolean', short: 'h' }, json: { type: 'boolean' }, out: { type: 'string' },
       home: { type: 'string' }, address: { type: 'string' }, 'chain-id': { type: 'string' },
       wallet: { type: 'string' }, 'max-depth': { type: 'string' }, 'max-visits': { type: 'string' },
+      'rpc-url': { type: 'string' }, symbol: { type: 'string' }, decimals: { type: 'string' },
+      'timeout-ms': { type: 'string' },
     },
   });
   if (values.help || positionals.length === 0) { console.log(help); return 0; }
@@ -53,7 +65,12 @@ async function main(): Promise<number> {
     if (positionals.length > maxPositionals) throw new Error('Unexpected positional arguments');
   }
   if (command === 'wallet') {
-    allow(action === 'add' ? ['home', 'address', 'chain-id'] : ['home'], action === 'list' ? 2 : 3);
+    allow(
+      action === 'add' ? ['home', 'address', 'chain-id']
+        : action === 'balance' ? ['home', 'rpc-url', 'symbol', 'decimals', 'timeout-ms', 'json']
+          : ['home'],
+      action === 'list' ? 2 : 3,
+    );
     switch (action) {
       case 'add': console.log(JSON.stringify(await addWallet(home, {
         schemaVersion: 1, mode: 'watch-only', name: required(argument, 'wallet name'),
@@ -61,6 +78,23 @@ async function main(): Promise<number> {
       }), null, 2)); break;
       case 'list': console.log(JSON.stringify(await listWallets(home), null, 2)); break;
       case 'show': console.log(JSON.stringify(await getWallet(home, required(argument, 'wallet name')), null, 2)); break;
+      case 'balance': {
+        const wallet = await getWallet(home, required(argument, 'wallet name'));
+        const result = await getNativeBalance(
+          required(values['rpc-url'] ?? process.env.TARE_RPC_URL, '--rpc-url or TARE_RPC_URL'),
+          wallet,
+          { symbol: values.symbol ?? 'NATIVE', decimals: values.decimals === undefined ? 18 : nonnegativeInteger(values.decimals, '--decimals') },
+          { timeoutMs: values['timeout-ms'] === undefined ? 10000 : integer(values['timeout-ms'], '--timeout-ms') },
+        );
+        console.log(values.json ? JSON.stringify(result, null, 2) : [
+          `Native balance: ${result.balance} ${result.asset.symbol} (${result.balanceRaw} raw)`,
+          `Address: ${result.address}`,
+          `Chain: ${result.chainId}`,
+          `Block: ${result.block.number} (${result.block.hash})`,
+          'Verification: observed through the supplied EVM JSON-RPC endpoint',
+        ].join('\n'));
+        break;
+      }
       case 'remove': await removeWallet(home, required(argument, 'wallet name')); console.log('Wallet profile removed'); break;
       default: throw new Error('Unknown wallet command; use --help');
     }

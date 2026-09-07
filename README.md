@@ -1,8 +1,9 @@
 # Tare
 
 Tare is an exposure resolver for nested vault positions. Phase one is a working
-**offline, synthetic-data CLI** with local watch-only wallet profiles. It makes no
-RPC, Graph, wallet-provider, or other network calls at runtime.
+**offline, synthetic-data resolver** with local watch-only wallet profiles. An
+explicit wallet-balance command can make a read-only EVM JSON-RPC call; resolution
+itself makes no RPC, Graph, wallet-provider, or other network calls.
 
 This is an implementation foundation, not a live portfolio analyzer. All demo
 amounts and block references are explicitly synthetic. A complete traversal is
@@ -54,6 +55,28 @@ ownership. Included demo snapshots use the synthetic address
 `0x1111111111111111111111111111111111111111`; they will reject an unrelated real
 wallet profile rather than attribute demo holdings to it.
 
+### Read the real native balance
+
+The balance command works with any EVM-compatible HTTP(S) JSON-RPC endpoint. It
+first calls `eth_chainId`, refuses a network mismatch, reads the latest block, and
+then calls `eth_getBalance` at that exact block number. The RPC URL is supplied at
+read time and is not saved in the wallet profile.
+
+For Base Sepolia:
+
+```sh
+pnpm cli wallet balance base-sepolia --rpc-url https://sepolia.base.org --symbol ETH
+pnpm cli wallet balance base-sepolia --rpc-url https://sepolia.base.org --symbol ETH --json
+```
+
+Use `TARE_RPC_URL` instead of `--rpc-url` when an endpoint contains a provider
+token that should not be written to shell history. Native decimals default to 18;
+override them with `--decimals` for a chain whose native asset differs.
+
+This reports an RPC-observed native balance, not its fiat value. It does not
+discover ERC-20 balances, NFTs, vault positions, or independently verify the RPC
+operator. No transaction, connection request, or signature is made.
+
 ## Commands and outputs
 
 | Command | Purpose |
@@ -65,6 +88,7 @@ wallet profile rather than attribute demo holdings to it.
 | `resolve <file> --max-depth 2 --max-visits 100` | Bound traversal work |
 | `snapshot validate <file>` | Validate the fixture schema, not completeness or truth |
 | `wallet add/list/show/remove` | Manage local watch-only profiles |
+| `wallet balance <name> --rpc-url <url>` | Read a block-pinned native balance from an EVM RPC endpoint |
 
 Exit codes: **0** successful command or complete resolution; **1** invalid input
 or I/O failure; **2** partial resolution. `demo` exits 0 when all selected cases

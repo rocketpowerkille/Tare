@@ -8,7 +8,12 @@ no filesystem, provider, wallet, or transport dependency.
 CLI arguments -> local snapshot reader -> domain validation -> resolver -> receipt
       |                                                    -> text / JSON / file
       +-------> watch-only profile store -> owner/network match
+      +-------> explicit EVM RPC URL -> chain check -> block-pinned native balance
 ```
+
+The native-balance path is separate from exposure resolution. It validates the RPC
+chain against the selected watch-only profile and records the observed block number
+and hash. It does not feed RPC data into the synthetic snapshot schema.
 
 `domain` defines a versioned snapshot and a discriminated complete/partial receipt.
 Partial receipts contain at least one finding; complete receipts contain none.

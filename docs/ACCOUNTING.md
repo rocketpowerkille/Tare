@@ -40,3 +40,7 @@ scope. Depth is never substituted for this metric.
 Unresolved exposure is never imputed as zero. Known terminal amounts are preserved,
 but incomplete branches prevent completeness. Value coverage is `null`; structural
 finding counts do not estimate portfolio value coverage.
+
+The watch-only native-balance command is outside this accounting model. It reports
+an `eth_getBalance` observation at a pinned block and does not treat wallet-native
+currency as a resolved vault exposure, a fiat valuation, or verified backing.

@@ -1,7 +1,8 @@
 # Phase one — offline CLI
 
 The September 7 user direction supersedes the live-first sequencing in the original
-implementation plan: finish the CLI first and defer all on-chain integration.
+implementation plan: finish the CLI first. A subsequent user direction added one
+narrow live feature: an explicit, read-only, block-pinned native EVM balance query.
 
 ## Implementation order
 
@@ -22,7 +23,8 @@ implementation plan: finish the CLI first and defer all on-chain integration.
 - Wallet profiles can be added, listed, loaded, and removed locally.
 - A wallet-bound resolution rejects owner or network mismatches.
 - CLI reports partial results with exit code 2 and exports versioned JSON without clobbering files.
-- No Graph client, RPC provider, signing path, deployment, or transaction is introduced.
+- No Graph client, signing path, deployment, or transaction is introduced. The only
+  RPC path reads a wallet's native balance and cannot feed or verify a resolution.
 
 Phase one does not require the user to supply a real address. The wallet workflow is
 tested using a clearly synthetic identity, and no user profile is created by default.

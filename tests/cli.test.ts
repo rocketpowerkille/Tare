@@ -47,6 +47,7 @@ test('watch-only profile lifecycle and wallet-bound resolution are local and rej
     assert.equal(run(...args).status, 0);
     assert.equal(run(...args).status, 1, 'Existing profile must not be overwritten');
     assert.equal(JSON.parse(run('wallet', 'show', 'metamask').stdout).mode, 'watch-only');
+    assert.equal(run('wallet', 'balance', 'metamask').status, 1, 'Balance reads require an explicit RPC endpoint');
     assert.equal(run('resolve', 'fixtures/synthetic/control.json', '--wallet', 'metamask').status, 0);
     assert.equal(run('wallet', 'add', 'base', '--address', `0x${'11'.repeat(20)}`, '--chain-id', '8453').status, 0);
     assert.equal(run('resolve', 'fixtures/synthetic/control.json', '--wallet', 'base').status, 1);
