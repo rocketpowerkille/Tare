@@ -1,0 +1,10 @@
+node_modules/
+.pnpm-store/
+dist/
+.tare/
+receipts/
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+tmp

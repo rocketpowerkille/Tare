@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "provenance": "synthetic",
+  "name": "degraded",
+  "chainId": 1,
+  "block": {
+    "number": "100",
+    "hash": "0xabababababababababababababababababababababababababababababababab"
+  },
+  "root": {
+    "owner": "0x1111111111111111111111111111111111111111",
+    "nodeId": "root",
+    "sharesRaw": "100000000"
+  },
+  "sources": [
+    {
+      "id": "fixture",
+      "status": "healthy",
+      "detail": "Synthetic declaration; no network health check performed"
+    },
+    {
+      "id": "offline",
+      "status": "unavailable",
+      "detail": "Deliberately unavailable fixture source"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "root",
+      "sourceId": "fixture",
+      "block": {
+        "number": "100",
+        "hash": "0xabababababababababababababababababababababababababababababababab"
+      },
+      "kind": "vault",
+      "totalSupplyRaw": "100000000",
+      "allocations": [
+        {
+          "target": "usdc",
+          "balanceRaw": "70000000"
+        },
+        {
+          "target": "missing-vault",
+          "balanceRaw": "30000000"
+        }
+      ]
+    },
+    {
+      "id": "usdc",
+      "sourceId": "fixture",
+      "block": {
+        "number": "100",
+        "hash": "0xabababababababababababababababababababababababababababababababab"
+      },
+      "kind": "token",
+      "symbol": "USDC",
+      "decimals": 6
+    },
+    {
+      "id": "missing-vault",
+      "sourceId": "offline",
+      "block": {
+        "number": "100",
+        "hash": "0xabababababababababababababababababababababababababababababababab"
+      },
+      "kind": "opaque",
+      "reason": "Allocation source is offline"
+    }
+  ]
+}

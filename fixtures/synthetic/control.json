@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "provenance": "synthetic",
+  "name": "control",
+  "chainId": 1,
+  "block": {
+    "number": "100",
+    "hash": "0xabababababababababababababababababababababababababababababababab"
+  },
+  "root": {
+    "owner": "0x1111111111111111111111111111111111111111",
+    "nodeId": "root",
+    "sharesRaw": "100000000"
+  },
+  "sources": [
+    {
+      "id": "fixture",
+      "status": "healthy",
+      "detail": "Synthetic declaration; no network health check performed"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "root",
+      "sourceId": "fixture",
+      "block": {
+        "number": "100",
+        "hash": "0xabababababababababababababababababababababababababababababababab"
+      },
+      "kind": "vault",
+      "totalSupplyRaw": "100000000",
+      "allocations": [
+        {
+          "target": "usdc",
+          "balanceRaw": "100000000"
+        }
+      ]
+    },
+    {
+      "id": "usdc",
+      "sourceId": "fixture",
+      "block": {
+        "number": "100",
+        "hash": "0xabababababababababababababababababababababababababababababababab"
+      },
+      "kind": "token",
+      "symbol": "USDC",
+      "decimals": 6
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "tare",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24.0.0" },
+  "packageManager": "pnpm@11.19.0",
+  "bin": { "tare": "dist/apps/cli/src/main.js" },
+  "scripts": {
+    "build": "node node_modules/typescript/bin/tsc -p tsconfig.json",
+    "check": "node node_modules/typescript/bin/tsc -p tsconfig.json --noEmit",
+    "test": "node --test dist/tests/*.test.js",
+    "cli": "node dist/apps/cli/src/main.js",
+    "demo": "node dist/apps/cli/src/main.js demo all",
+    "verify": "node --run build && node --run test && node --run demo"
+  },
+  "dependencies": { "zod": "3.25.76" },
+  "devDependencies": { "@types/node": "24.13.2", "typescript": "5.9.3" }
+}
