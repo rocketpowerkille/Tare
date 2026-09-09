@@ -1,0 +1,288 @@
+{
+  "recordingVersion": 1,
+  "origin": "synthetic-recording",
+  "name": "debt",
+  "chainId": 1,
+  "block": {
+    "number": "100",
+    "hash": "0xabababababababababababababababababababababababababababababababab"
+  },
+  "owner": "0x0000000000000000000000000000000000000011",
+  "positions": [
+    {
+      "asset": "0x0000000000000000000000000000000000000001",
+      "sharesRaw": "40",
+      "evidenceId": "account"
+    },
+    {
+      "asset": "0x0000000000000000000000000000000000000002",
+      "sharesRaw": "20",
+      "evidenceId": "account"
+    }
+  ],
+  "sources": [
+    {
+      "id": "fixture",
+      "status": "healthy",
+      "healthBasis": "fixture-declared"
+    },
+    {
+      "id": "offline",
+      "status": "unavailable",
+      "healthBasis": "fixture-declared"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "account",
+      "sourceId": "fixture",
+      "chainId": 1,
+      "block": {
+        "number": "100",
+        "hash": "0xabababababababababababababababababababababababababababababababab"
+      },
+      "observedAt": "2026-09-09T00:00:00Z",
+      "origin": "synthetic-recording"
+    },
+    {
+      "id": "a",
+      "sourceId": "fixture",
+      "chainId": 1,
+      "block": {
+        "number": "100",
+        "hash": "0xabababababababababababababababababababababababababababababababab"
+      },
+      "observedAt": "2026-09-09T00:00:00Z",
+      "origin": "synthetic-recording"
+    },
+    {
+      "id": "b",
+      "sourceId": "fixture",
+      "chainId": 1,
+      "block": {
+        "number": "100",
+        "hash": "0xabababababababababababababababababababababababababababababababab"
+      },
+      "observedAt": "2026-09-09T00:00:00Z",
+      "origin": "synthetic-recording"
+    },
+    {
+      "id": "c",
+      "sourceId": "fixture",
+      "chainId": 1,
+      "block": {
+        "number": "100",
+        "hash": "0xabababababababababababababababababababababababababababababababab"
+      },
+      "observedAt": "2026-09-09T00:00:00Z",
+      "origin": "synthetic-recording"
+    },
+    {
+      "id": "d",
+      "sourceId": "fixture",
+      "chainId": 1,
+      "block": {
+        "number": "100",
+        "hash": "0xabababababababababababababababababababababababababababababababab"
+      },
+      "observedAt": "2026-09-09T00:00:00Z",
+      "origin": "synthetic-recording"
+    },
+    {
+      "id": "e",
+      "sourceId": "fixture",
+      "chainId": 1,
+      "block": {
+        "number": "100",
+        "hash": "0xabababababababababababababababababababababababababababababababab"
+      },
+      "observedAt": "2026-09-09T00:00:00Z",
+      "origin": "synthetic-recording"
+    },
+    {
+      "id": "metadata",
+      "sourceId": "fixture",
+      "chainId": 1,
+      "block": {
+        "number": "100",
+        "hash": "0xabababababababababababababababababababababababababababababababab"
+      },
+      "observedAt": "2026-09-09T00:00:00Z",
+      "origin": "synthetic-recording"
+    },
+    {
+      "id": "a-holding",
+      "sourceId": "fixture",
+      "chainId": 1,
+      "block": {
+        "number": "100",
+        "hash": "0xabababababababababababababababababababababababababababababababab"
+      },
+      "observedAt": "2026-09-09T00:00:00Z",
+      "origin": "synthetic-recording"
+    },
+    {
+      "id": "b-holding",
+      "sourceId": "fixture",
+      "chainId": 1,
+      "block": {
+        "number": "100",
+        "hash": "0xabababababababababababababababababababababababababababababababab"
+      },
+      "observedAt": "2026-09-09T00:00:00Z",
+      "origin": "synthetic-recording"
+    },
+    {
+      "id": "c-d",
+      "sourceId": "fixture",
+      "chainId": 1,
+      "block": {
+        "number": "100",
+        "hash": "0xabababababababababababababababababababababababababababababababab"
+      },
+      "observedAt": "2026-09-09T00:00:00Z",
+      "origin": "synthetic-recording"
+    },
+    {
+      "id": "c-e",
+      "sourceId": "fixture",
+      "chainId": 1,
+      "block": {
+        "number": "100",
+        "hash": "0xabababababababababababababababababababababababababababababababab"
+      },
+      "observedAt": "2026-09-09T00:00:00Z",
+      "origin": "synthetic-recording"
+    },
+    {
+      "id": "debt",
+      "sourceId": "fixture",
+      "chainId": 1,
+      "block": {
+        "number": "100",
+        "hash": "0xabababababababababababababababababababababababababababababababab"
+      },
+      "observedAt": "2026-09-09T00:00:00Z",
+      "origin": "synthetic-recording"
+    }
+  ],
+  "records": [
+    {
+      "address": "0x0000000000000000000000000000000000000001",
+      "evidenceId": "a",
+      "adapter": "fixture-holdings-v1",
+      "response": {
+        "type": "vault",
+        "total_supply": "100",
+        "allocations_complete": true,
+        "holdings": [
+          {
+            "token": "0x0000000000000000000000000000000000000003",
+            "evidence_id": "a-holding",
+            "raw_balance": "60"
+          }
+        ],
+        "debts": [],
+        "accounting_asset": {
+          "token": "0x0000000000000000000000000000000000000004",
+          "evidence_id": "metadata"
+        },
+        "risk_dependencies": [
+          {
+            "token": "0x0000000000000000000000000000000000000063",
+            "evidence_id": "metadata"
+          }
+        ]
+      }
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000002",
+      "evidenceId": "b",
+      "adapter": "fixture-holdings-v1",
+      "response": {
+        "type": "vault",
+        "total_supply": "100",
+        "allocations_complete": true,
+        "holdings": [
+          {
+            "token": "0x0000000000000000000000000000000000000003",
+            "evidence_id": "b-holding",
+            "raw_balance": "40"
+          }
+        ],
+        "debts": [],
+        "accounting_asset": {
+          "token": "0x0000000000000000000000000000000000000004",
+          "evidence_id": "metadata"
+        },
+        "risk_dependencies": [
+          {
+            "token": "0x0000000000000000000000000000000000000063",
+            "evidence_id": "metadata"
+          }
+        ]
+      }
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000003",
+      "evidenceId": "c",
+      "adapter": "fixture-holdings-v1",
+      "response": {
+        "type": "vault",
+        "total_supply": "100",
+        "allocations_complete": true,
+        "holdings": [
+          {
+            "token": "0x0000000000000000000000000000000000000004",
+            "evidence_id": "c-d",
+            "raw_balance": "100000000"
+          },
+          {
+            "token": "0x0000000000000000000000000000000000000005",
+            "evidence_id": "c-e",
+            "raw_balance": "1000000000000000000"
+          }
+        ],
+        "debts": [
+          {
+            "token": "0x0000000000000000000000000000000000000004",
+            "evidence_id": "debt",
+            "raw_balance": "10"
+          }
+        ],
+        "accounting_asset": {
+          "token": "0x0000000000000000000000000000000000000004",
+          "evidence_id": "metadata"
+        },
+        "risk_dependencies": [
+          {
+            "token": "0x0000000000000000000000000000000000000063",
+            "evidence_id": "metadata"
+          }
+        ]
+      }
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000004",
+      "evidenceId": "d",
+      "adapter": "fixture-holdings-v1",
+      "response": {
+        "type": "token",
+        "classification": "plain-token",
+        "symbol": "USDC",
+        "decimals": 6
+      }
+    },
+    {
+      "address": "0x0000000000000000000000000000000000000005",
+      "evidenceId": "e",
+      "adapter": "fixture-holdings-v1",
+      "response": {
+        "type": "token",
+        "classification": "plain-token",
+        "symbol": "GOV",
+        "decimals": 18
+      }
+    }
+  ]
+}

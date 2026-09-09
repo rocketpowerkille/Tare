@@ -1,5 +1,9 @@
 # Tare
 
+**Phase two is implemented:** version-two evidence snapshots, canonical asset
+identities, multiple positions, explicit accounting relationships, offline adapter
+replay, and receipt provenance. See [phase two](docs/PHASE_2.md).
+
 Tare is an exposure resolver for nested vault positions. Phase one is a working
 **offline, synthetic-data resolver** with local watch-only wallet profiles. An
 explicit wallet-balance command can make a read-only EVM JSON-RPC call; resolution
@@ -20,10 +24,12 @@ pnpm cli --help
 pnpm demo
 pnpm cli resolve fixtures/synthetic/deep.json --json
 pnpm cli snapshot validate fixtures/synthetic/control.json
+pnpm demo:phase2
+pnpm cli replay fixtures/recordings/multi-asset.json --json
 ```
 
 `verify` builds strict TypeScript, runs the unit and CLI integration tests, and
-executes the four reproducible demos. After building, you can also run
+executes both sets of reproducible demos. After building, you can also run
 `node dist/apps/cli/src/main.js --help` directly. The demo command works from any
 working directory. User-provided file paths are relative to the current directory.
 
@@ -87,6 +93,9 @@ operator. No transaction, connection request, or signature is made.
 | `resolve <file> --out receipt.json` | Save a receipt without overwriting a file |
 | `resolve <file> --max-depth 2 --max-visits 100` | Bound traversal work |
 | `snapshot validate <file>` | Validate the fixture schema, not completeness or truth |
+| `snapshot normalize <recording> --out <file>` | Normalize an offline recording into a version-two snapshot |
+| `replay <recording> --json` | Normalize and resolve a synthetic adapter recording |
+| `demo phase2` | Run six version-two accounting and failure cases |
 | `wallet add/list/show/remove` | Manage local watch-only profiles |
 | `wallet balance <name> --rpc-url <url>` | Read a block-pinned native balance from an EVM RPC endpoint |
 
@@ -105,11 +114,13 @@ by the input snapshot, not measured. Export parents must already exist.
 ```text
 apps/cli/src/              Command parsing and local CLI workflows
 packages/domain/src/      Runtime schemas, branded addresses, result types
+packages/adapters/src/    Recorded response normalization and adapter interface
 packages/sources/src/     Bounded local JSON/snapshot reader
 packages/resolver/src/    Deterministic traversal and integer attribution
 packages/wallet/src/      Watch-only profile validation and persistence
 packages/receipts/src/    JSON serialization and terminal formatting
 fixtures/synthetic/       Control, deep, degraded, and cycle inputs
+fixtures/recordings/      Synthetic adapter responses and multi-position cases
 tests/                    Resolver and subprocess CLI integration tests
 docs/                     Phase plan, architecture, accounting policy
 .github/workflows/        Linux/Windows offline CI checks
@@ -123,6 +134,7 @@ isolated custom Substreams module after the live resolver and RPC verification
 path works end to end; it is not a general replacement path for core components.
 
 See [phase-one steps and exit criteria](docs/PHASE_1.md),
+[phase-two implementation](docs/PHASE_2.md),
 [architecture](docs/ARCHITECTURE.md), [accounting](docs/ACCOUNTING.md),
 [language strategy and Rust boundary](docs/LANGUAGE_STRATEGY.md),
 [scope](SCOPE.md), and [field notes](FIELD_NOTES.md).

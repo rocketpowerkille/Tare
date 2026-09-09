@@ -1,5 +1,7 @@
 import { open } from 'node:fs/promises';
+import { z } from 'zod/v4';
 import { SnapshotSchema } from '../../domain/src/index.js';
+import { SnapshotV2Schema } from '../../domain/src/v2.js';
 
 // Bound reads before JSON parsing; profiles reuse the same local-file boundary.
 export async function readJsonFile(path: string, maxBytes = 5 * 1024 * 1024): Promise<unknown> {
@@ -21,4 +23,8 @@ export async function readJsonFile(path: string, maxBytes = 5 * 1024 * 1024): Pr
 
 export async function loadSnapshot(path: string) {
   return SnapshotSchema.parse(await readJsonFile(path));
+}
+
+export async function loadInputSnapshot(path: string) {
+  return z.union([SnapshotSchema, SnapshotV2Schema]).parse(await readJsonFile(path));
 }

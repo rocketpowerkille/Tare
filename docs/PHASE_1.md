@@ -1,5 +1,9 @@
 # Phase one — offline CLI
 
+This milestone is complete. The current implementation extends it with
+[phase two: evidence and offline adapters](PHASE_2.md). Version-one fixtures and
+commands remain supported.
+
 The September 7 user direction supersedes the live-first sequencing in the original
 implementation plan: finish the CLI first. A subsequent user direction added one
 narrow live feature: an explicit, read-only, block-pinned native EVM balance query.

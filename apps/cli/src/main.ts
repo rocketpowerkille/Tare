@@ -2,8 +2,12 @@
 import { parseArgs } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
+import { writeFile } from 'node:fs/promises';
 import { ZodError } from 'zod/v4';
-import { loadSnapshot } from '../../../packages/sources/src/snapshot.js';
+import { loadSnapshot, loadInputSnapshot, readJsonFile } from '../../../packages/sources/src/snapshot.js';
+import { normalizeRecording } from '../../../packages/adapters/src/index.js';
+import { resolveSnapshotV2 } from '../../../packages/resolver/src/v2.js';
+import { renderReceiptV2, serializeReceiptV2 } from '../../../packages/receipts/src/v2.js';
 import { getNativeBalance } from '../../../packages/sources/src/rpc.js';
 import { resolveSnapshot } from '../../../packages/resolver/src/index.js';
 import { renderReceipt, serializeReceipt, writeReceipt } from '../../../packages/receipts/src/index.js';
@@ -11,9 +15,11 @@ import { addWallet, getWallet, listWallets, removeWallet } from '../../../packag
 
 const help = `Tare 0.1.0 — offline exposure CLI
 
-  tare demo [control|deep|degraded|cycle|all] [--json]
+  tare demo [control|deep|degraded|cycle|all|phase2] [--json]
   tare resolve <snapshot.json> [--wallet <name>] [--json] [--out <receipt.json>]
-       [--max-depth <1..128>] [--max-visits <1..100000>]
+       [--max-depth <1..128>] [--max-visits <1..100000>] [--max-edges <1..100000>]
+  tare replay <recording.json> [--wallet <name>] [--json] [--out <receipt.json>]
+  tare snapshot normalize <recording.json> --out <snapshot.json>
   tare snapshot validate <snapshot.json>
   tare wallet add <name> --address <0x...> --chain-id <number>
   tare wallet list
@@ -55,6 +61,7 @@ async function main(): Promise<number> {
       wallet: { type: 'string' }, 'max-depth': { type: 'string' }, 'max-visits': { type: 'string' },
       'rpc-url': { type: 'string' }, symbol: { type: 'string' }, decimals: { type: 'string' },
       'timeout-ms': { type: 'string' },
+      'max-edges': { type: 'string' },
     },
   });
   if (values.help || positionals.length === 0) { console.log(help); return 0; }
@@ -102,12 +109,30 @@ async function main(): Promise<number> {
   }
   if (command === 'snapshot' && action === 'validate') {
     allow([], 3);
-    const snapshot = await loadSnapshot(required(argument, 'snapshot path'));
-    console.log(`Valid synthetic snapshot: ${snapshot.name} (${snapshot.nodes.length} nodes)`);
+    const snapshot = await loadInputSnapshot(required(argument, 'snapshot path'));
+    console.log(`Valid synthetic snapshot: ${snapshot.name} (${snapshot.nodes.length} nodes; schema ${snapshot.schemaVersion})`);
+    return 0;
+  }
+  if (command === 'snapshot' && action === 'normalize') {
+    allow(['out'], 3);
+    const output = required(values.out, '--out');
+    const snapshot = normalizeRecording(await readJsonFile(required(argument, 'recording path')));
+    await writeFile(output, `${JSON.stringify(snapshot, null, 2)}\n`, { flag: 'wx', mode: 0o600 });
+    console.log(`Normalized synthetic snapshot: ${snapshot.name} (${snapshot.nodes.length} nodes; schema 2)`);
     return 0;
   }
   if (command === 'demo') {
     allow(['json'], 2);
+    if (action === 'phase2') {
+      const cases = ['multi-asset', 'overlap', 'debt', 'degraded', 'cycle', 'schema-drift'];
+      const receipts = [];
+      for (const name of cases) {
+        const path = fileURLToPath(new URL(`../../../../fixtures/recordings/${name}.json`, import.meta.url));
+        receipts.push(resolveSnapshotV2(normalizeRecording(await readJsonFile(path))));
+      }
+      console.log(values.json ? JSON.stringify(receipts, null, 2) : receipts.map(renderReceiptV2).join('\n\n'));
+      return receipts.every(receipt => receipt.kind === (['multi-asset', 'overlap'].includes(receipt.name) ? 'complete' : 'partial')) ? 0 : 1;
+    }
     const names = ['control', 'deep', 'degraded', 'cycle'];
     const selection = action ?? 'all';
     if (selection !== 'all' && !names.includes(selection)) throw new Error('Unknown demo; use --help');
@@ -121,18 +146,29 @@ async function main(): Promise<number> {
     const expected = (name: string) => name === 'degraded' || name === 'cycle' ? 'partial' : 'complete';
     return receipts.every(receipt => receipt.kind === expected(receipt.name)) ? 0 : 1;
   }
-  if (command === 'resolve') {
-    allow(['wallet', 'home', 'json', 'out', 'max-depth', 'max-visits'], 2);
+  if (command === 'resolve' || command === 'replay') {
+    allow(['wallet', 'home', 'json', 'out', 'max-depth', 'max-visits', 'max-edges'], 2);
     if (values.home && !values.wallet) throw new Error('--home requires --wallet for resolve');
-    const snapshot = await loadSnapshot(required(action, 'snapshot path'));
+    const snapshot = command === 'replay'
+      ? normalizeRecording(await readJsonFile(required(action, 'recording path')))
+      : await loadInputSnapshot(required(action, 'snapshot path'));
     if (values.wallet) {
       const wallet = await getWallet(home, values.wallet);
-      if (wallet.address !== snapshot.root.owner || wallet.chainId !== snapshot.chainId) throw new Error('Snapshot owner/network does not match the selected wallet profile');
+      const owner = snapshot.schemaVersion === 2 ? snapshot.owner : snapshot.root.owner;
+      if (wallet.address !== owner || wallet.chainId !== snapshot.chainId) throw new Error('Snapshot owner/network does not match the selected wallet profile');
     }
-    const receipt = resolveSnapshot(snapshot, {
+    const limits = {
       ...(values['max-depth'] ? { maxDepth: integer(values['max-depth'], '--max-depth') } : {}),
       ...(values['max-visits'] ? { maxVisits: integer(values['max-visits'], '--max-visits') } : {}),
-    });
+    };
+    if (snapshot.schemaVersion === 2) {
+      const receipt = resolveSnapshotV2(snapshot, { ...limits, ...(values['max-edges'] ? { maxEdges: integer(values['max-edges'], '--max-edges') } : {}) });
+      if (values.out) await writeFile(values.out, serializeReceiptV2(receipt), { flag: 'wx', mode: 0o600 });
+      process.stdout.write(values.json ? serializeReceiptV2(receipt) : `${renderReceiptV2(receipt)}\n`);
+      return receipt.kind === 'partial' ? 2 : 0;
+    }
+    if (values['max-edges']) throw new Error('--max-edges requires schema 2');
+    const receipt = resolveSnapshot(snapshot, limits);
     if (values.out) await writeReceipt(values.out, receipt);
     process.stdout.write(values.json ? serializeReceipt(receipt) : `${renderReceipt(receipt)}\n`);
     return receipt.kind === 'partial' ? 2 : 0;

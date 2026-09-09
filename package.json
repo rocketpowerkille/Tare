@@ -12,7 +12,8 @@
     "test": "node --test dist/tests/*.test.js",
     "cli": "node dist/apps/cli/src/main.js",
     "demo": "node dist/apps/cli/src/main.js demo all",
-    "verify": "node node_modules/typescript/bin/tsc -p tsconfig.json && node --test dist/tests/*.test.js && node dist/apps/cli/src/main.js demo all"
+    "demo:phase2": "node dist/apps/cli/src/main.js demo phase2",
+    "verify": "node node_modules/typescript/bin/tsc -p tsconfig.json && node --test dist/tests/*.test.js && node dist/apps/cli/src/main.js demo all && node dist/apps/cli/src/main.js demo phase2"
   },
   "dependencies": { "zod": "3.25.76" },
   "devDependencies": { "@types/node": "24.13.2", "typescript": "5.9.3" }

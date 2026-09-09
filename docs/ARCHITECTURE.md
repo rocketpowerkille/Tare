@@ -1,5 +1,25 @@
 # Architecture
 
+Phase two extends this layout with `packages/domain/src/v2.ts`,
+`packages/adapters/src/index.ts`, and the version-two resolver/receipt modules.
+The schema-one path remains supported independently.
+
+```text
+synthetic response recording -> adapter registry -> validated schema 2 snapshot
+schema 2 snapshot ---------------------------------------> deterministic resolver
+                                                           -> evidence receipt
+```
+
+`snapshot normalize` exports the intermediate format. `replay` performs both steps;
+`resolve` accepts either normalized schema version. Adapter response validation is
+separate from envelope/reference validation. Unsupported adapters and invalid source
+response shapes produce opaque nodes; programmer exceptions fail visibly.
+
+Version two adds a global edge budget alongside depth and visit limits. Dependencies
+are recorded separately from traversed holdings. Observations, root balances and
+holding/debt edges are checked against the common block and declared source health.
+See [phase two](PHASE_2.md) and [accounting](ACCOUNTING.md) for exact semantics.
+
 CLI inputs pass through strict schemas before reaching the deterministic resolver.
 The local snapshot is normalized evidence for a synthetic model. The resolver has
 no filesystem, provider, wallet, or transport dependency.
