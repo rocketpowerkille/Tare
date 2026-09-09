@@ -1,8 +1,9 @@
-# Tare share ledger — local build, not deployed
+# Tare share ledger and accounting — hosted deployment pending
 
 This AssemblyScript subgraph reconstructs the ERC-20 share ledger of the Ethereum
-Steakhouse USDC MetaMorpho V1 vault. It is the first phase-four indexing increment,
-not a complete ERC-4626 accounting, allocation or backing index.
+Steakhouse USDC MetaMorpho V1 vault. A separate end-of-block mapping observes its
+underlying accounting. Actual Graph Node indexing and rollback acceptance are
+documented in the [integration runbook](../integration/README.md).
 
 ```sh
 npm ci --ignore-scripts --no-audit --no-fund
@@ -35,8 +36,8 @@ TypeScript/pnpm application. Neither installation nor build deploys anything.
   `never`. Account for its storage cost when choosing deployment configuration.
 - An account has no entity until a transfer touches it. The verifier treats a
   missing entity as unknown, even when it could mean an unused zero-balance account.
-- Graph Node owns canonical-chain indexing and rollback. The local handler tests
-  do not test Graph Node's undo behavior; deployed indexing/reorg acceptance is pending.
+- Graph Node owns canonical-chain indexing and rollback. The Docker integration
+  test exercises actual rollback; hosted mainnet acceptance is still pending.
 
 ## Query contract
 
@@ -47,9 +48,12 @@ deployment CID can be enforced by the caller. Total shares and account shares
 come from event arithmetic, not from copying the RPC values being compared.
 
 Vault asset/decimals metadata itself uses contract reads during initialization;
-matching those fields does not make them independent backing evidence. Neither
-`totalAssets` nor `convertToAssets` is indexed here: those can change with interest
-without a share Transfer and need a separate observation policy.
+matching those fields does not make them independent backing evidence. The
+accounting mapping observes `totalAssets`, fee inputs, withdrawal queue, Blue
+market parameters/state and positions at every block from 25937756.
+`convertToAssets` is owner-dependent and is not indexed. Accounting reads can be
+expensive and require archive access. Identity and read failures stop indexing;
+stale state is never silently treated as current.
 
 The user deferred deployment configuration. When it is ready, use the compiled
 artifact in a reviewed Graph Studio/Graph Node deployment, wait for indexing,

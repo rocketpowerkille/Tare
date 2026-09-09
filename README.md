@@ -5,10 +5,11 @@ snapshots and offline adapters, plus live Ethereum USDC MetaMorpho V1 discovery,
 allocation accounting and reproducible RPC receipts. See [phase two](docs/PHASE_2.md)
 and [phase three](docs/PHASE_3.md) for acceptance evidence and limitations.
 
-**Phase four is in progress:** a Tare-owned share-ledger subgraph builds locally,
-and `verify shares` compares its indexed data with RPC at the same block. The
-user deferred deployment; a live Graph/RPC acceptance run, deeper backing
-verification and valuation remain pending. See [phase four](docs/PHASE_4.md).
+**Phase four implementation and local acceptance are delivered:** share and
+underlying accounting indexing, real Graph Node rollback tests, live V2→V1→Blue
+resolution, timestamped prices and a real WETH custody 1x control. Production
+Graph deployment/acceptance remains deferred, so the full phase is still open.
+See [phase four](docs/PHASE_4.md) for the exact remaining gates.
 
 Tare is an exposure resolver for nested vault positions. Phase one is a working
 **offline, synthetic-data resolver** with local watch-only wallet profiles. An
@@ -17,8 +18,9 @@ The original snapshot and synthetic adapter commands remain offline.
 
 Live resolution covers one protocol family and its loan receivables, not every
 position or underlying collateral. Synthetic demos and the real captured example
-are labeled separately. Complete allocation accounting remains independently
-unverified; no collateral multiple or valuation is claimed.
+are labeled separately. Morpho loan backing remains unverified; its scoped metric
+is unavailable even when a USD price is observed. The separate WETH custody
+command supports a narrow wrapper-only metric with explicit provider limitations.
 
 ## Run
 
@@ -113,6 +115,13 @@ operator. No transaction, connection request, or signature is made.
 | `live replay <capture>` | Recompute a retained RPC capture without network calls |
 | `verify shares --address <address> --vault <vault> --rpc-url <url> --graph-url <url>` | Compare Tare's indexed share ledger with RPC at one block |
 | `verify replay <report>` | Recompute saved Graph/RPC checks without network calls |
+| `live nested --address <owner> --vault <V2-vault>` | Resolve a supported V2→V1→Blue position and observe its USD price |
+| `live nested-replay <capture>` | Replay nested accounting and valuation offline |
+| `verify accounting --vault <V1-vault>` | Cross-check indexed underlying accounting against pinned RPC |
+| `verify accounting-replay <capture>` | Recompute underlying accounting comparisons |
+| `verify custody --address <holder>` | Cross-check WETH/native ETH custody across two RPC hosts |
+| `verify custody-replay <capture>` | Replay the scoped custody metric |
+| `demo phase4` | Synthetic 1x/3x methodology controls and blocked cases |
 | `wallet add/list/show/remove` | Manage local watch-only profiles |
 | `wallet balance <name> --rpc-url <url>` | Read a block-pinned native balance from an EVM RPC endpoint |
 

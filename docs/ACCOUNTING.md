@@ -80,7 +80,7 @@ supply and explicitly complete empty holdings can be topologically complete with
 no leaves; this does not establish solvency or metric eligibility. Zero supply is
 an unresolved state, avoiding undefined division.
 
-## Proposed metric contract — not yet executable
+## Scoped metric contract
 
 For a declared, fully supported graph scope at one block, define:
 
@@ -95,8 +95,8 @@ be positive; duplicated observations or repeated references cannot create new
 backing. Independent owner allocations may be summed, with ownership consistency
 checked. A supported single-layer custody case with 100 units of claim value and
 100 units of backing would yield 1x. A supported three-layer case with 100 at each
-layer and the same 100 terminal backing would yield 3x. These are methodology
-examples, not measured results from this repository.
+layer and the same 100 terminal backing would yield 3x. `demo phase4` executes
+these synthetic controls; the WETH control below uses real observations.
 
 This measures layered gross claims within the stated scope; it is not automatically
 borrower leverage, liquidation risk, or the entire ecosystem's TVL/TVR. The paper
@@ -160,6 +160,58 @@ supported amounts only when the known denominator and conversion still reconcile
 within observed evidence. A reorg or failed final block confirmation suppresses
 all attributed amounts. Complete means fully observed within this declared scope.
 Independent verification remains pending and value coverage remains null.
+
+## Phase-four nested accounting, pricing and backing
+
+The V2→V1→Blue path reuses the V1 accounting above with the V1 adapter as the
+actual share owner. It checks the adapter's parent, V1 target, nonzero allocation,
+and V1 conversion against `realAssets()`. Positive unsupported adapters, cycles,
+duplicate adapters and cumulative child ownership above supply block attribution.
+The root's idle USDC is observed separately; an adapter with zero reported assets
+is explicitly unexpanded. No borrower collateral is attributed to the root.
+
+V2 real assets are idle USDC plus adapter real assets. The adapter reconstructs
+`min(realAssets, storedAssets + floor(storedAssets * elapsed * maxRate / 1e18))`,
+then performance fees on positive growth and management fees on elapsed assets.
+Fee recipients' receive-share gates affect pending dilution. Reconstructed assets,
+fee shares and the root quote must match the contract views. Calls are separate
+top-level `eth_call` executions, so V2's transient first-accrual state is empty.
+See the [V2 implementation](https://github.com/morpho-org/vault-v2/blob/main/src/VaultV2.sol)
+and [V1 adapter](https://github.com/morpho-org/vault-v2/blob/main/src/adapters/MorphoVaultV1Adapter.sol).
+
+The root quote is allocated in proportion to controlled real assets, including
+when the accounting growth cap excludes some controlled value. Each child claim
+is then allocated using its already reconstructed V1 market attribution. Floors
+are applied at each step; the denominator of a nested market remainder is that
+adapter's real assets. Dust remains unattributed. This is an exposure allocation
+convention, not a redemption schedule or a guarantee of withdrawals.
+
+Shared lending paths consolidate by chain, market ID and loan asset. Their
+accounting liquidity upper bound is `min(ownerClaim, supplyAssets - borrowAssets)`;
+contradictory shared state removes this bound. It is not cash backing, net borrower
+solvency, or executable liquidity. Bad debt and unsupported wrapper backing remain
+unknown. Repeated references never add collateral to the backing denominator.
+
+Chainlink proxy calls use the same block hash as the position. USDC/USD permits
+86,400 seconds of age; ETH/USD permits 3,600. Prices must have eight decimals,
+positive signed answers, consistent round fields, and nonzero nonfuture timestamps.
+USDC value in USD with eight decimals is `floor(rawUSDC * answer / 1e6)`.
+The remainder is retained. A price is not a stablecoin reserve attestation.
+See [Chainlink's round API](https://docs.chain.link/data-feeds/api-reference).
+
+The separate canonical Ethereum WETH control compares owner WETH balance,
+decimals, reported supply, native ETH at the WETH contract, and ETH/USD across
+two different RPC hostnames at the same confirmed block. Native custody must
+equal reported supply and cover the owner's positive claim. WETH's reviewed
+custody model has one native ETH unit per token unit and no protocol borrow debt;
+the same attributable quantity prices both numerator and denominator, yielding
+1x. USD valuation rounding to zero blocks the metric. Forced native donations do
+not create additional owner claims. See [canonical WETH](https://github.com/gnosis/canonical-weth/blob/master/contracts/WETH9.sol).
+
+This metric's scope is `weth-wrapper-only`. It excludes the holder's other debts,
+and distinct endpoints do not prove organizational independence or authenticate
+unsigned captures. The Morpho metric remains unavailable: loan-denominated claims
+are not substituted for independently supported terminal backing.
 
 The captured [public example](../fixtures/live/README.md) provides exact integer
 acceptance values and links to the protocol's accounting sources. Matching views

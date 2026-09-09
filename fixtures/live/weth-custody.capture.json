@@ -1,0 +1,134 @@
+{
+  "captureVersion": 1,
+  "scope": "ethereum-weth-native-custody",
+  "chainId": 1,
+  "owner": "0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb",
+  "capturedAt": "2026-09-09T14:23:45.152Z",
+  "witnesses": [
+    {
+      "providerId": "sha256:65947e8555f0c1a54d328893b2e81242b41561ded855fdb61cbc3eaefb156f4d",
+      "rpc": {
+        "block": {
+          "number": "0x18bd1a3",
+          "hash": "0x68db55a5c26bebf3281cac55001c0bce30a2bf30d0482f840a1b39757e2bb07b",
+          "timestamp": "0x6aa16be7"
+        },
+        "confirmed": true,
+        "calls": [
+          {
+            "id": "rpc-1",
+            "to": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+            "data": "0x313ce567",
+            "result": "0x0000000000000000000000000000000000000000000000000000000000000012",
+            "blockHash": "0x68db55a5c26bebf3281cac55001c0bce30a2bf30d0482f840a1b39757e2bb07b",
+            "observedAt": "2026-09-09T14:23:47.292Z"
+          },
+          {
+            "id": "rpc-2",
+            "to": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+            "data": "0x70a08231000000000000000000000000bbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb",
+            "result": "0x0000000000000000000000000000000000000000000002c26f02b61660771335",
+            "blockHash": "0x68db55a5c26bebf3281cac55001c0bce30a2bf30d0482f840a1b39757e2bb07b",
+            "observedAt": "2026-09-09T14:23:47.351Z"
+          },
+          {
+            "id": "rpc-3",
+            "to": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+            "data": "0x18160ddd",
+            "result": "0x00000000000000000000000000000000000000000001b440e382dbee443b0d60",
+            "blockHash": "0x68db55a5c26bebf3281cac55001c0bce30a2bf30d0482f840a1b39757e2bb07b",
+            "observedAt": "2026-09-09T14:23:47.354Z"
+          },
+          {
+            "id": "rpc-4",
+            "to": "0x5f4ec3df9cbd43714fe2740f5e3616155c5b8419",
+            "data": "0xfeaf968c",
+            "result": "0x00000000000000000000000000000000000000000000000700000000000082aa0000000000000000000000000000000000000000000000000000003a25106c4a000000000000000000000000000000000000000000000000000000006aa166bd000000000000000000000000000000000000000000000000000000006aa166cb00000000000000000000000000000000000000000000000700000000000082aa",
+            "blockHash": "0x68db55a5c26bebf3281cac55001c0bce30a2bf30d0482f840a1b39757e2bb07b",
+            "observedAt": "2026-09-09T14:23:47.660Z"
+          },
+          {
+            "id": "rpc-5",
+            "to": "0x5f4ec3df9cbd43714fe2740f5e3616155c5b8419",
+            "data": "0x313ce567",
+            "result": "0x0000000000000000000000000000000000000000000000000000000000000008",
+            "blockHash": "0x68db55a5c26bebf3281cac55001c0bce30a2bf30d0482f840a1b39757e2bb07b",
+            "observedAt": "2026-09-09T14:23:47.806Z"
+          }
+        ],
+        "failedCalls": []
+      },
+      "balances": [
+        {
+          "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+          "balance": "0x1b440e382dbee443b0d60",
+          "blockHash": "0x68db55a5c26bebf3281cac55001c0bce30a2bf30d0482f840a1b39757e2bb07b",
+          "observedAt": "2026-09-09T14:23:48.022Z"
+        }
+      ]
+    },
+    {
+      "providerId": "sha256:e1bb36b2cbfbed0cb7c0754c75eaa6e8ead59a683fa634154056b0b3cdbfe1ff",
+      "rpc": {
+        "block": {
+          "number": "0x18bd1a3",
+          "hash": "0x68db55a5c26bebf3281cac55001c0bce30a2bf30d0482f840a1b39757e2bb07b",
+          "timestamp": "0x6aa16be7"
+        },
+        "confirmed": true,
+        "calls": [
+          {
+            "id": "rpc-1",
+            "to": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+            "data": "0x70a08231000000000000000000000000bbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb",
+            "result": "0x0000000000000000000000000000000000000000000002c26f02b61660771335",
+            "blockHash": "0x68db55a5c26bebf3281cac55001c0bce30a2bf30d0482f840a1b39757e2bb07b",
+            "observedAt": "2026-09-09T14:23:47.124Z"
+          },
+          {
+            "id": "rpc-2",
+            "to": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+            "data": "0x18160ddd",
+            "result": "0x00000000000000000000000000000000000000000001b440e382dbee443b0d60",
+            "blockHash": "0x68db55a5c26bebf3281cac55001c0bce30a2bf30d0482f840a1b39757e2bb07b",
+            "observedAt": "2026-09-09T14:23:47.209Z"
+          },
+          {
+            "id": "rpc-3",
+            "to": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+            "data": "0x313ce567",
+            "result": "0x0000000000000000000000000000000000000000000000000000000000000012",
+            "blockHash": "0x68db55a5c26bebf3281cac55001c0bce30a2bf30d0482f840a1b39757e2bb07b",
+            "observedAt": "2026-09-09T14:23:47.258Z"
+          },
+          {
+            "id": "rpc-4",
+            "to": "0x5f4ec3df9cbd43714fe2740f5e3616155c5b8419",
+            "data": "0x313ce567",
+            "result": "0x0000000000000000000000000000000000000000000000000000000000000008",
+            "blockHash": "0x68db55a5c26bebf3281cac55001c0bce30a2bf30d0482f840a1b39757e2bb07b",
+            "observedAt": "2026-09-09T14:23:47.483Z"
+          },
+          {
+            "id": "rpc-5",
+            "to": "0x5f4ec3df9cbd43714fe2740f5e3616155c5b8419",
+            "data": "0xfeaf968c",
+            "result": "0x00000000000000000000000000000000000000000000000700000000000082aa0000000000000000000000000000000000000000000000000000003a25106c4a000000000000000000000000000000000000000000000000000000006aa166bd000000000000000000000000000000000000000000000000000000006aa166cb00000000000000000000000000000000000000000000000700000000000082aa",
+            "blockHash": "0x68db55a5c26bebf3281cac55001c0bce30a2bf30d0482f840a1b39757e2bb07b",
+            "observedAt": "2026-09-09T14:23:47.498Z"
+          }
+        ],
+        "failedCalls": []
+      },
+      "balances": [
+        {
+          "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+          "balance": "0x1b440e382dbee443b0d60",
+          "blockHash": "0x68db55a5c26bebf3281cac55001c0bce30a2bf30d0482f840a1b39757e2bb07b",
+          "observedAt": "2026-09-09T14:23:47.715Z"
+        }
+      ]
+    }
+  ],
+  "failures": []
+}

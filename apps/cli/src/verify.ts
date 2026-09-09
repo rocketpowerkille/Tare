@@ -3,12 +3,16 @@ import type { Values } from './args.js';
 import { writeFile } from 'node:fs/promises';
 import { readJsonFile } from '../../../packages/sources/src/snapshot.js';
 import { replayShareVerification, ShareVerificationReportSchema, verifyShares } from '../../../packages/verification/src/shares.js';
+import { runAccountingCommand } from './accounting.js';
+import { runCustodyCommand } from './custody.js';
 
 function required(input: string | undefined, name: string): string {
   if (!input) throw new Error(`Missing ${name}`); return input;
 }
 export async function runVerifyCommand(positionals: string[], values: Values): Promise<number> {
   const action = positionals[1];
+  if (action === 'accounting' || action === 'accounting-replay') return runAccountingCommand(positionals, values);
+  if (action === 'custody' || action === 'custody-replay') return runCustodyCommand(positionals, values);
   if (!['shares', 'replay'].includes(action ?? '')) throw new Error('Use verify shares or verify replay');
   const allowed = action === 'replay' ? ['json', 'out'] : ['json', 'out', 'address', 'vault', 'rpc-url', 'graph-url', 'graph-deployment', 'block-number', 'timeout-ms'];
   for (const option of Object.keys(values)) if (!allowed.includes(option)) throw new Error(`Unsupported verify option --${option}`);

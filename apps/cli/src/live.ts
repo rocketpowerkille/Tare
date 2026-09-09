@@ -12,6 +12,7 @@ import { getWallet } from '../../../packages/wallet/src/index.js';
 import { PUBLIC_EXAMPLE_VAULT } from '../../../packages/adapters/src/morpho-blue.js';
 import { LiveOptionsSchema, replayLiveCapture, resolveLivePosition } from '../../../packages/resolver/src/live.js';
 import { validateHttpUrl } from '../../../packages/sources/src/http.js';
+import { runNestedCommand } from './nested.js';
 
 async function output(result: LiveReceipt, values: Values): Promise<number> {
   const validated = LiveReceiptSchema.parse(result);
@@ -24,6 +25,7 @@ async function output(result: LiveReceipt, values: Values): Promise<number> {
 }
 export async function runLiveCommand(positionals: string[], values: Values): Promise<number> {
   const action = positionals[1];
+  if (action === 'nested' || action === 'nested-replay') return runNestedCommand(positionals, values);
   const common = ['json', 'out', 'capture-out', 'max-markets'];
   const allowed = action === 'replay' ? common
     : ['address', 'wallet', 'home', 'chain-id', 'vault', 'graphql-url', 'timeout-ms', ...(action === 'resolve' ? [] : ['max-positions']),

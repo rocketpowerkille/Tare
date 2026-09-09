@@ -115,10 +115,26 @@ deployment identity and block alignment before comparing asset, decimals, supply
 and owner shares. `apps/cli/src/verify.ts` exposes comparison and offline replay.
 The receipt schema recomputes its checks from captured evidence during validation.
 
-The subgraph compiles locally; Graph Node indexing and live source acceptance
-have not been run. A matched share report is not verified backing and cannot
-enable a numerical collateral metric. The remaining phase-four work is recorded
-in [its acceptance checklist](PHASE_4.md).
+The actual mappings pass a local Graph Node/Anvil indexing and rollback test.
+Mainnet Graph deployment remains pending. Share agreement is not backing
+verification. Remaining acceptance gates are in [phase four](PHASE_4.md).
+
+The accounting mapping runs separately at end of block. `accounting-reads.ts`
+defines the bounded RPC read set; `verification/accounting-capture.ts` validates
+captured data and `verification/accounting.ts` acquires/replays exact comparisons.
+Graph queries use hashes because number-pinned `_meta` may return null hashes.
+
+`adapters/morpho-v2.ts` reconstructs V2 interest and fee dilution. The bounded
+`resolver/nested.ts` expands V1 share-owning adapters through the existing V1/Blue
+analysis, preserving per-path rounding. `sources/recorded.ts` supplies validated
+offline RPC reads. New CLI handlers export captures for deterministic replay.
+
+`sources/chainlink.ts` handles price rounds and precision. `verification/backing.ts`
+consolidates loan claims without treating borrower collateral as owned cash.
+`verification/custody.ts` implements the separate canonical WETH/native ETH
+control using two RPC witnesses, with separate capture schema and CLI handler.
+Generic methodology controls in `metric.ts` cannot authorize live metrics; the
+WETH path requires raw block-aligned evidence and reports its narrow scope.
 
 ## Future monitoring language boundary
 

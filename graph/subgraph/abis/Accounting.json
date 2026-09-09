@@ -1,0 +1,214 @@
+[
+  {
+    "type": "function",
+    "name": "MORPHO",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "v0",
+        "type": "address"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "asset",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "v0",
+        "type": "address"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "totalSupply",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "v0",
+        "type": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "totalAssets",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "v0",
+        "type": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "fee",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "v0",
+        "type": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "lastTotalAssets",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "v0",
+        "type": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "DECIMALS_OFFSET",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "v0",
+        "type": "uint8"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "withdrawQueueLength",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "v0",
+        "type": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "withdrawQueue",
+    "stateMutability": "view",
+    "inputs": [
+      {
+        "name": "v0",
+        "type": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "v0",
+        "type": "bytes32"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "idToMarketParams",
+    "stateMutability": "view",
+    "inputs": [
+      {
+        "name": "v0",
+        "type": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "v0",
+        "type": "address"
+      },
+      {
+        "name": "v1",
+        "type": "address"
+      },
+      {
+        "name": "v2",
+        "type": "address"
+      },
+      {
+        "name": "v3",
+        "type": "address"
+      },
+      {
+        "name": "v4",
+        "type": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "market",
+    "stateMutability": "view",
+    "inputs": [
+      {
+        "name": "v0",
+        "type": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "v0",
+        "type": "uint128"
+      },
+      {
+        "name": "v1",
+        "type": "uint128"
+      },
+      {
+        "name": "v2",
+        "type": "uint128"
+      },
+      {
+        "name": "v3",
+        "type": "uint128"
+      },
+      {
+        "name": "v4",
+        "type": "uint128"
+      },
+      {
+        "name": "v5",
+        "type": "uint128"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "position",
+    "stateMutability": "view",
+    "inputs": [
+      {
+        "name": "v0",
+        "type": "bytes32"
+      },
+      {
+        "name": "v1",
+        "type": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "v0",
+        "type": "uint256"
+      },
+      {
+        "name": "v1",
+        "type": "uint128"
+      },
+      {
+        "name": "v2",
+        "type": "uint128"
+      }
+    ]
+  }
+]

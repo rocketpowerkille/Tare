@@ -27,3 +27,20 @@ type ShareTransfer @entity(immutable: true) {
   transactionHash: Bytes!
   logIndex: BigInt!
 }
+
+# End-of-block contract state, distinct from the event-derived share ledger.
+type AccountingState @entity(immutable: false) {
+  id: Bytes!
+  chainId: Int!
+  blockNumber: BigInt!
+  blockHash: Bytes!
+  timestamp: BigInt!
+  reads: [AccountingRead!]!
+}
+
+type AccountingRead @entity(immutable: false) {
+  id: ID!
+  to: Bytes!
+  data: Bytes!
+  result: Bytes!
+}

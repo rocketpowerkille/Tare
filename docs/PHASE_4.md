@@ -1,102 +1,107 @@
-# Phase four — indexed evidence and verification (in progress)
+# Phase four — implementation delivered, hosted acceptance pending
 
-Phase three is closed against its documented Ethereum USDC MetaMorpho V1 scope.
-Its 50-test baseline and 12-market capture replay were rechecked before starting
-this work. Phase four has now started; it is **not complete**.
+The Ethereum implementation and local Graph Node acceptance tests are delivered.
+**The full phase-four milestone is not closed:** the user previously deferred
+Graph deployment, and no production Graph endpoint/CID is configured. A fully
+indexed mainnet Graph/RPC acceptance capture remains required. Broader standardized
+indexing and multiple-network coverage are not implemented.
 
-## First increment delivered
+## Delivered
 
-1. `graph/subgraph/` contains a Tare-owned share ledger for the public Ethereum
-   Steakhouse USDC vault. It reconstructs share supply and account balances from
-   ERC-20 Transfer events, including fee mints, burns and ordinary transfers.
-   It records event identity and block provenance. This is a small custom schema,
-   not a claim to have implemented The Graph's standardized Subgraph products.
-2. The subgraph manifest, ABI and AssemblyScript mapping generate types and build
-   to WASM successfully with pinned Graph tooling. Dependencies and build output
-   are isolated from the TypeScript CLI; Rust is not needed.
-3. `packages/sources/src/the-graph.ts` queries Tare's schema at a requested block.
-   It retains `_meta` deployment, block number/hash and indexing-error status.
-   GraphQL partial-with-errors responses and unexpected schemas are rejected.
-   Optional `GRAPH_API_KEY` authentication uses an HTTP header and is excluded
-   from receipts and provider error messages.
-4. `packages/verification/src/shares.ts` compares Graph and fresh RPC evidence for
-   asset identity, share decimals, total share supply and owner share balance.
-   Every RPC contract read uses the same canonical block hash, followed by a final
-   confirmation. Graph block mismatch, indexing errors, wrong identity, optional
-   deployment mismatch, missing entities or malformed evidence prevent agreement.
-5. `verify shares` exports the comparison and evidence; `verify replay` recomputes
-   it offline. Schema validation recalculates checks and status from captured
-   evidence, rejecting a changed digest or fabricated report fields.
+| Capability | Implementation and evidence |
+| --- | --- |
+| Share indexing | Transfer-derived supply/balances, including fee mints, burns and rollback |
+| Underlying indexing | End-of-block vault accounting, withdrawal queue, market parameters/state and vault positions |
+| Graph/RPC verification | Hash-pinned queries, deployment/identity checks, exact read-set comparison and replay |
+| Real indexer testing | Graph Node 0.45.0, PostgreSQL, IPFS and Anvil; actual WASM mappings, orphan rollback and replacement burn |
+| Three economic layers | Public OV USDC V2 → Steakhouse V1 → 12 Blue markets, through a V1 share-owning adapter |
+| V2 accounting | Capped interest, pending performance/management fee shares, fee gates and conversion reconciliation |
+| Valuation | Chainlink USDC/USD and ETH/USD rounds, timestamp/age/signed-answer checks and integer rounding |
+| Backing policy | Consolidated shared loan claims; lending backing remains unknown; liquidity bounds are not withdrawal promises |
+| Real 1x control | Canonical WETH holdings and native ETH custody cross-checked across two public RPC hosts with a common ETH/USD price |
 
-Morpho's [current developer documentation](https://docs.morpho.org/developers/)
-marks its former Subgraphs deprecated and unsupported. Rather than assume those
-deployments remain current, this increment supplies our own narrowly scoped
-indexer. The existing Morpho API remains phase-three discovery-only.
+The Graph Node test found a defect that mocks missed: `_meta` can return a null
+hash for number-pinned historical queries. Verification now queries Graph by the
+RPC block hash and checks both number and hash. `--block-number` still selects
+that block through RPC.
 
-The user chose **build and test now, configure deployment later**. Nothing has
-been deployed or published. No live Graph/RPC acceptance result is claimed.
-
-## Local verification
+## Verification and commands
 
 ```sh
-pnpm install --frozen-lockfile
 node --run verify
-npm ci --prefix graph/subgraph --ignore-scripts --no-audit --no-fund
 node --run build:subgraph
+node dist/apps/cli/src/main.js demo phase4
+node dist/apps/cli/src/main.js live nested-replay fixtures/live/ov-usdc-v2.capture.json
+node dist/apps/cli/src/main.js verify custody-replay fixtures/live/weth-custody.capture.json
 ```
 
-The root suite has 61 tests, ten synthetic demo cases and the retained real RPC
-capture replay. New tests exercise Graph/RPC comparison using a local HTTP server,
-exact quantity mismatches, block/deployment/identity checks, missing entities,
-reorgs, source errors, credential redaction, exports and replay. Mapping tests
-execute the actual handler source with a small Graph host double. The WASM build
-is checked separately. These are not Graph Node indexing or hosted deployment
-tests, and they do not demonstrate live independent verification.
-
-## Commands after deployment is configured
-
-Use an endpoint implementing **tare-share-ledger-v1**, not Morpho's public API or
-an arbitrary existing Subgraph. Set `TARE_GRAPH_URL`, `TARE_RPC_URL` and, where
-required, `GRAPH_API_KEY` in your shell. Set `TARE_GRAPH_DEPLOYMENT` to the expected
-manifest CID to pin the deployed schema/mapping. `.env` is not automatically read.
+`demo phase4` labels its 1x/3x arithmetic as synthetic. The separate WETH capture
+is a real custody control. All replay commands are offline. See the
+[Graph Node runbook](../graph/integration/README.md) and
+[public capture provenance](../fixtures/live/README.md). CI includes a Docker
+integration job; its remote run has not been observed from this workspace.
 
 ```sh
-pnpm cli verify shares --address 0x334f5d28a71432f8fc21c7b2b6f5dbbcd8b32a7b --vault 0xbeef01735c132ada46aa9aa4c54623caa92a64cb --block-number 25937756 --out share-check.json
-pnpm cli verify replay share-check.json --json
+# Configure TARE_RPC_URL. --out saves a capture for the new commands.
+tare live nested --address 0xba3356e6a4eac76980067dbaa3758e5e5685cfb7 --vault 0x18032c694f8ebfdcc030cb8c54c3701a107c2f72 --out nested.json
+tare live nested-replay nested.json --json
+
+# Also configure TARE_SECONDARY_RPC_URL for a distinct provider.
+tare verify custody --address 0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb --out custody.json
+tare verify custody-replay custody.json --json
+
+# After the Tare deployment has indexed the selected mainnet block:
+tare verify shares --address 0x334f5d28a71432f8fc21c7b2b6f5dbbcd8b32a7b --vault 0xbeef01735c132ada46aa9aa4c54623caa92a64cb --block-number 25937756 --out shares.json
+tare verify accounting --vault 0xbeef01735c132ada46aa9aa4c54623caa92a64cb --block-number 25937756 --out accounting.json
+tare verify accounting-replay accounting.json --json
 ```
 
-Flags `--graph-url`, `--rpc-url` and `--graph-deployment` override the corresponding
-environment variables. `--timeout-ms` bounds each request. Without `--block-number`
-the RPC chooses latest; a lagging index may then fail the comparison. Explicitly
-select an indexed block for acceptance. The supplied endpoint must retain that
-historical state; the subgraph manifest disables pruning for this reason.
+Graph commands use `TARE_GRAPH_URL`, `TARE_RPC_URL`, optional `GRAPH_API_KEY`, and
+`TARE_GRAPH_DEPLOYMENT` to pin a manifest CID. Flags override environment values;
+`.env` is not loaded automatically. Keys stay in headers and out of receipts.
 
-Exit 0 means four share-ledger fields matched at a confirmed block. Exit 2 means
-a numerical mismatch or incomplete evidence. Exit 1 means invalid configuration,
-invalid input file or export failure. Output files never overwrite existing files.
-An absent indexed account remains unknown; it is not automatically assigned zero.
+New nested/accounting/custody commands export **captures** with `--out`; replay
+recomputes reports/digests rather than trusting saved result fields. Existing
+`verify shares --out` still exports its validated report for `verify replay`.
+Exports never overwrite. Exit 0 means complete accounting or a matched comparison
+within scope; 2 means incomplete/mismatch; 1 means invalid input or I/O failure.
+Complete nested accounting can coexist with unavailable valuation if pricing fails.
 
-## Phase-four completion checklist
+## Limits
 
-- [x] Build a local subgraph and a bounded Graph client with block/deployment checks.
-- [x] Implement deterministic share-ledger comparison, receipts and replay.
-- [ ] Configure deployment, index full history and retain a real Graph/RPC result.
-- [ ] Validate indexing/reorg behavior in Graph Node, beyond the local host double.
-- [ ] Extend indexed observations and comparisons to protocol allocations and
-  underlying accounting; share agreement alone does not cover these quantities.
-- [ ] Connect supported live adapters into recursive traversal and resolve a real
-  position spanning at least three economic layers. Collateral references must
-  not be treated as assets the vault owns merely to add depth.
-- [ ] Define independent backing and debt treatment, including lending claims,
-  liquidity limitations, unsupported wrappers and shared backing.
-- [ ] Add timestamped valuation and metric eligibility, including a supported 1x
-  control and explicit mismatch/partial cases. Keep the metric unavailable until
-  all required backing and valuation evidence is present.
-- [ ] Deliver the broader standardized indexing/multiple-network milestone if
-  retained for the submission; this single-vault Ethereum index does not satisfy it.
+The nested adapter supports Ethereum USDC V2 vaults with V1 adapters, at most 64
+adapters and 64 markets per V1, bounded globally by 1,000 RPC requests and five
+minutes. Positive unsupported adapters, cycles or accounting contradictions suppress
+attribution. Zero-value adapters stay unexpanded. General V2→V2 wrappers and direct
+Blue adapters are unsupported. The adapter custodian is not an extra economic
+layer, and collateral references never create ownership.
 
-The new report explicitly says `share-ledger-cross-check-only`. Agreement can
-detect implementation/source discrepancies; it does not prove source independence,
-deployment authenticity, collateral value, USDC reserves or solvency. The numerical
-collateral multiple remains unavailable. API/MCP/Bazantic remain phase five,
-monitoring phase six, and optional execution phase seven.
+The subgraph observes accounting at every block from 25937756. The share ledger
+starts at zero for full transfer history. An archive-capable indexer RPC is needed;
+per-block indexing can be expensive. Select the accounting start block deliberately.
+The exact comparison covers 8 vault reads plus 4 per market: 56 for the public V1
+example. This checks raw agreement, not independent IRM accrual or solvency.
+
+The WETH metric covers only the canonical wrapper's claim against native ETH
+custody, excluding the holder's other liabilities. Distinct hostnames establish
+provider diversity, not proven organizational independence or cryptographic state
+proofs. Captures are unsigned. WETH's custody rule does not extend to stablecoin
+reserves or lending receivables: the Morpho metric remains unavailable even with
+observed USD valuation.
+
+## Remaining gates
+
+- [x] Local subgraph build and bounded verification/replay.
+- [x] Actual Graph Node indexing/reorg acceptance and retained evidence.
+- [x] Indexed underlying accounting and exact comparisons.
+- [x] Real three-layer resolution with conserved integer attribution.
+- [x] Explicit debt, wrapper, shared-backing and liquidity treatment.
+- [x] Timestamped valuation, real WETH 1x control, and partial/mismatch tests.
+- [ ] Configure production deployment, index full share history, and retain matched
+  mainnet share **and** accounting reports at one indexed block.
+- [ ] Broader standardized indexing/multiple-network coverage, if retained as a
+  submission milestone. This implementation remains Ethereum-only.
+
+API/MCP/web remains phase five, monitoring phase six, optional execution phase
+seven. No mainnet transactions are signed or broadcast. Anvil transactions are
+confined to the localhost integration test.

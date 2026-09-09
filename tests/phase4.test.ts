@@ -28,7 +28,7 @@ function handler(data = graphData(), mutate?: (call: z.infer<typeof RpcRequest>,
   return (body, response) => {
     if (typeof body === 'object' && body !== null && 'query' in body) {
       const query = z.object({ query: z.string(), variables: z.unknown() }).parse(body);
-      assert.deepEqual(query.variables, { block: { number: 16 }, vault, balance: `${vault}-${owner}` });
+      assert.deepEqual(query.variables, { block: { hash: block.hash }, vault, balance: `${vault}-${owner}` });
       assert.equal((query.query.match(/block:\$block/g) ?? []).length, 3);
       json(response, { data }); return;
     }

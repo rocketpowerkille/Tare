@@ -1,6 +1,15 @@
 export const help = `Tare 0.1.0 — exposure CLI with offline replay and read-only live sources
 
-  tare demo [control|deep|degraded|cycle|all|phase2] [--json]
+  tare live nested --address <owner> --vault <V2-vault> [--rpc-url <url>] [--block-number <n>] [--json] [--out <capture.json>]
+  tare live nested-replay <capture.json> [--json]
+  tare verify accounting --vault <V1-vault> [--rpc-url <url>] [--graph-url <url>]
+       [--graph-deployment <CID>] [--block-number <n>] [--json] [--out <capture.json>]
+  tare verify accounting-replay <capture.json> [--json]
+  tare verify custody --address <holder> [--rpc-url <url>] [--secondary-rpc-url <url>]
+       [--block-number <n>] [--json] [--out <capture.json>]
+  tare verify custody-replay <capture.json> [--json]
+
+  tare demo [control|deep|degraded|cycle|all|phase2|phase4] [--json]
   tare resolve <snapshot.json> [--wallet <name>] [--json] [--out <receipt.json>]
        [--max-depth <1..128>] [--max-visits <1..100000>] [--max-edges <1..100000>]
   tare replay <recording.json> [--wallet <name>] [--json] [--out <receipt.json>]

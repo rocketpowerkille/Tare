@@ -67,7 +67,7 @@ export async function verifyShares(input: z.input<typeof ShareVerificationOption
         await settleReads(calls.map(data => rpc.call(options.vault, data)));
       }),
       observe('graph', async () => {
-        capture.graph = await graphql.readAt(options.vault, options.owner, number);
+        capture.graph = await graphql.readAt(options.vault, options.owner, number, rpc.block.hash);
       }),
     ]);
     await rpc.confirm();

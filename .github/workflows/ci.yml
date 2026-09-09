@@ -16,3 +16,23 @@ jobs:
       - run: pnpm verify
       - run: npm ci --prefix graph/subgraph --ignore-scripts --no-audit --no-fund
       - run: node --run build:subgraph
+  graph-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: node --run build
+      - run: npm ci --prefix graph/subgraph --ignore-scripts --no-audit --no-fund
+      - run: node --run build:subgraph
+      - run: docker compose -f graph/integration/compose.yaml up -d
+      - run: docker run --rm --entrypoint forge -v "$PWD/graph/integration:/work" -w /work ghcr.io/foundry-rs/foundry:v1.3.1 build
+      - run: node --run test:graph
+      - if: failure()
+        run: docker compose -f graph/integration/compose.yaml logs --tail 100
+      - if: always()
+        run: docker compose -f graph/integration/compose.yaml down --volumes

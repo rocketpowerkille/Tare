@@ -1,0 +1,48 @@
+name: tare-phase4-test
+services:
+  chain:
+    image: ghcr.io/foundry-rs/foundry:v1.3.1
+    entrypoint: anvil
+    command: ["--host", "0.0.0.0", "--chain-id", "1"]
+    ports: ["127.0.0.1:18545:8545"]
+    healthcheck:
+      test: ["CMD", "cast", "block-number", "--rpc-url", "http://127.0.0.1:8545"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+  postgres:
+    image: postgres:16.4
+    environment:
+      POSTGRES_USER: graph
+      POSTGRES_PASSWORD: local-test-only
+      POSTGRES_DB: graph
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "graph", "-d", "graph"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+  ipfs:
+    image: ipfs/kubo:v0.32.1
+    ports: ["127.0.0.1:15001:5001"]
+  graph:
+    image: graphprotocol/graph-node:v0.45.0
+    depends_on:
+      chain:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      ipfs:
+        condition: service_healthy
+    ports: ["127.0.0.1:18000:8000", "127.0.0.1:18020:8020", "127.0.0.1:18030:8030"]
+    environment:
+      postgres_host: postgres
+      postgres_user: graph
+      postgres_pass: local-test-only
+      postgres_db: graph
+      ipfs: ipfs:5001
+      ethereum: mainnet:http://chain:8545
+      GRAPH_LOG: info
+      ETHEREUM_POLLING_INTERVAL: 100
+      GRAPH_ETHEREUM_MAX_BLOCK_RANGE_SIZE: 10
+      GRAPH_ETHEREUM_TARGET_TRIGGERS_PER_BLOCK_RANGE: 10

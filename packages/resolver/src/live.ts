@@ -5,7 +5,7 @@ import type { LiveCapture, LiveReceipt, MarketObservation } from '../../domain/s
 import { decodeAddress, decodeWords, PinnedRpc, settleReads, word } from '../../sources/src/evm.js';
 import type { ContractReader, RpcBlock } from '../../sources/src/evm.js';
 import { MorphoDiscovery } from '../../sources/src/morpho.js';
-import type { Discovery, VaultMetadata } from '../../sources/src/morpho.js';
+import type { Discovery } from '../../sources/src/morpho.js';
 import { SourceFailure } from '../../sources/src/http.js';
 import { ETHEREUM_USDC, MORPHO_BLUE_ETHEREUM, readMarket, readUint, SELECTOR, vaultFeeShares } from '../../adapters/src/morpho-blue.js';
 
@@ -24,12 +24,12 @@ function failure(error: unknown, stage: string, marketId?: string): LiveReceipt[
   if (error instanceof z.ZodError) return { stage, code: 'invalid-response', ...(marketId ? { marketId } : {}) };
   throw error;
 }
-async function analyze(reader: ContractReader, metadata: VaultMetadata, owner: string, vaultAddress: string, maxMarkets: number): Promise<Analysis> {
+export async function analyzeMetaMorpho(reader: ContractReader, owner: string, vaultAddress: string, maxMarkets: number, expectedAsset: string = ETHEREUM_USDC): Promise<Analysis> {
   const result: Analysis = { vault: null, markets: [], findings: [], unattributedAssetsRaw: null };
   try {
     const [morpho, assetData] = await settleReads([reader.call(vaultAddress, SELECTOR.morpho), reader.call(vaultAddress, SELECTOR.asset)]);
     const asset = decodeAddress(assetData!);
-    if (decodeAddress(morpho!) !== MORPHO_BLUE_ETHEREUM || asset !== ETHEREUM_USDC || metadata.asset.address !== asset) throw new SourceFailure('invalid-response', 'Unsupported vault, Morpho deployment or loan asset');
+    if (decodeAddress(morpho!) !== MORPHO_BLUE_ETHEREUM || asset !== ETHEREUM_USDC || asset !== expectedAsset) throw new SourceFailure('invalid-response', 'Unsupported vault, Morpho deployment or loan asset');
     const [supply, assets, shares, fee, lastAssets, offset, queueLength, decimals] = await settleReads([
       readUint(reader, vaultAddress, SELECTOR.supply), readUint(reader, vaultAddress, SELECTOR.assets),
       readUint(reader, vaultAddress, SELECTOR.balance, word(owner)), readUint(reader, vaultAddress, SELECTOR.fee),
@@ -108,7 +108,7 @@ export async function resolveLivePosition(input: LiveOptions, discovery: Discove
   if (capture.metadata && capture.acquisitionFailures.length === 0) {
     try {
       await rpc.pin(1, options.blockNumber); capture.block = rpc.block;
-      analysis = await analyze(rpc, capture.metadata, options.owner, options.vault, options.maxMarkets);
+      analysis = await analyzeMetaMorpho(rpc, options.owner, options.vault, options.maxMarkets, capture.metadata.asset.address);
       await rpc.confirm(); capture.blockConfirmed = true;
     } catch (error) { capture.acquisitionFailures.push(failure(error, 'rpc')); }
   }
@@ -135,7 +135,7 @@ class ReplayReader implements ContractReader {
 export async function replayLiveCapture(input: unknown, limits: { maxMarkets?: number } = {}): Promise<LiveReceipt> {
   const capture = CaptureSchema.parse(input); const { maxMarkets } = LimitsSchema.parse(limits);
   const analysis = capture.block && capture.metadata
-    ? await analyze(new ReplayReader(capture), capture.metadata, capture.owner, capture.vault, maxMarkets)
+    ? await analyzeMetaMorpho(new ReplayReader(capture), capture.owner, capture.vault, maxMarkets, capture.metadata.asset.address)
     : { vault: null, markets: [], findings: [{ stage: 'capture', code: 'missing-root-evidence' }], unattributedAssetsRaw: null };
   return receipt(capture, analysis, 'recorded-rpc');
 }

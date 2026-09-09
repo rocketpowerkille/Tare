@@ -12,6 +12,9 @@ export const CallObservationSchema = z.strictObject({
   blockHash: HashSchema, observedAt: z.iso.datetime(),
 });
 export type CallObservation = z.infer<typeof CallObservationSchema>;
+export const NativeBalanceSchema = z.strictObject({
+  address: AddressSchema, balance: HexQuantitySchema, blockHash: HashSchema, observedAt: z.iso.datetime(),
+});
 export const FailedCallSchema = z.strictObject({ to: AddressSchema, data: HexDataSchema, blockHash: HashSchema, code: z.enum(['timeout', 'network', 'http', 'oversized', 'invalid-json', 'invalid-response', 'rpc-error', 'graphql-error', 'budget', 'reorg']) });
 export type FailedCall = z.infer<typeof FailedCallSchema>;
 const EnvelopeSchema = z.object({ jsonrpc: z.literal('2.0'), id: z.number().int(), result: z.unknown().optional(), error: z.unknown().optional() });
@@ -37,6 +40,7 @@ export async function settleReads<T>(requests: Promise<T>[]): Promise<T[]> {
 export class PinnedRpc implements ContractReader {
   block!: RpcBlock;
   readonly observations: CallObservation[] = [];
+  readonly nativeBalances: z.infer<typeof NativeBalanceSchema>[] = [];
   readonly failedCalls: FailedCall[] = [];
   readonly health: Health = { source: 'rpc', status: 'healthy', requests: 0, failures: 0, elapsedMs: 0 };
   private readonly cache = new Map<string, string>();
@@ -44,6 +48,15 @@ export class PinnedRpc implements ContractReader {
   private readonly deadline: number;
   constructor(url: string, private readonly timeoutMs = 10000, private readonly maxCalls = 250, deadlineMs = 120000) {
     this.url = validateHttpUrl(url); this.deadline = Date.now() + deadlineMs;
+  }
+  async nativeBalance(addressInput: string): Promise<bigint> {
+    if (!this.block) throw new Error('Pin a block before reading balances');
+    const address = AddressSchema.parse(addressInput);
+    const raw = await this.request('eth_getBalance', [address, { blockHash: this.block.hash, requireCanonical: true }]);
+    const parsed = HexQuantitySchema.safeParse(raw);
+    if (!parsed.success) throw new SourceFailure('invalid-response', 'Invalid native balance');
+    this.nativeBalances.push({ address, balance: parsed.data, blockHash: this.block.hash, observedAt: new Date().toISOString() });
+    return BigInt(parsed.data);
   }
   private async request(method: string, params: unknown[]): Promise<unknown> {
     if (this.health.requests >= this.maxCalls || Date.now() >= this.deadline) throw new SourceFailure('budget', 'RPC request or deadline budget exhausted');

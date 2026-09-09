@@ -7,10 +7,20 @@ import { renderReceipt } from '../../../packages/receipts/src/index.js';
 import { renderReceiptV2 } from '../../../packages/receipts/src/v2.js';
 import { allowOptions } from './args.js';
 import type { CliValues } from './args.js';
+import { metricControls } from '../../../packages/verification/src/controls.js';
 
 export async function runDemoCommand(positionals: string[], values: CliValues): Promise<number> {
   const action = positionals[1];
   allowOptions(values, positionals, ['json'], 2);
+  if (action === 'phase4') {
+    const controls = metricControls();
+    console.log(values.json ? JSON.stringify(controls, null, 2) : controls.map(control => {
+      const metric = control.metric;
+      return `${control.name} | synthetic methodology control | ${metric.kind === 'control-result'
+        ? `${metric.multipleMillionths}/1000000 x` : metric.reasons.join(', ')}`;
+    }).join('\n'));
+    return controls.every((control, index) => control.metric.kind === (index < 2 ? 'control-result' : 'unavailable')) ? 0 : 1;
+  }
   if (action === 'phase2') {
     const cases = ['multi-asset', 'overlap', 'debt', 'degraded', 'cycle', 'schema-drift'];
     const receipts = [];

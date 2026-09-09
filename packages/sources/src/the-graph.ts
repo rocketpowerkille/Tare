@@ -42,19 +42,24 @@ export class GraphShareClient {
       if (parsed.protocol !== 'https:' && !['localhost', '127.0.0.1', '[::1]'].includes(parsed.hostname)) throw new Error('Graph authentication requires HTTPS outside localhost');
     }
   }
-  async readAt(vaultInput: string, ownerInput: string, block: number): Promise<GraphShareObservation> {
+  async readAt(vaultInput: string, ownerInput: string, block: number, blockHash?: string): Promise<GraphShareObservation> {
     const vault = AddressSchema.parse(vaultInput); const owner = AddressSchema.parse(ownerInput);
     z.number().int().min(0).max(2147483647).parse(block);
+    const height = blockHash ? { hash: HashSchema.parse(blockHash) } : { number: block };
+    const data = await this.query(SHARE_QUERY, { block: height, vault, balance: `${vault}-${owner}` }, GraphShareDataSchema);
+    return { source: 'the-graph', schema: 'tare-share-ledger-v1', requestedBlock: block, observedAt: new Date().toISOString(), data };
+  }
+  async query<T>(query: string, variables: Record<string, unknown>, schema: z.ZodType<T>): Promise<T> {
     this.health.requests++; const start = performance.now();
     try {
-      const raw = await postJson(this.url, { query: SHARE_QUERY, variables: { block: { number: block }, vault, balance: `${vault}-${owner}` } }, this.timeoutMs, 1024 * 1024, this.apiKey ? `Bearer ${this.apiKey}` : undefined);
+      const raw = await postJson(this.url, { query, variables }, this.timeoutMs, 1024 * 1024, this.apiKey ? `Bearer ${this.apiKey}` : undefined);
       const envelope = z.object({ data: z.unknown().optional(), errors: z.array(z.unknown()).optional() }).safeParse(raw);
       if (!envelope.success) throw new SourceFailure('invalid-response', 'Invalid Graph response envelope');
       if (envelope.data.errors?.length) throw new SourceFailure('graphql-error', 'Graph query failed; partial data was rejected');
-      const data = GraphShareDataSchema.safeParse(envelope.data.data);
-      if (!data.success) throw new SourceFailure('invalid-response', 'Graph response does not implement tare-share-ledger-v1');
+      const data = schema.safeParse(envelope.data.data);
+      if (!data.success) throw new SourceFailure('invalid-response', 'Graph response does not implement the requested Tare schema');
       this.health.status = 'healthy';
-      return { source: 'the-graph', schema: 'tare-share-ledger-v1', requestedBlock: block, observedAt: new Date().toISOString(), data: data.data };
+      return data.data;
     } catch (error) {
       this.health.failures++; this.health.status = 'unavailable'; throw error;
     } finally { this.health.elapsedMs += performance.now() - start; }

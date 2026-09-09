@@ -35,3 +35,26 @@ dataSources:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
       file: ./src/mapping.ts
+  - kind: ethereum
+    name: VaultAccounting
+    network: mainnet
+    source:
+      address: '0xbeef01735c132ada46aa9aa4c54623caa92a64cb'
+      abi: Accounting
+      # Point-in-time state needs no event bootstrap. This is the retained V1 capture block.
+      startBlock: 25937756
+    context:
+      chainId:
+        type: Int
+        data: 1
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities: [AccountingState, AccountingRead]
+      abis:
+        - name: Accounting
+          file: ./abis/Accounting.json
+      blockHandlers:
+        - handler: handleAccountingBlock
+      file: ./src/accounting.ts

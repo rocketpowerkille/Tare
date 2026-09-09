@@ -1,8 +1,10 @@
-# Real public RPC capture
+# Real public RPC captures
 
 Unlike `fixtures/synthetic` and `fixtures/recordings`, the JSON files in this
 directory were acquired from public sources. They are retained observations,
 not synthetic vectors or independent attestations.
+
+## Steakhouse USDC V1
 
 - Discovery and vault metadata: <https://api.morpho.org/graphql>
 - RPC: <https://ethereum-rpc.publicnode.com>
@@ -58,4 +60,52 @@ Accounting and discovery references:
 - [MetaMorpho accounting](https://github.com/morpho-org/metamorpho/blob/main/src/MetaMorpho.sol)
 - [Expected market balances](https://github.com/morpho-org/morpho-blue/blob/main/src/libraries/periphery/MorphoBalancesLib.sol)
 - [Integer interest math](https://github.com/morpho-org/morpho-blue/blob/main/src/libraries/MathLib.sol)
+
+## OV USDC V2 nested capture
+
+`ov-usdc-v2.capture.json` contains 96 successful block-pinned contract reads from
+PublicNode, followed by block confirmation. Morpho's public API selected the
+holder; all attribution uses RPC evidence, not unpinned API amounts.
+
+- Root V2: `0x18032c694f8ebfdcc030cb8c54c3701a107c2f72` (OV USDC).
+- Holder: `0xba3356e6a4eac76980067dbaa3758e5e5685cfb7`.
+- V1 adapter: `0xec8bc344764091a4138abb7b64e5fd95aa6e40c6`.
+- Child V1: Steakhouse USDC, the same address as above; 12 Blue markets.
+- Block: 25940252, hash `0x99400a4a99db9af525edf7b1c30c8dfa1425ee98e9df8d29708d2ffbf65307f3`.
+- Account quote: 17,464,608,156 raw USDC; unattributed rounding: 13 raw units.
+- A second adapter has zero reported assets and is explicitly unexpanded.
+- Chainlink USDC/USD proxy: `0x8fffffd4afb6115b954bd326cbe7b4ba576818f6`.
+- Price: 99,988,513 at eight decimals, updated at 1788940835; block time 1788962159.
+- Account quote valuation: 1,746,260,199,646 raw USD at eight decimals, with a
+  rounding numerator of 112028 over 1,000,000. This prices a lending claim;
+  it does not establish backing, reserves, or withdrawable cash.
+
+```sh
+tare live nested-replay fixtures/live/ov-usdc-v2.capture.json --json
+```
+
+## WETH native custody control
+
+`weth-custody.capture.json` records two provider witnesses: PublicNode
+(`ethereum-rpc.publicnode.com`) and MEV Blocker (`rpc.mevblocker.io`). Hostnames
+are hashed into provider IDs; no URLs or query credentials are retained.
+
+- Public example holder: Morpho Blue, `0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb`.
+- Token/custodian: canonical WETH, `0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2`.
+- Block: 25940387, hash `0x68db55a5c26bebf3281cac55001c0bce30a2bf30d0482f840a1b39757e2bb07b`.
+- Each provider supplies five contract reads, one native-balance observation,
+  chain/block selection and final block confirmation.
+- Chainlink ETH/USD proxy: `0x5f4ec3df9cbd43714fe2740f5e3616155c5b8419`.
+
+Replay produces **1.000000x for the WETH wrapper only**. It excludes the public
+holder's own liabilities and beneficiaries, including Morpho's lending obligations.
+Matching provider data does not prove provider independence or cryptographic state
+authenticity. This result cannot be used as the Morpho portfolio's collateral metric.
+
+```sh
+tare verify custody-replay fixtures/live/weth-custody.capture.json --json
+```
+
+The Graph Node rollback result belongs in `fixtures/integration/`, clearly labeled
+as a local Anvil test. It is not a mainnet Graph acceptance capture.
 - [Virtual shares](https://github.com/morpho-org/morpho-blue/blob/main/src/libraries/SharesMathLib.sol)
