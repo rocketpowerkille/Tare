@@ -1,17 +1,19 @@
 # Tare
 
-**Phase two is implemented:** version-two evidence snapshots, canonical asset
-identities, multiple positions, explicit accounting relationships, offline adapter
-replay, and receipt provenance. See [phase two](docs/PHASE_2.md).
+**Phases two and three are implemented within their documented scope:** evidence
+snapshots and offline adapters, plus live Ethereum USDC MetaMorpho V1 discovery,
+allocation accounting and reproducible RPC receipts. See [phase two](docs/PHASE_2.md)
+and [phase three](docs/PHASE_3.md) for acceptance evidence and limitations.
 
 Tare is an exposure resolver for nested vault positions. Phase one is a working
 **offline, synthetic-data resolver** with local watch-only wallet profiles. An
-explicit wallet-balance command can make a read-only EVM JSON-RPC call; resolution
-itself makes no RPC, Graph, wallet-provider, or other network calls.
+explicit `live` command now uses Morpho's public GraphQL API and read-only EVM RPC.
+The original snapshot and synthetic adapter commands remain offline.
 
-This is an implementation foundation, not a live portfolio analyzer. All demo
-amounts and block references are explicitly synthetic. A complete traversal is
-still unverified; no collateral multiple is claimed in this phase.
+Live resolution covers one protocol family and its loan receivables, not every
+position or underlying collateral. Synthetic demos and the real captured example
+are labeled separately. Complete allocation accounting remains independently
+unverified; no collateral multiple or valuation is claimed.
 
 ## Run
 
@@ -26,10 +28,14 @@ pnpm cli resolve fixtures/synthetic/deep.json --json
 pnpm cli snapshot validate fixtures/synthetic/control.json
 pnpm demo:phase2
 pnpm cli replay fixtures/recordings/multi-asset.json --json
+pnpm demo:phase3
+pnpm cli live example --rpc-url https://ethereum-rpc.publicnode.com
 ```
 
 `verify` builds strict TypeScript, runs the unit and CLI integration tests, and
-executes both sets of reproducible demos. After building, you can also run
+executes both synthetic demo sets and the real capture replay, without external
+network access. The separate `live example` command contacts public sources.
+After building, you can also run
 `node dist/apps/cli/src/main.js --help` directly. The demo command works from any
 working directory. User-provided file paths are relative to the current directory.
 
@@ -96,6 +102,10 @@ operator. No transaction, connection request, or signature is made.
 | `snapshot normalize <recording> --out <file>` | Normalize an offline recording into a version-two snapshot |
 | `replay <recording> --json` | Normalize and resolve a synthetic adapter recording |
 | `demo phase2` | Run six version-two accounting and failure cases |
+| `live discover --address <address>` | Discover indexed Ethereum MetaMorpho V1 positions |
+| `live resolve --address <address> --vault <vault> --rpc-url <url>` | Resolve a supported USDC vault position at one block |
+| `live example --rpc-url <url>` | Discover and resolve a public Steakhouse USDC depositor |
+| `live replay <capture>` | Recompute a retained RPC capture without network calls |
 | `wallet add/list/show/remove` | Manage local watch-only profiles |
 | `wallet balance <name> --rpc-url <url>` | Read a block-pinned native balance from an EVM RPC endpoint |
 
@@ -107,20 +117,23 @@ Machine-readable output goes to stdout and errors to stderr.
 Coverage lists terminal visits and unresolved findings, not an invented percentage.
 If the global visit budget is exhausted, one finding represents all remaining
 unvisited work; it is not a count of every missing branch. Source health is declared
-by the input snapshot, not measured. Export parents must already exist.
+by offline input snapshots; live receipts measure requests, failures and elapsed
+time. Export parents must already exist. Live discovery is supplied by Morpho's
+GraphQL API, not The Graph; a The Graph integration remains separate future work.
 
 ## Repository structure
 
 ```text
 apps/cli/src/              Command parsing and local CLI workflows
 packages/domain/src/      Runtime schemas, branded addresses, result types
-packages/adapters/src/    Recorded response normalization and adapter interface
-packages/sources/src/     Bounded local JSON/snapshot reader
+packages/adapters/src/    Fixture normalization and MetaMorpho/Morpho Blue accounting
+packages/sources/src/     Bounded files, HTTP, GraphQL and block-pinned RPC readers
 packages/resolver/src/    Deterministic traversal and integer attribution
 packages/wallet/src/      Watch-only profile validation and persistence
 packages/receipts/src/    JSON serialization and terminal formatting
 fixtures/synthetic/       Control, deep, degraded, and cycle inputs
 fixtures/recordings/      Synthetic adapter responses and multi-position cases
+fixtures/live/            Real public RPC capture, receipt and provenance
 tests/                    Resolver and subprocess CLI integration tests
 docs/                     Phase plan, architecture, accounting policy
 .github/workflows/        Linux/Windows offline CI checks
@@ -135,6 +148,7 @@ path works end to end; it is not a general replacement path for core components.
 
 See [phase-one steps and exit criteria](docs/PHASE_1.md),
 [phase-two implementation](docs/PHASE_2.md),
+[phase-three implementation](docs/PHASE_3.md),
 [architecture](docs/ARCHITECTURE.md), [accounting](docs/ACCOUNTING.md),
 [language strategy and Rust boundary](docs/LANGUAGE_STRATEGY.md),
 [scope](SCOPE.md), and [field notes](FIELD_NOTES.md).

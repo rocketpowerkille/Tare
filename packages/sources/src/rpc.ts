@@ -1,5 +1,6 @@
 import { z } from 'zod/v4';
 import { AddressSchema, ChainIdSchema, RawSchema, formatUnits } from '../../domain/src/index.js';
+import { postJson } from './http.js';
 
 const HexQuantitySchema = z.string().regex(/^0x(?:0|[1-9a-fA-F][0-9a-fA-F]*)$/, 'Expected a JSON-RPC quantity');
 const BlockHashSchema = z.string().regex(/^0x[0-9a-fA-F]{64}$/, 'Expected a 32-byte block hash');
@@ -40,30 +41,10 @@ function parseRpcUrl(input: string): string {
 }
 
 async function rpcCall(url: string, method: string, params: readonly unknown[], id: number, timeoutMs: number): Promise<unknown> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  let response: Response;
-  let text: string;
-  try {
-    response = await fetch(url, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', accept: 'application/json' },
-      body: JSON.stringify({ jsonrpc: '2.0', method, params, id }),
-      signal: controller.signal,
-    });
-    text = await response.text();
-  } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') throw new Error(`RPC request timed out during ${method}`);
-    throw new Error(`RPC request failed during ${method}`);
-  } finally { clearTimeout(timeout); }
-  if (!response.ok) throw new Error(`RPC returned HTTP ${response.status} during ${method}`);
-  if (Buffer.byteLength(text, 'utf8') > 1024 * 1024) throw new Error('RPC response exceeds 1048576 bytes');
-  let parsed: unknown;
-  try { parsed = JSON.parse(text) as unknown; }
-  catch { throw new Error(`RPC returned invalid JSON during ${method}`); }
+  const parsed = await postJson(url, { jsonrpc: '2.0', method, params, id }, timeoutMs);
   const envelope = RpcEnvelopeSchema.parse(parsed);
   if (envelope.id !== id) throw new Error(`RPC returned a mismatched response ID during ${method}`);
-  if (envelope.error) throw new Error(`RPC ${method} failed with code ${envelope.error.code}: ${envelope.error.message.slice(0, 200)}`);
+  if (envelope.error) throw new Error(`RPC ${method} failed with code ${envelope.error.code}`);
   if (!('result' in envelope)) throw new Error(`RPC response omitted a result during ${method}`);
   return envelope.result;
 }
@@ -88,7 +69,7 @@ export async function getNativeBalance(
   const initialBlock = RpcBlockSchema.parse(await rpcCall(url, 'eth_getBlockByNumber', ['latest', false], 2, timeoutMs));
   const balance = quantityToBigInt(await rpcCall(url, 'eth_getBalance', [address, initialBlock.number], 3, timeoutMs));
   const confirmedBlock = RpcBlockSchema.parse(await rpcCall(url, 'eth_getBlockByNumber', [initialBlock.number, false], 4, timeoutMs));
-  if (confirmedBlock.hash.toLowerCase() !== initialBlock.hash.toLowerCase()) throw new Error('RPC block changed during the balance read; retry the request');
+  if (confirmedBlock.number !== initialBlock.number || confirmedBlock.hash.toLowerCase() !== initialBlock.hash.toLowerCase()) throw new Error('RPC block changed during the balance read; retry the request');
 
   const balanceRaw = balance.toString();
   return NativeBalanceSchema.parse({

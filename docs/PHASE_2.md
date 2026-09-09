@@ -59,9 +59,11 @@ alignment, all budgets, cycles, conservation, order independence, receipt valida
 and CLI replay/export. Source recordings are authored synthetic vectors, not live
 captures. RPC tests still use a local mock server.
 
-## Next phase
+## Completion and next phase
 
-Real integration requires a protocol's actual allocation/conversion rules, live
-source discovery, independently verified block-aligned evidence and measured health.
-Do not simply expand the synthetic provenance enum to accept live inputs. Pricing,
-numerical metrics, monitoring, MCP, API and web remain deferred.
+Phase two's acceptance cases are complete and remain in the regression suite.
+[Phase three](PHASE_3.md) adds a separate live protocol path, actual conversion
+rules, block-aligned RPC observations and measured health. It preserves the
+synthetic schemas instead of relabeling their provenance. Independent backing
+verification and valuation are phase-four work; numerical metrics, monitoring,
+MCP, API and web remain deferred.

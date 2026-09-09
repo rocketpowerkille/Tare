@@ -18,7 +18,7 @@ async function cleanup(directory: string) {
   await rm(absolute, { recursive: true, force: true });
 }
 test('CLI runs help, validates input and demonstrates all four cases from another directory', () => {
-  assert.match(cli(['--help']).stdout, /offline exposure CLI/);
+  assert.match(cli(['--help']).stdout, /exposure CLI/);
   const demos = cli(['demo', 'all', '--json'], tmpdir());
   assert.equal(demos.status, 0, demos.stderr);
   assert.equal(JSON.parse(demos.stdout).length, 4);

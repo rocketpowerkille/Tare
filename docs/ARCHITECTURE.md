@@ -20,7 +20,7 @@ are recorded separately from traversed holdings. Observations, root balances and
 holding/debt edges are checked against the common block and declared source health.
 See [phase two](PHASE_2.md) and [accounting](ACCOUNTING.md) for exact semantics.
 
-CLI inputs pass through strict schemas before reaching the deterministic resolver.
+Offline CLI inputs pass through strict schemas before reaching the deterministic resolver.
 The local snapshot is normalized evidence for a synthetic model. The resolver has
 no filesystem, provider, wallet, or transport dependency.
 
@@ -58,10 +58,36 @@ and emits an explicit gap. File size, number of nodes, number of allocations per
 node, and numeric input lengths are bounded before traversal. A block mismatch or
 unavailable source stops only the affected branch.
 
-Future provider and protocol adapters belong behind `sources` and a future
-`adapters` module. They must preserve provenance and error semantics before being
-allowed to feed a live snapshot schema. Do not extend the current synthetic
-provenance enum without implementing its evidence requirements.
+## Phase-three live path
+
+```text
+public Morpho GraphQL -> indexed owner/vault discovery and metadata
+explicit RPC URL -> chain check -> pinned block hash -> static contract calls
+                               -> MetaMorpho/Blue accounting -> block confirmation
+                               -> schema 3 receipt + raw capture
+saved raw capture -> same protocol accounting -> recorded-rpc receipt
+```
+
+`apps/cli/src/live.ts` exposes discovery, resolution, public-example selection and
+replay. `packages/sources/src/http.ts` bounds streamed response bytes and time;
+`evm.ts` enforces RPC identity, request/deadline budgets and block-hash calls;
+`morpho.ts` validates paginated public GraphQL discovery. Provider URLs and error
+bodies are excluded from captured evidence to avoid retaining endpoint tokens.
+
+`packages/adapters/src/morpho-blue.ts` implements the supported protocol's static
+ABI reads, interest, fee and virtual-share rules. `packages/resolver/src/live.ts`
+acquires/replays evidence and reconciles allocations against vault contract views.
+It distinguishes transport errors, unsupported/malformed evidence, bounded partial
+coverage, conversion inconsistencies and reorgs. Concurrent read groups settle
+before evidence is frozen. Schema-three receipts live in `domain/src/live.ts` and
+do not change either synthetic schema or its accounting model.
+
+GraphQL is discovery-only and unpinned. RPC accounting uses one block hash plus a
+final confirmation; it is not an independent source consensus. Successful and
+failed contract reads are retained for deterministic replay. Collateral/oracle/IRM
+references are risk dependencies, not holdings to multiply into exposure.
+Complete live receipts cover vault-to-Blue loan receivables only. Verification and
+the metric remain unavailable pending phase four. See [phase three](PHASE_3.md).
 
 ## Future monitoring language boundary
 

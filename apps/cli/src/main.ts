@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import { writeFile } from 'node:fs/promises';
 import { ZodError } from 'zod/v4';
+import { runLiveCommand } from './live.js';
 import { loadSnapshot, loadInputSnapshot, readJsonFile } from '../../../packages/sources/src/snapshot.js';
 import { normalizeRecording } from '../../../packages/adapters/src/index.js';
 import { resolveSnapshotV2 } from '../../../packages/resolver/src/v2.js';
@@ -13,7 +14,7 @@ import { resolveSnapshot } from '../../../packages/resolver/src/index.js';
 import { renderReceipt, serializeReceipt, writeReceipt } from '../../../packages/receipts/src/index.js';
 import { addWallet, getWallet, listWallets, removeWallet } from '../../../packages/wallet/src/index.js';
 
-const help = `Tare 0.1.0 — offline exposure CLI
+const help = `Tare 0.1.0 — exposure CLI with offline replay and read-only live sources
 
   tare demo [control|deep|degraded|cycle|all|phase2] [--json]
   tare resolve <snapshot.json> [--wallet <name>] [--json] [--out <receipt.json>]
@@ -21,6 +22,12 @@ const help = `Tare 0.1.0 — offline exposure CLI
   tare replay <recording.json> [--wallet <name>] [--json] [--out <receipt.json>]
   tare snapshot normalize <recording.json> --out <snapshot.json>
   tare snapshot validate <snapshot.json>
+  tare live discover [--address <0x...>] [--vault <0x...>] [--max-positions <1..500>] [--json]
+  tare live resolve --address <0x...> --vault <0x...> --rpc-url <https://...> [--json]
+  tare live example --rpc-url <https://...> [--out <receipt.json>] [--capture-out <capture.json>]
+  tare live replay <capture.json> [--json]
+       Live reads: Ethereum USDC MetaMorpho V1 only; --wallet may replace --address.
+       Optional: --block-number, --max-markets, --max-calls, --deadline-ms, --graphql-url.
   tare wallet add <name> --address <0x...> --chain-id <number>
   tare wallet list
   tare wallet show <name>
@@ -32,7 +39,8 @@ Wallet commands accept --home <directory>; resolve --wallet does too.
 Default profile directory: TARE_HOME or .tare in the current directory.
 Watch-only profiles store public addresses only. Balance reads are opt-in and never sign.
 RPC URLs may also be supplied through TARE_RPC_URL instead of --rpc-url.
-Snapshots and demos are synthetic, not live or independently verified evidence.
+Legacy snapshots and demo cases are synthetic. Live captures retain RPC observations.
+Complete live accounting is not independently verified backing or valuation.
 Exit codes: 0 success; 1 invalid input/I/O; 2 partial resolution.
 Output files are created exclusively; existing files are never overwritten.`;
 
@@ -62,9 +70,13 @@ async function main(): Promise<number> {
       'rpc-url': { type: 'string' }, symbol: { type: 'string' }, decimals: { type: 'string' },
       'timeout-ms': { type: 'string' },
       'max-edges': { type: 'string' },
+      vault: { type: 'string' }, 'graphql-url': { type: 'string' }, 'max-positions': { type: 'string' },
+      'capture-out': { type: 'string' }, 'block-number': { type: 'string' }, 'max-markets': { type: 'string' },
+      'max-calls': { type: 'string' }, 'deadline-ms': { type: 'string' },
     },
   });
   if (values.help || positionals.length === 0) { console.log(help); return 0; }
+  if (positionals[0] === 'live') return runLiveCommand(positionals, values);
   const [command, action, argument] = positionals;
   const home = resolve(values.home ?? process.env.TARE_HOME ?? '.tare');
   function allow(options: string[], maxPositionals: number) {

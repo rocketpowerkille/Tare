@@ -1,4 +1,8 @@
-# Offline accounting policy
+# Accounting policy
+
+The first sections describe the offline synthetic formats. The separate live
+MetaMorpho accounting policy follows below; its production conversion rules do
+not change the meaning of either synthetic format.
 
 Version one remains the original single-position fixture format. Version two adds
 canonical asset identity, multiple positions and typed evidence/relationships; the
@@ -100,7 +104,7 @@ borrower leverage, liquidation risk, or the entire ecosystem's TVL/TVR. The pape
 provides related work on consolidated backing and the TVL/TVR multiplier. Tare's
 owner-specific scope and inclusion rules must be validated separately.
 
-Current receipts always block the metric for synthetic evidence, missing independent
+Offline receipts always block the metric for synthetic evidence, missing independent
 verification and missing valuation, plus incomplete resolution where applicable.
 Future eligibility requires supported conversion/debt treatment, complete allocation
 coverage, common-unit prices, positive verified backing and a defined treatment of
@@ -113,3 +117,50 @@ to the `SnapshotV2Schema.parse` result. This hashes the normalized input, not or
 file bytes. It ignores JSON whitespace and schema-normalized address/hash casing.
 It retains array ordering; reordered inputs can have a different digest while their
 computed exposures agree. Adapter recording bytes are not independently attested.
+
+## Version-three MetaMorpho / Morpho Blue accounting
+
+The supported live scope is an Ethereum USDC MetaMorpho V1 vault and its Morpho
+Blue V1 withdrawal-queue loan receivables at a single RPC block hash. For each
+market, the adapter reconstructs expected supply/borrow assets with the protocol's
+three-term integer interest expansion and market fee shares. It converts the
+vault's market supply shares using Blue's virtual assets (1) and virtual shares
+(1,000,000). The sum must equal the vault's `totalAssets()` view when every market
+is observed. Direct donated tokens are outside this queue accounting.
+
+Vault performance fees are accrued on positive growth over `lastTotalAssets`.
+For the supported six-decimal asset and 12-decimal offset:
+
+```text
+feeAssets = floor(max(totalAssets - lastTotalAssets, 0) * fee / 1e18)
+feeShares = floor(feeAssets * (totalSupply + 1e12) / (totalAssets - feeAssets + 1))
+accountQuote = floor(accountShares * (totalAssets + 1) / (totalSupply + feeShares + 1e12))
+marketAttribution = floor(accountQuote * vaultMarketAssets / totalAssets)
+```
+
+The account quote must match `convertToAssets(accountShares)`. This is an
+accounting conversion, not `previewRedeem`, a liquidity estimate or an executable
+withdrawal promise. The adapter uses BigInt arithmetic and rejects unsupported
+integer ranges, loan assets, ownership contradictions and malformed ABI results.
+
+Each market is a **loan-denominated receivable**. Its collateral, oracle, IRM and
+LLTV identify risk dependencies without attributing collateral ownership. This
+phase does not decompose borrower collateral or value expected bad debt. Even
+USDC-denominated amounts have no implied fiat price or reserve verification.
+
+The denominator for `attributionRemainder` is the vault's raw `totalAssets`.
+`unattributedAssetsRaw` is the account quote minus the sum of supported market
+attributions: it includes integer rounding and, in partial receipts, unresolved
+allocations. It is never silently distributed to observed markets. A zero-asset,
+zero-quote vault with fully observed allocations supports zero attribution;
+inconsistent zero states remain partial.
+
+Accounting mismatches suppress market attribution. Source/market gaps preserve
+supported amounts only when the known denominator and conversion still reconcile
+within observed evidence. A reorg or failed final block confirmation suppresses
+all attributed amounts. Complete means fully observed within this declared scope.
+Independent verification remains pending and value coverage remains null.
+
+The captured [public example](../fixtures/live/README.md) provides exact integer
+acceptance values and links to the protocol's accounting sources. Matching views
+from one RPC provider checks our implementation, not the provider's truthfulness.
