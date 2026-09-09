@@ -1,5 +1,15 @@
 # Architecture
 
+The CLI entry point parses and dispatches commands; wallet, snapshot, demo, live
+and verification workflows have separate handlers. Argument utilities are shared,
+and live receipt formatting belongs to `packages/receipts`.
+
+Share verification separates `capture.ts` (evidence schemas), `shares.ts` (source
+acquisition), `comparison.ts` (pure checks) and `report.ts` (validation and replay).
+The existing `shares.ts` exports remain available to callers. Live tests are split
+into accounting, source-client and CLI cases, using shared HTTP/process fixtures
+under `tests/helpers/`.
+
 Phase two extends this layout with `packages/domain/src/v2.ts`,
 `packages/adapters/src/index.ts`, and the version-two resolver/receipt modules.
 The schema-one path remains supported independently.
@@ -88,6 +98,27 @@ failed contract reads are retained for deterministic replay. Collateral/oracle/I
 references are risk dependencies, not holdings to multiply into exposure.
 Complete live receipts cover vault-to-Blue loan receivables only. Verification and
 the metric remain unavailable pending phase four. See [phase three](PHASE_3.md).
+
+## Phase-four share-ledger comparison (local, deployment pending)
+
+```text
+vault Transfer events -> AssemblyScript mapping -> Tare share-ledger subgraph
+                                                -> historical Graph query --+
+fresh Ethereum RPC -> chain check -> same-block contract reads --------------+-> share comparison
+                                                                            -> report and replay
+```
+
+`graph/subgraph/` maintains supply and account balances from events, with identity
+metadata read once when first observed. `sources/src/the-graph.ts` targets this
+specific schema. `verification/src/shares.ts` checks Graph metadata, optional
+deployment identity and block alignment before comparing asset, decimals, supply
+and owner shares. `apps/cli/src/verify.ts` exposes comparison and offline replay.
+The receipt schema recomputes its checks from captured evidence during validation.
+
+The subgraph compiles locally; Graph Node indexing and live source acceptance
+have not been run. A matched share report is not verified backing and cannot
+enable a numerical collateral metric. The remaining phase-four work is recorded
+in [its acceptance checklist](PHASE_4.md).
 
 ## Future monitoring language boundary
 

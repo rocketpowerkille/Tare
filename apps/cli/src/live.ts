@@ -1,6 +1,9 @@
+import { stringOption as string, integerOption as integer } from './args.js';
+import type { Values } from './args.js';
+import { renderLiveReceipt } from '../../../packages/receipts/src/live.js';
+export { renderLiveReceipt } from '../../../packages/receipts/src/live.js';
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { formatUnits } from '../../../packages/domain/src/index.js';
 import { LiveReceiptSchema } from '../../../packages/domain/src/live.js';
 import type { LiveReceipt } from '../../../packages/domain/src/live.js';
 import { MorphoDiscovery } from '../../../packages/sources/src/morpho.js';
@@ -10,32 +13,6 @@ import { PUBLIC_EXAMPLE_VAULT } from '../../../packages/adapters/src/morpho-blue
 import { LiveOptionsSchema, replayLiveCapture, resolveLivePosition } from '../../../packages/resolver/src/live.js';
 import { validateHttpUrl } from '../../../packages/sources/src/http.js';
 
-type Values = Record<string, string | boolean | undefined>;
-function string(values: Values, name: string): string | undefined {
-  const value = values[name]; if (value === undefined) return undefined;
-  if (typeof value !== 'string' || !value) throw new Error(`--${name} requires a value`); return value;
-}
-function integer(values: Values, name: string, fallback: number): number {
-  const value = string(values, name); if (value === undefined) return fallback;
-  if (!/^[1-9][0-9]*$/.test(value) || !Number.isSafeInteger(Number(value))) throw new Error(`--${name} requires a positive integer`);
-  return Number(value);
-}
-export function renderLiveReceipt(result: LiveReceipt): string {
-  const block = result.capture.block;
-  return [
-    `Tare | MetaMorpho V1 | ${result.sourceMode} | ${result.kind}`,
-    `Owner: ${result.owner}; vault: ${result.capture.vault}`,
-    `Block: ${block ? `${BigInt(block.number)} (${block.hash})` : 'unavailable'}`,
-    'Scope: vault -> Morpho Blue loan receivables; collateral is a dependency, not an owned asset.',
-    `Vault conversion quote: ${result.vault ? `${formatUnits(result.vault.convertToAssetsRaw, result.vault.decimals)} USDC` : 'unavailable'}`,
-    `Markets observed: ${result.coverage.observedMarkets}/${result.coverage.expectedMarkets ?? 'unknown'}`,
-    ...result.markets.map(market => `  ${market.marketId}: ${market.attributedAssetsRaw === null ? 'unresolved' : `${formatUnits(market.attributedAssetsRaw, 6)} USDC receivable`}; collateral=${market.collateralToken}; oracle=${market.oracle}`),
-    `Unattributed quote units (rounding and/or unresolved allocations): ${result.unattributedAssetsRaw ?? 'unavailable'}`,
-    ...result.capture.health.map(health => `Source ${health.source}: ${health.status}; ${health.requests} requests; ${health.failures} transport failures`),
-    ...result.findings.map(finding => `Finding [${finding.code}]: ${finding.stage}${finding.marketId ? ` ${finding.marketId}` : ''}`),
-    'Verification: not independently verified. Effective collateral multiple: unavailable.',
-  ].join('\n');
-}
 async function output(result: LiveReceipt, values: Values): Promise<number> {
   const validated = LiveReceiptSchema.parse(result);
   const receiptPath = string(values, 'out'); const capturePath = string(values, 'capture-out');

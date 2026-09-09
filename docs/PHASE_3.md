@@ -76,9 +76,14 @@ can still be complete within its separate allocation scope.
 
 ## Completion boundary and phase four
 
-Morpho's public **GraphQL API is not The Graph**. No The Graph gateway, Subgraph,
-Substreams integration or sponsor-specific milestone is claimed. Those remain
-separate integration work if required by the project submission.
+Phase-three acceptance was rechecked before moving forward: all 50 existing tests,
+the ten synthetic demos and the real 12-market capture replay passed. The phase
+is closed within its stated protocol scope. [Phase four](PHASE_4.md) has started
+with a local subgraph and share-ledger comparison; deployment is deferred.
+
+Morpho's public **GraphQL API is not The Graph**. Phase three claims no The Graph
+gateway, Subgraph, Substreams integration or sponsor-specific milestone. Those
+are separate from its delivered scope; phase-four progress is tracked separately.
 
 Reconciliation uses views and storage exposed by the same RPC provider. It
 checks the adapter's accounting but does not independently verify that provider,

@@ -1,0 +1,37 @@
+specVersion: 1.3.0
+description: Tare Ethereum vault share ledger, reconstructed from Transfer events.
+schema:
+  file: ./schema.graphql
+indexerHints:
+  prune: never
+dataSources:
+  - kind: ethereum
+    name: VaultShares
+    network: mainnet
+    source:
+      address: '0xbeef01735c132ada46aa9aa4c54623caa92a64cb'
+      abi: VaultShares
+      # Full history is required. Narrow only to a verified deployment block.
+      startBlock: 0
+    context:
+      chainId:
+        type: Int
+        data: 1
+      indexedFromBlock:
+        type: BigInt
+        data: '0'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Vault
+        - AccountBalance
+        - ShareTransfer
+      abis:
+        - name: VaultShares
+          file: ./abis/VaultShares.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+      file: ./src/mapping.ts

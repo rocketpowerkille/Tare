@@ -9,6 +9,7 @@
   "scripts": {
     "build": "node node_modules/typescript/bin/tsc -p tsconfig.json",
     "check": "node node_modules/typescript/bin/tsc -p tsconfig.json --noEmit",
+    "build:subgraph": "npm run build --prefix graph/subgraph",
     "test": "node --test dist/tests/*.test.js",
     "cli": "node dist/apps/cli/src/main.js",
     "demo": "node dist/apps/cli/src/main.js demo all",

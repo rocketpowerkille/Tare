@@ -1,4 +1,4 @@
-name: Offline CLI
+name: CLI and subgraph
 on: [push, pull_request]
 jobs:
   verify:
@@ -14,3 +14,5 @@ jobs:
       - uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lockfile
       - run: pnpm verify
+      - run: npm ci --prefix graph/subgraph --ignore-scripts --no-audit --no-fund
+      - run: node --run build:subgraph

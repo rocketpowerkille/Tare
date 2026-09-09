@@ -5,6 +5,11 @@ snapshots and offline adapters, plus live Ethereum USDC MetaMorpho V1 discovery,
 allocation accounting and reproducible RPC receipts. See [phase two](docs/PHASE_2.md)
 and [phase three](docs/PHASE_3.md) for acceptance evidence and limitations.
 
+**Phase four is in progress:** a Tare-owned share-ledger subgraph builds locally,
+and `verify shares` compares its indexed data with RPC at the same block. The
+user deferred deployment; a live Graph/RPC acceptance run, deeper backing
+verification and valuation remain pending. See [phase four](docs/PHASE_4.md).
+
 Tare is an exposure resolver for nested vault positions. Phase one is a working
 **offline, synthetic-data resolver** with local watch-only wallet profiles. An
 explicit `live` command now uses Morpho's public GraphQL API and read-only EVM RPC.
@@ -106,6 +111,8 @@ operator. No transaction, connection request, or signature is made.
 | `live resolve --address <address> --vault <vault> --rpc-url <url>` | Resolve a supported USDC vault position at one block |
 | `live example --rpc-url <url>` | Discover and resolve a public Steakhouse USDC depositor |
 | `live replay <capture>` | Recompute a retained RPC capture without network calls |
+| `verify shares --address <address> --vault <vault> --rpc-url <url> --graph-url <url>` | Compare Tare's indexed share ledger with RPC at one block |
+| `verify replay <report>` | Recompute saved Graph/RPC checks without network calls |
 | `wallet add/list/show/remove` | Manage local watch-only profiles |
 | `wallet balance <name> --rpc-url <url>` | Read a block-pinned native balance from an EVM RPC endpoint |
 
@@ -119,7 +126,8 @@ If the global visit budget is exhausted, one finding represents all remaining
 unvisited work; it is not a count of every missing branch. Source health is declared
 by offline input snapshots; live receipts measure requests, failures and elapsed
 time. Export parents must already exist. Live discovery is supplied by Morpho's
-GraphQL API, not The Graph; a The Graph integration remains separate future work.
+GraphQL API, not The Graph. Phase four adds a separate The Graph client and local
+subgraph build; its live deployment validation is still pending.
 
 ## Repository structure
 
@@ -131,6 +139,8 @@ packages/sources/src/     Bounded files, HTTP, GraphQL and block-pinned RPC read
 packages/resolver/src/    Deterministic traversal and integer attribution
 packages/wallet/src/      Watch-only profile validation and persistence
 packages/receipts/src/    JSON serialization and terminal formatting
+packages/verification/    Block-aligned Graph/RPC share checks and evidence replay
+graph/subgraph/           AssemblyScript share ledger, schema, manifest and isolated tooling
 fixtures/synthetic/       Control, deep, degraded, and cycle inputs
 fixtures/recordings/      Synthetic adapter responses and multi-position cases
 fixtures/live/            Real public RPC capture, receipt and provenance
@@ -149,6 +159,7 @@ path works end to end; it is not a general replacement path for core components.
 See [phase-one steps and exit criteria](docs/PHASE_1.md),
 [phase-two implementation](docs/PHASE_2.md),
 [phase-three implementation](docs/PHASE_3.md),
+[phase-four progress and acceptance](docs/PHASE_4.md),
 [architecture](docs/ARCHITECTURE.md), [accounting](docs/ACCOUNTING.md),
 [language strategy and Rust boundary](docs/LANGUAGE_STRATEGY.md),
 [scope](SCOPE.md), and [field notes](FIELD_NOTES.md).

@@ -1,16 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
+import { runCliSync as cli } from './helpers/cli.js';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import { ReceiptSchema } from '../packages/domain/src/index.js';
 import { readJsonFile } from '../packages/sources/src/snapshot.js';
 
-const cliPath = resolve('dist/apps/cli/src/main.js');
-function cli(args: string[], cwd = process.cwd()) {
-  return spawnSync(process.execPath, [cliPath, ...args], { encoding: 'utf8', cwd, timeout: 10000 });
-}
 async function cleanup(directory: string) {
   const absolute = resolve(directory);
   assert.equal(dirname(absolute), resolve(tmpdir()));

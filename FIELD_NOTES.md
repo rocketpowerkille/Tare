@@ -1,5 +1,23 @@
 # Field notes
 
+## Phase-three closeout and phase-four indexing increment
+
+- Revalidated the phase-three baseline: 50 tests, ten synthetic demos and the
+  real 12-market capture replay pass. No phase-three acceptance gap was found.
+- Current Morpho documentation deprecates its old Subgraphs. Added a small
+  Tare-owned event-derived share ledger instead of assuming the old index is live.
+- The user explicitly chose local build/test and deployment configuration later.
+  No Graph Studio deployment, live Graph result or sponsor completion is claimed.
+- Graph CLI 0.98.1 and graph-ts 0.38.2 are pinned in an isolated npm package.
+  Type generation and the AssemblyScript WASM build pass locally on Windows.
+  Root runtime dependencies are unchanged; root tests use existing TypeScript.
+- Added Graph block/deployment/error checks, optional header authentication and
+  exact same-block share comparison with export/replay. Agreement remains scoped
+  to the share ledger and cannot enable backing verification or a numerical metric.
+- Validation now includes 61 tests. Mapping logic uses a Graph host double;
+  actual Graph Node indexing/rollback and live acceptance remain phase-four work.
+  CI now includes the subgraph build on Linux and Windows; remote CI was not run.
+
 ## Phase-three public-source implementation
 
 - Phase-two acceptance was revalidated as part of the complete suite. Its 35

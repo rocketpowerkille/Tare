@@ -14,8 +14,13 @@ loan receivables, accrues interest/fees, reconciles contract conversion views an
 emits block-pinned schema-three captures/receipts with offline replay. The public
 example resolved all 12 markets; see [acceptance evidence](docs/PHASE_3.md).
 
-Deferred: other live protocol families/assets/chains, The Graph gateway/Subgraph
-integration, independent backing verification, pricing/numerical multiples, cross-chain holdings,
+Phase four is in progress: a local Tare share-ledger subgraph and The Graph query
+client feed same-block RPC comparison of identities and raw shares. CLI comparison,
+capture and replay are implemented and locally tested. Deployment and live Graph
+acceptance are deferred by the user; this is not yet a live verified backing path.
+
+Deferred: other live protocol families/assets/chains, live The Graph deployment
+acceptance and broader standardized indexing, independent backing verification, pricing/numerical multiples, cross-chain holdings,
 general debt/cycle valuation, native assets inside exposure snapshots, ENS/checksums,
 browser wallet connection, signing/transactions/deployment, monitoring, API, MCP, web.
 

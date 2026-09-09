@@ -1,0 +1,29 @@
+type Vault @entity(immutable: false) {
+  id: Bytes!
+  chainId: Int!
+  asset: Bytes!
+  shareDecimals: Int!
+  totalShares: BigInt!
+  indexedFromBlock: BigInt!
+  lastUpdateBlock: BigInt!
+}
+
+type AccountBalance @entity(immutable: false) {
+  id: ID!
+  vault: Vault!
+  account: Bytes!
+  shares: BigInt!
+  lastUpdateBlock: BigInt!
+}
+
+type ShareTransfer @entity(immutable: true) {
+  id: Bytes!
+  vault: Vault!
+  sender: Bytes!
+  receiver: Bytes!
+  shares: BigInt!
+  blockNumber: BigInt!
+  blockHash: Bytes!
+  transactionHash: Bytes!
+  logIndex: BigInt!
+}
