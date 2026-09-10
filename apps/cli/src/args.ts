@@ -31,6 +31,7 @@ export function parseCliArgs() {
       'max-calls': { type: 'string' }, 'deadline-ms': { type: 'string' },
       'graph-url': { type: 'string' }, 'graph-deployment': { type: 'string' },
       'secondary-rpc-url': { type: 'string' },
+      spkg: { type: 'string' }, 'stop-block-number': { type: 'string' }, 'max-blocks': { type: 'string' },
     },
   });
 }

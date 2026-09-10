@@ -25,7 +25,11 @@
     "verify": "node node_modules/typescript/bin/tsc -p tsconfig.json && node --test dist/tests/*.test.js && node dist/apps/cli/src/main.js demo all && node dist/apps/cli/src/main.js demo phase2 && node dist/apps/cli/src/main.js live replay fixtures/live/steakhouse-usdc.capture.json"
   },
   "dependencies": {
+    "@bufbuild/protobuf": "1.10.1",
+    "@connectrpc/connect": "1.7.0",
+    "@connectrpc/connect-node": "1.7.0",
     "@modelcontextprotocol/server": "2.0.0",
+    "@substreams/core": "0.17.0",
     "zod": "4.5.4"
   },
   "devDependencies": {

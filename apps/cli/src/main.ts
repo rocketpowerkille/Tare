@@ -7,6 +7,7 @@ import { runLiveCommand } from './live.js';
 import { runSnapshotCommand } from './snapshot.js';
 import { runVerifyCommand } from './verify.js';
 import { runWalletCommand } from './wallet.js';
+import { runMonitorCommand } from './monitor.js';
 
 async function main(): Promise<number> {
   const { values, positionals } = parseCliArgs();
@@ -19,6 +20,7 @@ async function main(): Promise<number> {
     case 'live': return runLiveCommand(positionals, values);
     case 'verify': return runVerifyCommand(positionals, values);
     case 'wallet': return runWalletCommand(positionals, values);
+    case 'monitor': return runMonitorCommand(positionals, values);
     case 'snapshot':
     case 'resolve':
     case 'replay': return runSnapshotCommand(positionals, values);

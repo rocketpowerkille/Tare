@@ -17,6 +17,10 @@ composition are tested; public recordings need no configuration. Deployment,
 Bazantic platform authoring/registration and live acceptance remain deferred.
 See [phase five](docs/PHASE_5.md) for the implementation and rollout checklist.
 
+**Phase six local V1 monitoring is implemented:** Substreams events trigger existing
+resolution and Graph/RPC checks, with resumable checkpoints, deduplication and
+reorg retractions. Hosted acceptance remains pending; see [monitoring](docs/PHASE_6.md).
+
 Tare is an exposure resolver for nested vault positions. Phase one is a working
 **offline, synthetic-data resolver** with local watch-only wallet profiles. An
 explicit `live` command now uses Morpho's public GraphQL API and read-only EVM RPC.
@@ -157,6 +161,7 @@ apps/api/src/              HTTP/OpenAPI, access controls and static serving
 apps/mcp/src/              Tare's stdio MCP tools
 apps/web/                  Explorer, capture import and report downloads
 packages/service/src/     Shared dispatch and deterministic evidence composition
+packages/monitor/src/     Event transitions, evidence evaluation and durable progress
 packages/domain/src/      Runtime schemas, branded addresses, result types
 packages/adapters/src/    Fixture normalization and MetaMorpho/Morpho Blue accounting
 packages/sources/src/     Bounded files, HTTP, GraphQL and block-pinned RPC readers

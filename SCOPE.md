@@ -24,7 +24,10 @@ Phase five adds the shared service, API/OpenAPI, Tare MCP, web explorer, hosted
 access controls and deterministic two-source composition. Hosted deployment,
 Bazantic's required gateway, native Recipe and live acceptance remain deferred.
 
-Phase six monitoring/Substreams and optional phase seven CRE are not implemented.
+Phase six implements event-driven V1 monitoring through an existing Substreams
+package, with checkpoint/replay/reorg handling and local alerts. Hosted acceptance,
+V2 monitoring and periodic refresh remain outside this delivered scope.
+Optional phase seven CRE is not implemented.
 ENS is outside the agreed plan. Other deferred capabilities include additional
 protocol families/chains, broader standardized indexing, independent lending
 backing verification and its numerical multiples, cross-chain holdings, general

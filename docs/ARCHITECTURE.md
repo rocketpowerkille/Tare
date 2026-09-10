@@ -150,7 +150,15 @@ control using two RPC witnesses, with separate capture schema and CLI handler.
 Generic methodology controls in `metric.ts` cannot authorize live metrics; the
 WETH path requires raw block-aligned evidence and reports its narrow scope.
 
-## Future monitoring language boundary
+## Monitoring
+
+The phase-six CLI delegates stream decoding to the source module, pure block/undo
+transitions to the monitor engine, and capture evaluation to existing resolution
+and composition. A dedicated store commits evidence before atomic progress updates.
+The worker coordinates reconnection and bounded runs; it does not perform accounting.
+See [phase six](PHASE_6.md) for protocol scope, persistence and operational limits.
+
+## Monitoring language boundary
 
 The resolver, provider clients, protocol adapters, verification, API, MCP server,
 web application, and monitoring consumer remain TypeScript. Standardized

@@ -31,6 +31,13 @@ export const help = `Tare 0.1.0 — exposure CLI with offline replay and read-on
   tare wallet balance <name> --rpc-url <https://...> [--symbol <symbol>]
        [--decimals <0..36>] [--timeout-ms <100..60000>] [--json]
   tare wallet remove <name>
+  tare monitor run --address <0x...> --vault <0x...> --block-number <start>
+       --spkg <ethereum-common-v0.3.3.spkg> --home <state-directory>
+       [--stop-block-number <exclusive-end>] [--max-blocks <1..100000>]
+       Requires configured RPC, Graph/deployment and SUBSTREAMS_API_TOKEN; read-only V1 monitoring.
+  tare monitor replay <recording.json>
+  tare monitor status --home <state-directory>
+       JSON output; resumable checkpoints and retained alerts. Default run limit: 1000 block messages.
 
 Wallet commands accept --home <directory>; resolve --wallet does too.
 Default profile directory: TARE_HOME or .tare in the current directory.
@@ -39,4 +46,4 @@ RPC URLs may also be supplied through TARE_RPC_URL instead of --rpc-url.
 Legacy snapshots and demo cases are synthetic. Live captures retain RPC observations.
 Complete live accounting is not independently verified backing or valuation.
 Exit codes: 0 success; 1 invalid input/I/O; 2 partial resolution.
-Output files are created exclusively; existing files are never overwritten.`;
+Receipt outputs are created exclusively. Monitor checkpoints are atomically replaced under a worker lock.`;
