@@ -1,0 +1,17 @@
+{
+  "schedule": "0 */5 * * * *",
+  "apiUrl": "https://tare.example.invalid/api/analyze",
+  "owner": "0x1111111111111111111111111111111111111111",
+  "vault": "0x2222222222222222222222222222222222222222",
+  "graphDeployment": "CONFIGURE_DEPLOYMENT_CID",
+  "policySecretId": "TARE_PRIVATE_POLICY",
+  "apiSecretId": "TARE_API_TOKEN",
+  "execution": {
+    "enabled": false,
+    "receiver": "0x0000000000000000000000000000000000000000",
+    "shares": "0",
+    "minAssets": "0",
+    "nonce": "0",
+    "validUntil": "0"
+  }
+}

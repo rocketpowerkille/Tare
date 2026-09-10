@@ -21,6 +21,12 @@ See [phase five](docs/PHASE_5.md) for the implementation and rollout checklist.
 resolution and Graph/RPC checks, with resumable checkpoints, deduplication and
 reorg retractions. Hosted acceptance remains pending; see [monitoring](docs/PHASE_6.md).
 
+**Phase seven has a local confidential policy workflow and Solidity exit receiver:**
+private thresholds drive signed verdicts, with a guarded Sepolia execution path
+tested using synthetic evidence. A verified Sepolia evidence producer and hosted
+acceptance remain open. Current V1 reports cannot authorize exits.
+See [phase seven](docs/PHASE_7.md) for verification and deferred setup.
+
 Tare is an exposure resolver for nested vault positions. Phase one is a working
 **offline, synthetic-data resolver** with local watch-only wallet profiles. An
 explicit `live` command now uses Morpho's public GraphQL API and read-only EVM RPC.
@@ -162,6 +168,7 @@ apps/mcp/src/              Tare's stdio MCP tools
 apps/web/                  Explorer, capture import and report downloads
 packages/service/src/     Shared dispatch and deterministic evidence composition
 packages/monitor/src/     Event transitions, evidence evaluation and durable progress
+packages/policy/src/      Private policy rules and Tare evidence projection
 packages/domain/src/      Runtime schemas, branded addresses, result types
 packages/adapters/src/    Fixture normalization and MetaMorpho/Morpho Blue accounting
 packages/sources/src/     Bounded files, HTTP, GraphQL and block-pinned RPC readers
@@ -170,6 +177,8 @@ packages/wallet/src/      Watch-only profile validation and persistence
 packages/receipts/src/    JSON serialization and terminal formatting
 packages/verification/    Block-aligned Graph/RPC share checks and evidence replay
 graph/subgraph/           AssemblyScript share ledger, schema, manifest and isolated tooling
+workflows/cre/            Confidential CRE workflow and isolated Bun/SDK tooling
+contracts/                Sepolia-only Solidity exit receiver and Foundry tests
 fixtures/synthetic/       Control, deep, degraded, and cycle inputs
 fixtures/recordings/      Synthetic adapter responses and multi-position cases
 fixtures/live/            Real public RPC capture, receipt and provenance
@@ -178,8 +187,9 @@ docs/                     Phase plan, architecture, accounting policy
 .github/workflows/        Linux/Windows offline CI checks
 ```
 
-The directories are logical modules under one TypeScript package and one lockfile,
-not separately published workspace packages. This keeps phase one small while
+Core directories are logical modules under one TypeScript package and lockfile;
+Graph and CRE tooling have isolated dependencies. These are not separately
+published workspace packages. This keeps the core small while
 preserving boundaries between adapters, verification and the CLI/API/MCP/web interfaces.
 The project remains TypeScript-first. Rust is permitted only for an approved,
 isolated custom Substreams module after the live resolver and RPC verification

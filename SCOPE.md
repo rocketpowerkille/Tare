@@ -1,6 +1,6 @@
 # Current scope
 
-Phases one through three and the local implementations of phases four and five
+Phases one through three and the local implementations of phases four through six
 are delivered within the boundaries below. Hosted acceptance remains open.
 
 Phase two extends the CLI with versioned evidence and offline adapter replay.
@@ -27,12 +27,15 @@ Bazantic's required gateway, native Recipe and live acceptance remain deferred.
 Phase six implements event-driven V1 monitoring through an existing Substreams
 package, with checkpoint/replay/reorg handling and local alerts. Hosted acceptance,
 V2 monitoring and periodic refresh remain outside this delivered scope.
-Optional phase seven CRE is not implemented.
+Phase seven adds a confidential CRE policy handler, signed verdicts and a guarded
+Sepolia Solidity exit receiver. Local SDK/Foundry tests and WASM compilation are
+delivered. A verified Sepolia evidence producer, hosted confidential acceptance
+and deployed exit acceptance remain open. Current V1 evidence cannot execute.
 ENS is outside the agreed plan. Other deferred capabilities include additional
 protocol families/chains, broader standardized indexing, independent lending
 backing verification and its numerical multiples, cross-chain holdings, general
 debt/cycle valuation, native assets inside exposure snapshots, address checksums,
-browser wallet connection, signing and transaction execution.
+browser wallet connection, user-wallet signing and mainnet transaction execution.
 
 The original allocation recordings are synthetic; `fixtures/live` contains a real
 public RPC capture. Live health is measured; offline health/classification remain

@@ -1,0 +1,7 @@
+staging-settings:
+  user-workflow:
+    workflow-name: tare-confidential-policy
+  workflow-artifacts:
+    workflow-path: ./src/main.ts
+    config-path: ./config.example.json
+    secrets-path: ./secrets.yaml
