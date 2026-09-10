@@ -1,5 +1,13 @@
 # Architecture
 
+Phase-five interfaces add `packages/service` for request validation, provider
+configuration, bounded operation dispatch and named example replay. `apps/api`
+owns HTTP and the generated OpenAPI contract; `apps/mcp` owns MCP stdio transport;
+`apps/web` is the static explorer served by that API. Both transports return the
+existing reports without recalculating or relabeling their evidence. Neither
+accepts a provider URL, credential or arbitrary filesystem path in a request.
+The CLI remains independently usable. See [phase five](PHASE_5.md).
+
 The CLI entry point parses and dispatches commands; wallet, snapshot, demo, live
 and verification workflows have separate handlers. Argument utilities are shared,
 and live receipt formatting belongs to `packages/receipts`.

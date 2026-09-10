@@ -11,6 +11,11 @@ resolution, timestamped prices and a real WETH custody 1x control. Production
 Graph deployment/acceptance remains deferred, so the full phase is still open.
 See [phase four](docs/PHASE_4.md) for the exact remaining gates.
 
+**Phase five local interfaces are implemented:** a read-only HTTP API, an official
+MCP stdio server and a web evidence explorer share the existing resolver. Public
+recordings work without configuration. Hosted deployment and Bazantic registration
+remain deferred; see [phase five](docs/PHASE_5.md) for setup and acceptance status.
+
 Tare is an exposure resolver for nested vault positions. Phase one is a working
 **offline, synthetic-data resolver** with local watch-only wallet profiles. An
 explicit `live` command now uses Morpho's public GraphQL API and read-only EVM RPC.
@@ -36,8 +41,13 @@ pnpm cli snapshot validate fixtures/synthetic/control.json
 pnpm demo:phase2
 pnpm cli replay fixtures/recordings/multi-asset.json --json
 pnpm demo:phase3
+pnpm serve
 pnpm cli live example --rpc-url https://ethereum-rpc.publicnode.com
 ```
+
+After building, `pnpm serve` opens the service at `http://127.0.0.1:4318`.
+For MCP clients, launch `node` with the absolute path to
+`dist/apps/mcp/src/main.js`; see the [interface guide](docs/PHASE_5.md).
 
 `verify` builds strict TypeScript, runs the unit and CLI integration tests, and
 executes both synthetic demo sets and the real capture replay, without external

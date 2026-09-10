@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tare · Evidence explorer</title>
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header><a class="brand" href="/">tare<span> / evidence explorer</span></a><span class="tag">ETHEREUM · READ ONLY</span></header>
+  <main>
+    <section class="intro"><p class="eyebrow">TRACE THE POSITION</p><h1>See what sits underneath.</h1>
+      <p>Follow vault allocations, inspect the evidence and keep uncertainty visible.</p></section>
+    <div class="workspace">
+      <aside>
+        <section class="panel"><h2>Start with a recording</h2><p>Public positions captured earlier. Replay makes no network calls.</p>
+          <form id="example-form"><label for="example">Recorded position</label><select id="example" required></select>
+            <button type="submit">Explore recording <span aria-hidden="true">→</span></button></form>
+        </section>
+        <section class="panel"><h2>Read a position</h2><p id="configuration">Checking local configuration…</p>
+          <form id="live-form">
+            <label for="operation">Operation</label><select id="operation">
+              <option value="resolve-v1">Resolve USDC V1 vault</option><option value="resolve-v2">Resolve USDC V2 vault</option>
+              <option value="verify-shares">Cross-check vault shares</option><option value="verify-accounting">Cross-check V1 accounting</option>
+              <option value="verify-weth">Verify WETH wrapper custody</option>
+            </select>
+            <label for="owner">Public owner address</label><input id="owner" placeholder="0x…" pattern="0x[0-9a-fA-F]{40}" required autocomplete="off" spellcheck="false">
+            <label for="vault">Vault address</label><input id="vault" placeholder="0x…" pattern="0x[0-9a-fA-F]{40}" required autocomplete="off" spellcheck="false">
+            <label for="block">Block number <span>(optional)</span></label><input id="block" placeholder="Latest at request time" inputmode="numeric" pattern="0|[1-9][0-9]*">
+            <button id="live-submit" type="submit" disabled>Read configured sources</button>
+          </form>
+        </section>
+        <section class="panel"><h2>Replay your capture</h2><p>Choose the matching operation above, then import raw capture JSON (up to 5 MiB).</p>
+          <label for="capture-file">Capture file</label><input id="capture-file" type="file" accept="application/json,.json">
+        </section>
+      </aside>
+      <section class="results" aria-label="Analysis results">
+        <p id="activity" role="status" aria-live="polite">Choose a recording to begin.</p>
+        <p id="error" role="alert" hidden></p>
+        <div id="empty" class="empty"><span class="diagram" aria-hidden="true">○<br>│<br>◇<br>╱ ╲<br>○ ○</span>
+          <h2>A position, with its evidence.</h2><p>Explore allocations and verification gaps.<br>Recorded and live results are always labeled.</p></div>
+        <article id="report" hidden>
+          <div class="result-heading"><div><p id="source" class="eyebrow"></p><h2 id="result-title"></h2></div><span id="result-status" class="tag"></span></div>
+          <dl id="facts" class="facts"></dl>
+          <section class="metric"><h3>Scoped metric</h3><p id="metric"></p><p id="metric-reasons"></p></section>
+          <section><h3>Evidence and limitations</h3><ul id="findings"></ul></section>
+          <section id="paths" hidden><h3>Vault allocation paths</h3><ul id="branches"></ul></section>
+          <section id="allocations" hidden><h3>Attributed loan exposure</h3><p>Raw USDC units (6 decimals). Loan receivables are not verified backing.</p>
+            <div class="table-scroll"><table><thead><tr><th>Vault / market</th><th>Attributed USDC, raw</th></tr></thead><tbody id="rows"></tbody></table></div>
+          </section>
+          <details><summary>Full report and raw evidence</summary><pre id="raw"></pre></details>
+          <div class="actions"><button id="download" type="button">Download report</button><button id="download-capture" class="secondary" type="button">Download capture</button></div>
+        </article>
+      </section>
+    </div>
+  </main>
+  <footer>Deterministic calculations. Explicit scope. <a href="/openapi.json">API contract</a></footer>
+</body>
+</html>

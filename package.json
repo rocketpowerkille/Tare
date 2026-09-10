@@ -3,9 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=24.0.0" },
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "packageManager": "pnpm@11.19.0",
-  "bin": { "tare": "dist/apps/cli/src/main.js" },
+  "bin": {
+    "tare": "dist/apps/cli/src/main.js"
+  },
   "scripts": {
     "build": "node node_modules/typescript/bin/tsc -p tsconfig.json",
     "check": "node node_modules/typescript/bin/tsc -p tsconfig.json --noEmit",
@@ -13,11 +17,20 @@
     "test:graph": "node graph/integration/run.mjs",
     "test": "node --test dist/tests/*.test.js",
     "cli": "node dist/apps/cli/src/main.js",
+    "serve": "node dist/apps/api/src/main.js",
+    "mcp": "node dist/apps/mcp/src/main.js",
     "demo": "node dist/apps/cli/src/main.js demo all",
     "demo:phase2": "node dist/apps/cli/src/main.js demo phase2",
     "demo:phase3": "node dist/apps/cli/src/main.js live replay fixtures/live/steakhouse-usdc.capture.json",
     "verify": "node node_modules/typescript/bin/tsc -p tsconfig.json && node --test dist/tests/*.test.js && node dist/apps/cli/src/main.js demo all && node dist/apps/cli/src/main.js demo phase2 && node dist/apps/cli/src/main.js live replay fixtures/live/steakhouse-usdc.capture.json"
   },
-  "dependencies": { "zod": "3.25.76" },
-  "devDependencies": { "@types/node": "24.13.2", "typescript": "5.9.3" }
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.0.0",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "2.0.0",
+    "@types/node": "24.13.2",
+    "typescript": "5.9.3"
+  }
 }
