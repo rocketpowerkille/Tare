@@ -56,6 +56,8 @@ details { margin-top: 26px; }
 summary { font-size: 13px; cursor: pointer; }
 pre { background: #f1f4ef; padding: 16px; font-size: 11px; max-height: 420px; overflow: auto; }
 .actions { display: flex; gap: 12px; }
+.download { display: block; flex: 1; text-align: center; text-decoration: none; margin-top: 16px; padding: 12px; border: 1px solid #235c4c; border-radius: 6px; background: #235c4c; color: white; font-size: 13px; font-weight: 600; }
+.download.secondary { color: #235c4c; background: white; }
 footer { font-size: 12px; color: #63776a; }
 footer a { margin-left: 16px; }
 [hidden] { display: none !important; }

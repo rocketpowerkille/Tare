@@ -7,27 +7,12 @@ import { Client } from '@modelcontextprotocol/client';
 import { StdioClientTransport } from '@modelcontextprotocol/client/stdio';
 import { TareService, configFromEnv, examples } from '../packages/service/src/index.js';
 import { MAX_INPUT_BYTES, ServiceError, publicError } from '../packages/service/src/requests.js';
-import { createApiServer } from '../apps/api/src/server.js';
+import { withApi, post } from './helpers/api.js';
+import { compositionFixture } from './helpers/composition.js';
 import { replayLiveCapture } from '../packages/resolver/src/live.js';
 import { replayNestedCapture } from '../packages/resolver/src/nested.js';
 import { replayCustody } from '../packages/verification/src/custody.js';
 import { readJsonFile } from '../packages/sources/src/snapshot.js';
-
-async function withApi(run: (url: string) => Promise<void>, service = new TareService()) {
-  const server = createApiServer(service);
-  await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
-  const address = server.address();
-  assert.ok(address && typeof address !== 'string');
-  try { await run(`http://127.0.0.1:${address.port}`); }
-  finally {
-    server.closeAllConnections();
-    await new Promise<void>(resolve => server.close(() => resolve()));
-  }
-}
-
-function post(url: string, action: string, input: unknown, headers: Record<string, string> = {}) {
-  return fetch(`${url}/api/${action}`, { method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: JSON.stringify(input) });
-}
 
 test('API examples and uploaded captures preserve the exact resolver reports and scoped metrics', async () => {
   const replays = [replayLiveCapture, replayNestedCapture, replayCustody];
@@ -91,7 +76,7 @@ test('configuration stays private, OpenAPI describes strict requests, and explor
     assert.equal(JSON.parse(text).live['resolve-v1'], true);
     assert.equal(JSON.parse(text).live['verify-shares'], false);
     const schema = await (await fetch(`${url}/openapi.json`)).json() as { paths: Record<string, unknown> };
-    assert.deepEqual(Object.keys(schema.paths).sort(), ['/api/analyze', '/api/example', '/api/replay', '/api/status']);
+    assert.deepEqual(Object.keys(schema.paths).sort(), ['/api/analyze', '/api/compose', '/api/example', '/api/replay', '/api/status']);
     for (const [path, type] of [['/', 'text/html'], ['/app.js', 'text/javascript'], ['/style.css', 'text/css']]) {
       const response = await fetch(`${url}${path}`);
       assert.equal(response.status, 200);
@@ -119,7 +104,7 @@ test('real MCP stdio client discovers tools, replays evidence and returns action
   try {
     await client.connect(transport);
     const listed = await client.listTools();
-    assert.deepEqual(listed.tools.map(tool => tool.name).sort(), ['tare_analyze', 'tare_example', 'tare_replay', 'tare_status']);
+    assert.deepEqual(listed.tools.map(tool => tool.name).sort(), ['tare_analyze', 'tare_compose', 'tare_example', 'tare_replay', 'tare_status']);
     assert.ok(listed.tools.every(tool => tool.annotations?.readOnlyHint === true));
     const service = new TareService();
     for (const example of examples) {
@@ -136,5 +121,13 @@ test('real MCP stdio client discovers tools, replays evidence and returns action
     const missing = await client.callTool({ name: 'tare_analyze', arguments: { operation: 'resolve-v2', owner: address, vault: address } });
     assert.equal(missing.isError, true);
     assert.match(JSON.stringify(missing.content), /not-configured/);
+    const combined = await compositionFixture();
+    const composed = await client.callTool({ name: 'tare_compose', arguments: combined });
+    assert.deepEqual(composed.structuredContent, await service.run('compose', combined));
+    await withApi(async url => {
+      const response = await post(url, 'compose', combined);
+      assert.equal(response.status, 200);
+      assert.deepEqual(await response.json(), composed.structuredContent);
+    });
   } finally { await client.close(); }
 });

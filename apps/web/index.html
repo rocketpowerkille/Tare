@@ -14,6 +14,10 @@
       <p>Follow vault allocations, inspect the evidence and keep uncertainty visible.</p></section>
     <div class="workspace">
       <aside>
+        <section id="access-panel" class="panel" hidden><h2>API access</h2><p>Enter your Tare service token. It stays in memory until you reload.</p>
+          <form id="access-form"><label for="access-token">Tare API token</label><input id="access-token" type="password" autocomplete="off" required>
+            <button type="submit">Connect</button></form>
+        </section>
         <section class="panel"><h2>Start with a recording</h2><p>Public positions captured earlier. Replay makes no network calls.</p>
           <form id="example-form"><label for="example">Recorded position</label><select id="example" required></select>
             <button type="submit">Explore recording <span aria-hidden="true">→</span></button></form>
@@ -50,7 +54,7 @@
             <div class="table-scroll"><table><thead><tr><th>Vault / market</th><th>Attributed USDC, raw</th></tr></thead><tbody id="rows"></tbody></table></div>
           </section>
           <details><summary>Full report and raw evidence</summary><pre id="raw"></pre></details>
-          <div class="actions"><button id="download" type="button">Download report</button><button id="download-capture" class="secondary" type="button">Download capture</button></div>
+          <div class="actions"><a id="download" class="download">Download report</a><a id="download-capture" class="download secondary">Download capture</a></div>
         </article>
       </section>
     </div>

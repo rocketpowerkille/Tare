@@ -1,6 +1,7 @@
 # Current scope
 
-Phases two and three are implemented within the boundaries below.
+Phases one through three and the local implementations of phases four and five
+are delivered within the boundaries below. Hosted acceptance remains open.
 
 Phase two extends the CLI with versioned evidence and offline adapter replay.
 It supports canonical ERC-20 identity on one EVM chain per snapshot, multiple
@@ -14,15 +15,21 @@ loan receivables, accrues interest/fees, reconciles contract conversion views an
 emits block-pinned schema-three captures/receipts with offline replay. The public
 example resolved all 12 markets; see [acceptance evidence](docs/PHASE_3.md).
 
-Phase four is in progress: a local Tare share-ledger subgraph and The Graph query
-client feed same-block RPC comparison of identities and raw shares. CLI comparison,
-capture and replay are implemented and locally tested. Deployment and live Graph
-acceptance are deferred by the user; this is not yet a live verified backing path.
+Phase four adds share and underlying accounting indexing, same-block Graph/RPC
+comparison, real local indexer rollback tests, nested V2-to-V1-to-Blue resolution,
+timestamped USD prices and a scoped WETH custody control. Deployment and live Graph
+acceptance are deferred by the user; lending backing remains unverified.
 
-Deferred: other live protocol families/assets/chains, live The Graph deployment
-acceptance and broader standardized indexing, independent backing verification, pricing/numerical multiples, cross-chain holdings,
-general debt/cycle valuation, native assets inside exposure snapshots, ENS/checksums,
-browser wallet connection, signing/transactions/deployment, monitoring, API, MCP, web.
+Phase five adds the shared service, API/OpenAPI, Tare MCP, web explorer, hosted
+access controls and deterministic two-source composition. Hosted deployment,
+Bazantic's required gateway, native Recipe and live acceptance remain deferred.
+
+Phase six monitoring/Substreams and optional phase seven CRE are not implemented.
+ENS is outside the agreed plan. Other deferred capabilities include additional
+protocol families/chains, broader standardized indexing, independent lending
+backing verification and its numerical multiples, cross-chain holdings, general
+debt/cycle valuation, native assets inside exposure snapshots, address checksums,
+browser wallet connection, signing and transaction execution.
 
 The original allocation recordings are synthetic; `fixtures/live` contains a real
 public RPC capture. Live health is measured; offline health/classification remain

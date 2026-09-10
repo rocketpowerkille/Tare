@@ -11,10 +11,11 @@ resolution, timestamped prices and a real WETH custody 1x control. Production
 Graph deployment/acceptance remains deferred, so the full phase is still open.
 See [phase four](docs/PHASE_4.md) for the exact remaining gates.
 
-**Phase five local interfaces are implemented:** a read-only HTTP API, an official
-MCP stdio server and a web evidence explorer share the existing resolver. Public
-recordings work without configuration. Hosted deployment and Bazantic registration
-remain deferred; see [phase five](docs/PHASE_5.md) for setup and acceptance status.
+**Phase five Tare-side implementation is complete:** API, MCP and the web explorer
+share the existing resolver. Hosted access controls and deterministic Recipe
+composition are tested; public recordings need no configuration. Deployment,
+Bazantic platform authoring/registration and live acceptance remain deferred.
+See [phase five](docs/PHASE_5.md) for the implementation and rollout checklist.
 
 Tare is an exposure resolver for nested vault positions. Phase one is a working
 **offline, synthetic-data resolver** with local watch-only wallet profiles. An
@@ -152,6 +153,10 @@ subgraph build; its live deployment validation is still pending.
 
 ```text
 apps/cli/src/              Command parsing and local CLI workflows
+apps/api/src/              HTTP/OpenAPI, access controls and static serving
+apps/mcp/src/              Tare's stdio MCP tools
+apps/web/                  Explorer, capture import and report downloads
+packages/service/src/     Shared dispatch and deterministic evidence composition
 packages/domain/src/      Runtime schemas, branded addresses, result types
 packages/adapters/src/    Fixture normalization and MetaMorpho/Morpho Blue accounting
 packages/sources/src/     Bounded files, HTTP, GraphQL and block-pinned RPC readers
@@ -170,7 +175,7 @@ docs/                     Phase plan, architecture, accounting policy
 
 The directories are logical modules under one TypeScript package and one lockfile,
 not separately published workspace packages. This keeps phase one small while
-preserving boundaries for future adapters, verification, API, MCP, and web apps.
+preserving boundaries between adapters, verification and the CLI/API/MCP/web interfaces.
 The project remains TypeScript-first. Rust is permitted only for an approved,
 isolated custom Substreams module after the live resolver and RPC verification
 path works end to end; it is not a general replacement path for core components.

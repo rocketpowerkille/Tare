@@ -6,7 +6,13 @@ owns HTTP and the generated OpenAPI contract; `apps/mcp` owns MCP stdio transpor
 `apps/web` is the static explorer served by that API. Both transports return the
 existing reports without recalculating or relabeling their evidence. Neither
 accepts a provider URL, credential or arbitrary filesystem path in a request.
-The CLI remains independently usable. See [phase five](PHASE_5.md).
+`apps/api/src/access.ts` owns optional hosted authentication, origin validation
+and bounded per-client quotas. The server stays behind a loopback reverse proxy.
+`packages/service/src/composition.ts` recomputes and joins the resolution, share
+capture and direct Graph response; it reuses the existing verifiers. The web
+controller owns requests and temporary access tokens, while `report.js` owns
+rendering and downloadable evidence. The CLI remains independently usable.
+See [phase five](PHASE_5.md).
 
 The CLI entry point parses and dispatches commands; wallet, snapshot, demo, live
 and verification workflows have separate handlers. Argument utilities are shared,

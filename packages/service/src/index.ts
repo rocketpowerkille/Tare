@@ -6,6 +6,7 @@ import { verifyAccounting, replayAccounting } from '../../verification/src/accou
 import { verifyWethCustody, replayCustody } from '../../verification/src/custody.js';
 import { readJsonFile } from '../../sources/src/snapshot.js';
 import { AnalyzeSchema, ReplaySchema, ExampleSchema, MAX_INPUT_BYTES, ServiceError } from './requests.js';
+import { composePosition } from './composition.js';
 
 export interface ServiceConfig {
   rpcUrl?: string;
@@ -47,7 +48,7 @@ export class TareService {
   }
 
   // Shared across transports: requests cannot choose provider URLs, paths or credentials.
-  async run(action: 'analyze' | 'replay' | 'example', input: unknown): Promise<unknown> {
+  async run(action: 'analyze' | 'replay' | 'example' | 'compose', input: unknown): Promise<unknown> {
     const serialized = JSON.stringify(input);
     if (!serialized || Buffer.byteLength(serialized) > MAX_INPUT_BYTES) {
       throw new ServiceError(413, 'input-too-large', 'Input exceeds the 5 MiB limit.');
@@ -57,6 +58,7 @@ export class TareService {
     try {
       if (action === 'analyze') return await this.analyze(input);
       if (action === 'replay') return await this.replay(input);
+      if (action === 'compose') return await composePosition(input);
       const { id } = ExampleSchema.parse(input);
       const example = examples.find(item => item.id === id)!;
       const path = fileURLToPath(new URL(`../../../../fixtures/live/${id}.capture.json`, import.meta.url));
