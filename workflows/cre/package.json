@@ -5,6 +5,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "compile": "bun node_modules/@chainlink/cre-sdk/bin/cre-compile.ts src/main.ts ../../.tare/cre/tare-policy.wasm",
+    "prepare:e2e": "bun scripts/prepare-base-sepolia-e2e.ts",
     "test": "cd ../.. && bun test ./workflows/cre/test",
     "verify": "npm run build && npm test"
   },
