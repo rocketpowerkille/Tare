@@ -14,6 +14,7 @@ interface IAssetBalance {
 /// @notice Base-Sepolia-only, one-use ERC-4626 exit authorization. Never holds user funds.
 contract BoundedVaultExit {
     uint256 public constant EXECUTION_CHAIN_ID = 84532;
+
     struct Permit {
         address vault;
         address asset;
@@ -100,11 +101,19 @@ contract BoundedVaultExit {
 
     /// @dev Forwarder authenticates report signatures; this receiver also pins the workflow identity.
     function onReport(bytes calldata metadata, bytes calldata payload) external nonReentrant {
+        _authorizeReport(metadata);
+        _executeReport(payload);
+    }
+
+    function _authorizeReport(bytes calldata metadata) internal view virtual {
         if (msg.sender != forwarder || metadata.length != 64) revert Unauthorized();
         if (
             bytes32(metadata[0:32]) != workflowId || bytes10(metadata[32:42]) != workflowName
                 || address(bytes20(metadata[42:62])) != workflowOwner
         ) revert Unauthorized();
+    }
+
+    function _executeReport(bytes calldata payload) private {
         if (payload.length != 11 * 32) revert InvalidReport();
         Report memory report = abi.decode(payload, (Report));
         Permit storage permit = permits[report.owner];
