@@ -7,8 +7,9 @@ and [phase three](docs/PHASE_3.md) for acceptance evidence and limitations.
 
 **Phase four implementation and local acceptance are delivered:** share and
 underlying accounting indexing, real Graph Node rollback tests, live V2→V1→Blue
-resolution, timestamped prices and a real WETH custody 1x control. Production
-Graph deployment/acceptance remains deferred, so the full phase is still open.
+resolution, timestamped prices and a real WETH custody 1x control. Graph Studio
+version `0.1.0` is deployed and syncing; fully indexed Graph/RPC acceptance is
+still open.
 See [phase four](docs/PHASE_4.md) for the exact remaining gates.
 
 **Phase five Tare-side implementation is complete:** API, MCP and the web explorer
@@ -156,8 +157,8 @@ If the global visit budget is exhausted, one finding represents all remaining
 unvisited work; it is not a count of every missing branch. Source health is declared
 by offline input snapshots; live receipts measure requests, failures and elapsed
 time. Export parents must already exist. Live discovery is supplied by Morpho's
-GraphQL API, not The Graph. Phase four adds a separate The Graph client and local
-subgraph build; its live deployment validation is still pending.
+GraphQL API, not The Graph. Phase four adds a separate The Graph client and custom
+subgraph. Its Graph Studio deployment is syncing; live matched validation is pending.
 
 ## Repository structure
 

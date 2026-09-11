@@ -1,9 +1,13 @@
 # Field notes
 
-## 2026-09-11 — hosted Graph deployment preparation
+## 2026-09-11 — hosted Graph deployment and indexing
 
-- Reconfirmed that hosted Graph deployment remains the first unfinished external
-  acceptance gate; no deployment or credential use was performed.
+- Deployed Graph Studio version `0.1.0` for `tare-steakhouse-usdc-ethereum` with
+  manifest CID `QmZrGd5mh9V5x57J4ETN9sWVP2P3VMVpRgQ7p5XK9CW1hw`. Authentication was
+  performed locally; no deploy key or API token was written to the repository.
+- The query endpoint responds without indexing errors and has begun producing vault
+  and account-balance entities. Studio remains in `SYNCING`, so no matched hosted
+  Graph/RPC acceptance result is claimed yet.
 - The share-ledger manifest previously started at Ethereum genesis. Morpho's V1
   vault directory and Etherscan both identify Steakhouse USDC creation block
   `18928285`, so the manifest and `indexedFromBlock` now begin there while retaining

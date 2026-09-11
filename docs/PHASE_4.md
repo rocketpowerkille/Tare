@@ -1,10 +1,10 @@
-# Phase four — implementation delivered, hosted acceptance pending
+# Phase four — hosted deployment indexing, acceptance pending
 
 The Ethereum implementation and local Graph Node acceptance tests are delivered.
-**The full phase-four milestone is not closed:** the user previously deferred
-Graph deployment, and no production Graph endpoint/CID is configured. A fully
-indexed mainnet Graph/RPC acceptance capture remains required. Broader standardized
-indexing and multiple-network coverage are not implemented.
+Graph Studio version `0.1.0` is deployed and syncing under
+`tare-steakhouse-usdc-ethereum`. **The full phase-four milestone is not closed:**
+a fully indexed mainnet Graph/RPC acceptance capture remains required. Broader
+standardized indexing and multiple-network coverage are not implemented.
 
 ## Delivered
 
@@ -77,7 +77,8 @@ Blue adapters are unsupported. The adapter custodian is not an extra economic
 layer, and collateral references never create ownership.
 
 The subgraph observes accounting at every block from 25937756. The share ledger
-starts at zero for full transfer history. An archive-capable indexer RPC is needed;
+starts at the vault creation block, 18928285, preserving its full transfer history
+without scanning pre-deployment blocks. An archive-capable indexer RPC is needed;
 per-block indexing can be expensive. Select the accounting start block deliberately.
 The exact comparison covers 8 vault reads plus 4 per market: 56 for the public V1
 example. This checks raw agreement, not independent IRM accrual or solvency.
@@ -97,7 +98,7 @@ observed USD valuation.
 - [x] Real three-layer resolution with conserved integer attribution.
 - [x] Explicit debt, wrapper, shared-backing and liquidity treatment.
 - [x] Timestamped valuation, real WETH 1x control, and partial/mismatch tests.
-- [ ] Configure production deployment, index full share history, and retain matched
+- [ ] Let Graph Studio version `0.1.0` finish the required range, then retain matched
   mainnet share **and** accounting reports at one indexed block.
 - [ ] Broader standardized indexing/multiple-network coverage, if retained as a
   submission milestone. This implementation remains Ethereum-only.
