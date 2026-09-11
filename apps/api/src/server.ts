@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { TareService } from '../../../packages/service/src/index.js';
 import { MAX_INPUT_BYTES, ServiceError, publicError } from '../../../packages/service/src/requests.js';
 import { openapi } from './openapi.js';
+import { mcpOpenapi } from './openapi-mcp.js';
 import { ApiAccess } from './access.js';
 import type { HostedConfig } from './access.js';
 
@@ -13,7 +14,7 @@ const assets = new Map([
   ['/report.js', { file: 'report.js', type: 'text/javascript; charset=utf-8' }],
   ['/style.css', { file: 'style.css', type: 'text/css; charset=utf-8' }],
 ]);
-const specificationPaths = new Set(['/openapi.json', '/openapi-mcp.json']);
+const specificationPaths = new Set(['/openapi.json', '/openapi-mcp.json', '/openapi-mcp-v2.json']);
 
 function json(response: ServerResponse, status: number, value: unknown) {
   response.writeHead(status, { 'content-type': 'application/json; charset=utf-8' });
@@ -61,10 +62,18 @@ export function createApiServer(service = new TareService(), hosted?: HostedConf
       if (request.method !== 'GET') throw new ServiceError(405, 'method-not-allowed', 'Use GET.');
       if (path === '/healthz') return json(response, 200, { status: 'ok' });
       if (path === '/api/status') return json(response, 200, service.capabilities());
-      if (specificationPaths.has(path)) return json(response, 200, access.origin ? {
-        ...openapi, servers: [{ url: access.origin }], security: [{ bearerAuth: [] }],
-        components: { securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer' } } },
-      } : openapi);
+      if (specificationPaths.has(path)) {
+        const isMcpSpecification = path !== '/openapi.json';
+        const specification = isMcpSpecification ? mcpOpenapi : openapi;
+        if (!access.origin) return json(response, 200, specification);
+        if (isMcpSpecification) {
+          return json(response, 200, { ...specification, servers: [{ url: access.origin }] });
+        }
+        return json(response, 200, {
+          ...specification, servers: [{ url: access.origin }], security: [{ bearerAuth: [] }],
+          components: { securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer' } } },
+        });
+      }
       const asset = assets.get(path)!;
       const data = await readFile(new URL(`../../../../apps/web/${asset.file}`, import.meta.url));
       response.writeHead(200, { 'content-type': asset.type });

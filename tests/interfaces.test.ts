@@ -90,8 +90,14 @@ test('configuration stays private, OpenAPI describes strict requests, and explor
     }
     assert.ok(!JSON.stringify(schema).includes('"$schema"'));
     assert.ok(!JSON.stringify(schema).includes('"const"'));
-    const mcpSchema = await (await fetch(`${url}/openapi-mcp.json`)).json();
-    assert.deepEqual(mcpSchema, schema);
+    const mcpSchema = await (await fetch(`${url}/openapi-mcp.json`)).json() as {
+      openapi: string;
+      paths: Record<string, unknown>;
+    };
+    assert.equal(mcpSchema.openapi, '3.0.0');
+    assert.deepEqual(Object.keys(mcpSchema.paths).sort(), ['/api/analyze', '/api/example', '/api/status']);
+    assert.ok(!JSON.stringify(mcpSchema).includes('additionalProperties":true'));
+    assert.deepEqual(await (await fetch(`${url}/openapi-mcp-v2.json`)).json(), mcpSchema);
     for (const [path, type] of [['/', 'text/html'], ['/app.js', 'text/javascript'], ['/style.css', 'text/css']]) {
       const response = await fetch(`${url}${path}`);
       assert.equal(response.status, 200);
