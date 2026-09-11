@@ -154,6 +154,18 @@ This first hosted configuration selects verified Base Sepolia evidence but keeps
 onchain execution disabled. It is an acceptance deployment for the confidential
 policy, secret retrieval and HTTPS boundary; it cannot submit an exit report.
 
+After the hosted control is verified and immediately before owner authorization,
+generate the execution-enabled configuration and its matching one-hour arm plan:
+
+```sh
+npm run prepare:hosted --prefix workflows/cre -- --execute
+```
+
+The generated file remains ignored. Its `validUntil` value is both the permit
+ceiling to pass to `arm` and the ceiling used by CRE when deriving fresh report
+expiries. Re-running the command creates a new ceiling, so the owner must arm with
+the value from the same generated configuration that is deployed.
+
 Quick Tunnel URLs are temporary, have no uptime guarantee and work only while the
 `cloudflared` process remains running. They are suitable for bounded hosted
 acceptance and demos, not production hosting.

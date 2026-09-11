@@ -22,6 +22,12 @@
     "workflowOwner": "0xf7a77f49bf7f9805baa01bee187ca1fed6d64767"
   },
   "initialPositionRaw": "100000000000000000000",
+  "plannedExit": {
+    "sharesRaw": "100000000000000000000",
+    "minAssetsRaw": "95000000000000000000",
+    "nonce": "1",
+    "permitDurationSeconds": 3600
+  },
   "custodyAllowlist": "deployments/base-sepolia-hosted-custody.json",
   "acceptance": {
     "twoProviderVerification": {
