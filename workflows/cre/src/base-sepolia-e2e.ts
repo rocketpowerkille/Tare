@@ -1,5 +1,6 @@
 import { baseSepoliaCustodyEvidence } from '../../../packages/policy/src/base-sepolia.js';
 import { decide } from '../../../packages/policy/src/decision.js';
+import { configSchema } from './config.js';
 import { encodeExit, evidenceHash } from './report.js';
 
 const SHARES = '100000000000000000000';
@@ -12,7 +13,7 @@ type E2EManifest = {
   chainId: number;
   production: boolean;
   positionOwner: string;
-  contracts: { outerVault: string; testForwarder: string; receiver: string };
+  contracts: { outerVault: string; forwarder: string; receiver: string };
 };
 
 function manifestAddress(value: unknown, name: string): string {
@@ -21,17 +22,20 @@ function manifestAddress(value: unknown, name: string): string {
 }
 
 function parseManifest(input: unknown): E2EManifest {
-  const value = input as Partial<E2EManifest>;
+  const value = input as Partial<E2EManifest> & {
+    contracts?: { outerVault?: unknown; testForwarder?: unknown; mockForwarder?: unknown; receiver?: unknown };
+  };
   if (value?.chainId !== 84532 || value.production !== false || typeof value.contracts !== 'object') {
     throw new Error('Expected the non-production Base Sepolia E2E manifest');
   }
+  const forwarder = value.contracts.mockForwarder ?? value.contracts.testForwarder;
   return {
     chainId: value.chainId,
     production: value.production,
     positionOwner: manifestAddress(value.positionOwner, 'position owner'),
     contracts: {
       outerVault: manifestAddress(value.contracts?.outerVault, 'outer vault'),
-      testForwarder: manifestAddress(value.contracts?.testForwarder, 'test forwarder'),
+      forwarder: manifestAddress(forwarder, 'forwarder'),
       receiver: manifestAddress(value.contracts?.receiver, 'receiver'),
     },
   };
@@ -59,7 +63,7 @@ export function createBaseSepoliaExitPlan(report: unknown, manifestInput: unknow
     chainId: manifest.chainId,
     owner: manifest.positionOwner,
     vault: manifest.contracts.outerVault,
-    forwarder: manifest.contracts.testForwarder,
+    forwarder: manifest.contracts.forwarder,
     receiver: manifest.contracts.receiver,
     shares: SHARES,
     minAssets: MIN_ASSETS,
@@ -70,5 +74,38 @@ export function createBaseSepoliaExitPlan(report: unknown, manifestInput: unknow
     evidenceDigest: evidenceHash(evidence),
     payload: encodeExit(evidence, POLICY, now, authorization),
     invalidSharesPayload: encodeExit(evidence, POLICY, now, { ...authorization, shares: INVALID_SHARES }),
+  };
+}
+
+export function createBaseSepoliaSimulationSetup(report: unknown, manifestInput: unknown, now: number) {
+  const plan = createBaseSepoliaExitPlan(report, manifestInput, now);
+  const config = configSchema.parse({
+    schedule: '0 */5 * * * *',
+    evidenceSource: 'base-sepolia-custody',
+    apiUrl: 'http://127.0.0.1:4318/api/analyze',
+    owner: plan.owner,
+    vault: plan.vault,
+    graphDeployment: 'not-used-for-base-sepolia',
+    policySecretId: 'TARE_PRIVATE_POLICY',
+    apiSecretId: 'TARE_API_TOKEN',
+    execution: {
+      enabled: true,
+      receiver: plan.receiver,
+      shares: plan.shares,
+      minAssets: plan.minAssets,
+      nonce: plan.nonce,
+      validUntil: plan.validUntil,
+    },
+  });
+  return {
+    config,
+    approval: { token: plan.vault, spender: plan.receiver, shares: plan.shares },
+    arm: {
+      receiver: plan.receiver,
+      vault: plan.vault,
+      shares: plan.shares,
+      minAssets: plan.minAssets,
+      permitValidUntil: String(now + 3600),
+    },
   };
 }

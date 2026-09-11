@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { decodeAbiParameters } from 'viem';
 import { replayBaseSepoliaCustody } from '../../../packages/verification/src/base-sepolia-custody.js';
 import { baseSepoliaCapture } from '../../../tests/helpers/base-sepolia.js';
-import { createBaseSepoliaExitPlan } from '../src/base-sepolia-e2e.js';
+import { createBaseSepoliaExitPlan, createBaseSepoliaSimulationSetup } from '../src/base-sepolia-e2e.js';
 import { EXIT_ABI } from '../src/report.js';
 
 const manifest = {
@@ -43,5 +43,25 @@ describe('Base Sepolia E2E exit preparation', () => {
     expect(() => createBaseSepoliaExitPlan({ ...replay, sourceMode: 'live-rpc' }, manifest, 1301)).toThrow();
     expect(() => createBaseSepoliaExitPlan({ ...replay, sourceMode: 'live-rpc' },
       { ...manifest, production: true }, 1000)).toThrow();
+  });
+
+  test('simulation setup accepts the mock forwarder and keeps secrets and keys out of generated config', async () => {
+    const replay = await replayBaseSepoliaCustody(baseSepoliaCapture());
+    const report = { ...replay, sourceMode: 'live-rpc' };
+    const simulationManifest = {
+      ...manifest,
+      contracts: {
+        outerVault: manifest.contracts.outerVault,
+        mockForwarder: `0x${'77'.repeat(20)}`,
+        receiver: manifest.contracts.receiver,
+      },
+    };
+    const setup = createBaseSepoliaSimulationSetup(report, simulationManifest, 1000);
+    expect(setup.config.evidenceSource).toBe('base-sepolia-custody');
+    expect(setup.config.execution.validUntil).toBe('1300');
+    expect(setup.arm.permitValidUntil).toBe('4600');
+    expect(setup.approval.spender).toBe(manifest.contracts.receiver);
+    expect(JSON.stringify(setup)).not.toContain('PRIVATE_KEY');
+    expect(JSON.stringify(setup)).not.toContain('SECRET_');
   });
 });
