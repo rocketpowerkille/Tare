@@ -13,6 +13,7 @@ const assets = new Map([
   ['/report.js', { file: 'report.js', type: 'text/javascript; charset=utf-8' }],
   ['/style.css', { file: 'style.css', type: 'text/css; charset=utf-8' }],
 ]);
+const specificationPaths = new Set(['/openapi.json', '/openapi-mcp.json']);
 
 function json(response: ServerResponse, status: number, value: unknown) {
   response.writeHead(status, { 'content-type': 'application/json; charset=utf-8' });
@@ -56,11 +57,11 @@ export function createApiServer(service = new TareService(), hosted?: HostedConf
   async function route(request: IncomingMessage, response: ServerResponse) {
     const path = request.url ?? '';
     access.check(request, path.startsWith('/api/'));
-    if (path === '/healthz' || path === '/api/status' || path === '/openapi.json' || assets.has(path)) {
+    if (path === '/healthz' || path === '/api/status' || specificationPaths.has(path) || assets.has(path)) {
       if (request.method !== 'GET') throw new ServiceError(405, 'method-not-allowed', 'Use GET.');
       if (path === '/healthz') return json(response, 200, { status: 'ok' });
       if (path === '/api/status') return json(response, 200, service.capabilities());
-      if (path === '/openapi.json') return json(response, 200, access.origin ? {
+      if (specificationPaths.has(path)) return json(response, 200, access.origin ? {
         ...openapi, servers: [{ url: access.origin }], security: [{ bearerAuth: [] }],
         components: { securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer' } } },
       } : openapi);
