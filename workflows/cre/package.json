@@ -7,6 +7,7 @@
     "compile": "bun node_modules/@chainlink/cre-sdk/bin/cre-compile.ts src/main.ts ../../.tare/cre/tare-policy.wasm",
     "configure:base-deployment": "node scripts/configure-base-deployment.mjs",
     "configure:hosted": "node scripts/configure-hosted-env.mjs",
+    "configure:origin": "node scripts/configure-public-origin.mjs",
     "prepare:e2e": "bun scripts/prepare-base-sepolia-e2e.ts",
     "prepare:hosted": "node scripts/prepare-hosted-config.mjs",
     "prepare:simulation": "bun scripts/prepare-base-sepolia-simulation.ts",

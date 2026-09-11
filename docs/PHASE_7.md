@@ -143,6 +143,19 @@ npm run verify:hosted --prefix workflows/cre
 The verifier reads the token internally from `.env` and prints only public status
 and evidence fields.
 
+Once a permanent HTTPS API replaces the Quick Tunnel, bind its exact origin
+without rotating the matching API and CRE tokens:
+
+```sh
+npm run configure:origin --prefix workflows/cre -- https://tare-api.onrender.com
+npm run verify:hosted --prefix workflows/cre
+```
+
+The stable-origin helper changes only `TARE_PUBLIC_ORIGIN` and
+`TARE_CRE_API_URL` in the ignored `.env`. It first refuses mismatched API and CRE
+tokens, because silently rotating either token would break the other deployed
+side. Update the hosted workflow configuration only after verification succeeds.
+
 Generate the ignored hosted workflow configuration only after the HTTPS check
 passes:
 
