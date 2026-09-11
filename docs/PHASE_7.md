@@ -4,7 +4,9 @@ Local implementation: confidential CRE handler, private policy evaluation, signe
 verdicts, a verified Base Sepolia evidence producer, report submission and an ERC-4626 exit receiver. The official SDK
 compiles the workflow to WASM. SDK harness and Foundry tests exercise the isolated
 paths; the authenticated CRE CLI simulator now also exercises the live local path.
-This remains a simulator run, not a deployed TEE workflow or live transaction.
+The bounded receiver and its deterministic control position are now deployed on
+Base Sepolia. The CRE workflow remains a simulator build, not a deployed TEE
+workflow.
 
 ## Evidence and privacy boundary
 
@@ -77,7 +79,7 @@ has an isolated package/lockfile because its protobuf and runtime requirements
 differ from the Node CLI/API. No runtime dependencies were added to the root.
 
 Acceptance on 2026-09-11: 127 root tests plus existing demos/replay; 8 CRE tests;
-12 Solidity tests including 256 fuzz cases; official WASM compilation. The shared
+16 Solidity tests including 256 fuzz cases; official WASM compilation. The shared
 synthetic ABI vector is checked by both languages. SDK tests mock HTTP, secrets,
 signing and EVM submission; Foundry tests use a deliberately controllable vault.
 An authenticated CRE CLI v1.33.0 simulation called the loopback Tare API, resolved
@@ -115,12 +117,21 @@ Local production-limit acceptance is complete with the configured low-latency
 Ethereum RPC. A protected HTTPS Tare deployment and CRE deployment approval remain
 required for hosted acceptance; the access request is pending review.
 
-The verified Base Sepolia producer is implemented and wired through the CLI, protected
-API and confidential workflow. Its automated acceptance uses two independently served
-RPC fixtures; it has not yet been validated against deployed Base Sepolia control
-contracts. The current Ethereum V1 adapter remains non-executable. Next deploy the
-allowlisted control and receiver, record their code digests, obtain explicit owner
-authorization and verify a bounded testnet redemption and its failure cases.
+The verified Base Sepolia producer is implemented and wired through the CLI,
+protected API and confidential workflow. The allowlisted E2E control and actual
+bounded receiver were deployed on Base Sepolia in transaction
+`0x27672d1ff78f04ba5ac0d7f567c5fe1d98a17cc154b62bfe35852dd62c7d49bc`
+at block `46684694`. Read-only acceptance confirmed the expected owner, deployed
+bytecode, asset links and the complete 100-unit two-layer custody position. The
+deployment identities and bytecode digests are retained under `deployments/`.
+The current Ethereum V1 adapter remains non-executable. The bounded redemption and
+its live failure cases remain to be exercised.
+
+The E2E deployment deliberately uses an owner-only test forwarder because hosted
+CRE access and a production workflow identity are unavailable. It tests the real
+receiver and state transition on Base Sepolia but is not evidence of Chainlink DON
+signature delivery. A later production receiver must pin Chainlink's Base Sepolia
+Keystone Forwarder and the final hosted workflow identity.
 
 The production forwarder's metadata is 64 bytes: workflow ID (32), workflow name
 (10), workflow owner (20), report ID (2). The simulator's MockForwarder may omit

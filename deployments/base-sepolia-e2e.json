@@ -1,0 +1,25 @@
+{
+  "kind": "tare-base-sepolia-e2e-v1",
+  "network": "base-sepolia",
+  "chainId": 84532,
+  "production": false,
+  "deployer": "0xf1fea08ebba92ed342acc5639db312c3694bc391",
+  "positionOwner": "0xf1fea08ebba92ed342acc5639db312c3694bc391",
+  "transactionHash": "0x27672d1ff78f04ba5ac0d7f567c5fe1d98a17cc154b62bfe35852dd62c7d49bc",
+  "blockNumber": "46684694",
+  "harness": "0x39d408086d22859a3a1c19d8cfae1fbed2cb58ea",
+  "contracts": {
+    "terminalAsset": "0x8ee5f47e407006df298f45d0a4dae14d60cbde62",
+    "innerVault": "0x09b7f07f10800064f7db6a262ecff344da0bd867",
+    "outerVault": "0x60407bf755a379d530a5409ac3639ec4bbaa0bbe",
+    "testForwarder": "0xc819e99b4d2fb2a96bc47c67417f87213f86ad0c",
+    "receiver": "0xd1b87d595662f37390c02af906448cd38a100323"
+  },
+  "initialPositionRaw": "100000000000000000000",
+  "custodyAllowlist": "deployments/base-sepolia-custody.json",
+  "limitations": [
+    "owner-only-test-forwarder",
+    "not-a-hosted-cre-deployment",
+    "not-production-assets"
+  ]
+}
