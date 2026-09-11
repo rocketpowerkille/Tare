@@ -7,4 +7,5 @@ dist/
 .env.*
 !.env.example
 *.tsbuildinfo
+workflows/cre/src/.cre_build_tmp.js
 tmp

@@ -76,8 +76,10 @@ the live Steakhouse USDC V1 position, reconciled the deployed accounting subgrap
 against same-block RPC evidence and produced `hold` with the ordinary private
 threshold and `review` with a stricter threshold. Both runs disabled simulator
 limits because the stable no-key public RPC exceeded CRE's ten-second HTTP limit.
-No transaction was broadcast. CI repeats the automated checks; a remote CI run has
-not been performed for this change.
+The ordinary threshold was then repeated successfully under CRE's default
+production limits using a user-configured authenticated Ethereum RPC. No transaction
+was broadcast. CI repeats the automated checks; a remote CI run has not been
+performed for this change.
 
 ## Deferred setup and remaining code
 
@@ -88,11 +90,10 @@ is JSON with `maxAgeSeconds`, `maxConcentrationBps` and `maxMultipleBps`; basis
 points use 10,000 for 100% or a 1x multiple. The API secret must match the hosted
 Tare access token. Keep real values outside tracked configuration and chat.
 
-Before hosted policy acceptance, configure an HTTPS Tare API, pinned Graph
-deployment and its providers, CRE access and enclave secrets. Run and retain a
-successful CRE confidential simulation/deployment with stale/partial failure cases
-and two private thresholds producing different outcomes. Local SDK tests and WASM
-compilation do not satisfy this hosted acceptance step.
+Before hosted policy acceptance, configure a protected HTTPS Tare API, CRE
+deployment access and enclave secrets. Repeat the two private-threshold cases on
+the deployed workflow and retain the execution records. Local simulation does not
+satisfy this hosted acceptance step.
 
 For end-to-end development without exposing a machine, the CRE configuration may
 use `http://127.0.0.1:<port>/api/analyze` or the equivalent `localhost` URL while
@@ -101,9 +102,9 @@ every non-loopback hostname. This local path exercises live provider acquisition
 and confidential policy execution, but it is not evidence of a deployed CRE
 workflow or production HTTPS authentication.
 
-Production-limit acceptance still needs a reliable low-latency Ethereum RPC (a
-provider account/key is expected) and a protected HTTPS Tare deployment. The
-current CRE organization can simulate but reports deployment access as disabled.
+Local production-limit acceptance is complete with the configured low-latency
+Ethereum RPC. A protected HTTPS Tare deployment and CRE deployment approval remain
+required for hosted acceptance; the access request is pending review.
 
 Before live exits, **implement and validate a verified Sepolia evidence producer**.
 The current V1 adapter is Ethereum-only and cannot supply eligible exit evidence;
