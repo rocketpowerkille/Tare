@@ -124,8 +124,17 @@ bounded receiver were deployed on Base Sepolia in transaction
 at block `46684694`. Read-only acceptance confirmed the expected owner, deployed
 bytecode, asset links and the complete 100-unit two-layer custody position. The
 deployment identities and bytecode digests are retained under `deployments/`.
-The current Ethereum V1 adapter remains non-executable. The bounded redemption and
-its live failure cases remain to be exercised.
+The current Ethereum V1 adapter remains non-executable.
+
+Bounded exit acceptance completed on Base Sepolia. The owner approved exactly 100
+outer shares, armed a 95-share minimum with nonce 1, and a fresh two-provider
+verification produced the same ABI payload used by the CRE workflow. Transaction
+`0x727d95f56314b7756438f05069a27bf84f6216f8c8c771bbe28996ac897dce75`
+redeemed exactly 100 outer shares for 100 inner shares. Post-transaction reads
+confirmed zero owner outer shares, zero receiver balances, zero remaining allowance
+and a consumed permit at nonce 2. Direct receiver calls, non-owner forwarding,
+malformed payloads, a fresh wrong-share payload and replay of the exact mined
+calldata all reverted with their intended custom errors.
 
 The E2E deployment deliberately uses an owner-only test forwarder because hosted
 CRE access and a production workflow identity are unavailable. It tests the real

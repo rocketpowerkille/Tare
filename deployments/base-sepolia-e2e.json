@@ -17,6 +17,31 @@
   },
   "initialPositionRaw": "100000000000000000000",
   "custodyAllowlist": "deployments/base-sepolia-custody.json",
+  "acceptance": {
+    "approvalTransaction": "0xd47b3b76f20a4212301ed2e6d11596a229c07b19acb320fc4988135d64b3c0f8",
+    "armTransaction": "0x64ec65c7d7191748ae2969210e9899581716eae207a17f7ca2544b01e63e23ce",
+    "exitTransaction": "0x727d95f56314b7756438f05069a27bf84f6216f8c8c771bbe28996ac897dce75",
+    "exitBlockNumber": "46685423",
+    "evidenceDigest": "0x39f2402818eb7370fbf69a68f69c9820d44f9ed63eb18524dbc1953bb5301e78",
+    "sharesRedeemedRaw": "100000000000000000000",
+    "assetsReceivedRaw": "100000000000000000000",
+    "postState": {
+      "ownerOuterSharesRaw": "0",
+      "ownerInnerSharesRaw": "100000000000000000000",
+      "receiverOuterSharesRaw": "0",
+      "receiverInnerSharesRaw": "0",
+      "remainingAllowanceRaw": "0",
+      "permitSharesRaw": "0",
+      "permitNonce": "2"
+    },
+    "rejectedCases": [
+      "direct-receiver-caller",
+      "non-owner-test-forwarder-caller",
+      "malformed-payload",
+      "wrong-share-payload",
+      "replayed-mined-payload"
+    ]
+  },
   "limitations": [
     "owner-only-test-forwarder",
     "not-a-hosted-cre-deployment",
