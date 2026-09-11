@@ -1,9 +1,9 @@
 # Team handoff — current state and next work
 
-Point-in-time status: **2026-09-11**. This document separates implemented code,
-retained acceptance evidence and partner-hosted work that is still pending. Treat
-the deployment manifests and phase documents linked below as the detailed source
-of truth.
+Point-in-time status: **2026-09-12 IST**. This document separates implemented code,
+retained acceptance evidence and the remaining partner-hosted work. Treat the
+deployment manifests and phase documents linked below as the detailed source of
+truth.
 
 ## Executive status
 
@@ -11,12 +11,13 @@ Tare is a working technical MVP for resolving nested vault exposure, comparing
 independent observations and conditionally executing a tightly bounded exit on
 Base Sepolia. The core engine, CLI/API/MCP interfaces, local web explorer,
 monitoring logic, Graph mappings, confidential-policy workflow and receiver are
-implemented and tested. One bounded Base Sepolia exit has been executed onchain.
+implemented and tested. Both the deterministic test-forwarder path and a hosted
+Chainlink production-forwarder path completed bounded Base Sepolia exits.
 
-The MVP is **not submission-complete**. Chainlink has not enabled hosted CRE
-deployment access, Bazantic has not been connected on its platform, the
-historical Graph share ledger has not completed its backfill, and the UI still
-needs final product integration and polish.
+The technical MVP is complete for the implemented Chainlink path, but the project
+is **not submission-complete**. Bazantic has not been connected on its platform,
+hosted monitoring remains pending, the historical Graph share ledger has not
+completed its backfill, and the UI still needs final product integration and polish.
 
 ## Partner and component status
 
@@ -24,8 +25,8 @@ needs final product integration and polish.
 | --- | --- | --- |
 | Core resolver | Implemented for synthetic schemas and the documented Ethereum MetaMorpho V1 plus V2→V1→Blue scope. Integer accounting, partial evidence and replay are tested. | Broader protocol/network coverage is optional future scope, not part of the verified MVP. |
 | The Graph | Custom share/accounting mappings build and pass real local Graph Node rollback tests. The deadline-safe `tare-live-accounting` Studio deployment matched all 56 Graph observations to same-block RPC at Ethereum block `25953771`, with zero mismatches. | The original `tare-steakhouse-usdc-ethereum` full-history share ledger was last observed around 73% sync. When it completes, retain one same-block share **and** accounting acceptance report. |
-| Chainlink CRE | TypeScript workflow, private policy, redacted report, Base evidence producer and ABI payload are implemented. The official SDK compiles to WASM; local authenticated simulation works. Chainlink staff confirmed that end-to-end simulation, rather than deployment, is what they look for in bounty judging. | Deployment access is pending. Hosted execution, enclave secrets, production workflow identity and DON-signed delivery have not been accepted. |
-| Base Sepolia execution | Receiver/control harness deployed. Two-provider, allowlisted-bytecode custody verification matched a 2.000000x control. A bounded 100-share exit succeeded, and five failure/replay cases reverted. | The accepted control position is consumed. A hosted CRE test needs a fresh position and a new receiver pinned to the official Chainlink forwarder and final workflow identity. |
+| Chainlink CRE | The TypeScript workflow compiles to WASM, reads private secrets, acquires authenticated HTTPS evidence and submits a confidential consensus report. Local simulation passed, then private-registry workflow `0024de…e3bd` completed an EVM write through the production Base Sepolia Keystone Forwarder. It is paused after acceptance. | Preserve the acceptance artifacts and demo narrative. Persistent production hosting, a security audit and mainnet use are explicitly outside the current claim. |
+| Base Sepolia execution | Two-provider allowlisted-bytecode verification matched a 2.000000x control. Five deterministic failure/replay cases reverted. A separate hosted receiver redeemed exactly 100 outer shares for 100 inner shares through Chainlink transaction `0x65549c…b95f9`; allowance and permit shares became zero and nonce advanced to 2. | Both disposable control positions are consumed. Create another only if a new live demo is genuinely required. The contracts use test assets and are not production audited. |
 | Bazantic | Tare's deterministic composition API/MCP operation is implemented and rejects contradictory evidence. | Account/gateway setup, second-service binding, native Recipe authoring and a hosted run are not done. |
 | Monitoring | Local TypeScript Substreams consumer, checkpoints, deduplication, reorg rollback and evidence evaluation are implemented. | Hosted provider credentials, deployment and operational acceptance are pending. |
 | Interfaces/UI | CLI, protected HTTP API, stdio MCP server and localhost explorer are functional. | Connect the final hosted endpoints and complete the UI last, with clear live/recorded and verified/unverified labels. |
@@ -41,13 +42,15 @@ Latest local acceptance in this workspace:
 
 - `pnpm verify`: **128/128** Node tests passed, followed by all required demos and
   the retained Ethereum capture replay.
-- CRE workflow suite: **10/10** tests passed in the Bun-enabled environment; the
-  official SDK previously compiled the workflow to `.tare/cre/tare-policy.wasm`.
-- Foundry suite: **16/16** Solidity tests passed, including 256 fuzz cases.
+- CRE workflow suite: **12/12** tests passed in the Bun-enabled environment; the
+  official SDK compiled the workflow to `.tare/cre/tare-policy.wasm`.
+- Foundry suite: **23/23** Solidity tests passed, including 256 fuzz cases.
 - The Graph: local Graph Node/Anvil indexing and rollback passed; hosted live
   accounting matched **56/56** reads with zero mismatches.
 - Base Sepolia: live two-provider custody matched; the bounded success transaction
-  and rejected caller/payload/replay cases are recorded in the deployment manifest.
+  and rejected caller/payload/replay cases are recorded in the deployment manifests.
+- Hosted CRE: trigger, authenticated HTTP, consensus report and Base Sepolia
+  `WriteReport` capabilities succeeded. The following post-exit run made no EVM write.
 
 Useful verification commands:
 
@@ -89,47 +92,38 @@ zero owner outer shares, zero receiver balances, zero allowance, a consumed perm
 and nonce 2. The direct receiver caller, non-owner forwarder caller, malformed
 payload, wrong-share payload and exact-calldata replay all reverted.
 
-The delivery used an **owner-only test forwarder**, not Chainlink's DON. Therefore
-the accurate claim is “real Base Sepolia bounded exit accepted,” not “hosted CRE
-execution completed.” See [`deployments/base-sepolia-e2e.json`](../deployments/base-sepolia-e2e.json)
-and [phase seven](PHASE_7.md).
+This first delivery used an **owner-only test forwarder**, not Chainlink's DON. It
+remains the deterministic failure/replay fixture. See
+[`deployments/base-sepolia-e2e.json`](../deployments/base-sepolia-e2e.json).
 
 The retained Base custody capture was taken before the exit at block `46684889`
 (`0x2c85ad9`) from two differently hosted RPC providers. It is valuable replay
 evidence, but it is historical after the shares were redeemed. Do not relabel it
 as a fresh executable position.
 
+The separate hosted acceptance used a fresh control and Chainlink's production
+Base Sepolia Keystone Forwarder:
+
+| Hosted item | Value |
+| --- | --- |
+| Harness | `0xe4a29c01d197e190503bec2f7953f1044ee7374f` |
+| Outer vault | `0x65d8dcf4d0ae830b09a906ab57366fa226026d03` |
+| Bounded receiver | `0xec3b0dc653f9150ecde9a6a2c14e9138dfb9e577` |
+| Production forwarder | `0xf8344cfd5c43616a4366c34e3eee75af79a74482` |
+| CRE workflow ID | `0024de354e9d08c1e57c1cc4308e3ea462c89580de2ddbef2a3c69e8bd53e3bd` |
+| CRE exit execution ID | `c0c22aaf520df358ad5358bd5806015fd4335adf790432918d5abdd35654b206` |
+| Approval transaction | `0x7c99f67274625dc967fb10982ed3e5b4fff20aa72445a53504f05d4f75985380` |
+| Arm transaction | `0x66e916525001fd867708deec3ec9efd3a3348b485fc8d2a0d3449b30d2858e0e` |
+| Hosted exit transaction | `0x65549cd7b8c823795ec22ae17f297f8d3d3668ee5278e690ee836ba3d63b95f9` |
+
+That hosted exit redeemed 100 outer shares for 100 inner shares. A second scheduled
+run after consumption completed without an EVM write, and the workflow was paused.
+See [`deployments/cre-hosted-execution.json`](../deployments/cre-hosted-execution.json)
+and [phase seven](PHASE_7.md).
+
 ## Ordered next work
 
-### 1. Produce the prize-ready Chainlink CRE simulation
-
-1. Record a clean authenticated local simulator run that demonstrates evidence
-   acquisition, private policy evaluation, redacted output and the intended bounded
-   write path. Include both an allowed/review path and a blocked/failure path.
-2. Keep the simulator secrets local. Chainlink staff explicitly advised that
-   simulator secrets do not leave the machine.
-3. Pair the simulator record with the already retained Base Sepolia success and
-   failure transactions, while clearly stating that the transaction used the test
-   forwarder and was not DON-delivered.
-
-Chainlink support estimated deployment-access review at **24–48 hours** and said
-the queued access request is not a bounty blocker. Do not delay the submission or
-represent deployment as required judging evidence.
-
-### 2. Deploy hosted CRE if access arrives
-
-1. Check `cre whoami` periodically until deployment access is enabled.
-2. Host the Tare API behind HTTPS with authentication and configure CRE secrets
-   outside the repository.
-3. Obtain the final hosted workflow ID/name/owner and confirm Chainlink's official
-   Base Sepolia Keystone Forwarder from current documentation.
-4. Create a fresh test position and deploy a **new** production-path receiver pinned
-   to that official forwarder and final workflow identity. Do not reuse the consumed
-   control or the owner-only test-forwarder receiver.
-5. Deploy the workflow, repeat the policy cases and execute at most one newly armed
-   bounded test exit. Retain CRE execution and onchain records.
-
-### 3. Finish hosted monitoring and Bazantic
+### 1. Finish hosted monitoring and Bazantic
 
 1. Deploy the API/monitor with bounded provider configuration, durable state,
    TLS/auth and explicit live-source labels.
@@ -138,13 +132,20 @@ represent deployment as required judging evidence.
 3. Let the historical Graph share ledger continue independently. Once fully
    indexed, run the same-block share plus accounting comparison and retain it.
 
-### 4. Complete the UI last
+### 2. Complete the UI last
 
 Connect the explorer to the chosen hosted API and surface provenance, block,
 deployment identity, completeness, verification status and execution eligibility.
 Recorded captures must never appear live, and an unavailable collateral multiple
 must not be replaced by an invented percentage. Add a simple guided demo path and
 run manual browser acceptance before submission.
+
+### 3. Assemble submission evidence
+
+Link the hosted CRE execution record, Base Sepolia transaction, Graph 56/56
+acceptance and deterministic replay/failure cases from one concise demo path.
+Capture only public IDs and outputs; keep RPC credentials, API tokens, wallet keys
+and private policy values out of the submission.
 
 ## Claim boundary
 
@@ -155,10 +156,12 @@ Safe claims today:
 - The Base verifier matched allowlisted code and two-layer custody across two RPC
   hosts, and a real bounded Base Sepolia exit plus failure cases were accepted.
 - The CRE workflow compiles and runs in the authenticated local simulator.
+- A private-registry CRE workflow completed authenticated HTTP, confidential report
+  consensus and production-forwarder Base Sepolia delivery; it is paused afterward.
 
 Do **not** claim yet:
 
-- hosted CRE/DON execution, production readiness or a security audit;
+- production readiness, a security audit or mainnet execution;
 - completed Bazantic integration;
 - fully indexed historical share acceptance or broad multi-chain coverage;
 - Ethereum mainnet execution, independently verified Morpho loan backing, or that

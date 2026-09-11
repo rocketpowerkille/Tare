@@ -26,11 +26,12 @@ reorg retractions. Hosted acceptance remains pending; see [monitoring](docs/PHAS
 **Phase seven has a confidential policy workflow and Solidity exit receiver:** private
 thresholds drive signed verdicts, with a guarded Base Sepolia execution path.
 The Base Sepolia producer independently pins two RPC hosts, checks allowlisted bytecode
-and reconciles direct two-layer custody. A test receiver was deployed and a bounded
-100-share exit plus failure cases were accepted onchain. Delivery used an owner-only
-test forwarder; hosted CRE/DON acceptance remains open. Current Ethereum V1 reports
-cannot authorize exits.
-See [phase seven](docs/PHASE_7.md) for verification and deferred setup.
+and reconciles direct two-layer custody. Deterministic failure cases passed through a
+test forwarder, then a separate hosted private-registry workflow delivered a bounded
+100-share exit through Chainlink's production Base Sepolia Keystone Forwarder. That
+workflow is paused after successful acceptance. The control assets are test-only, and
+current Ethereum V1 reports cannot authorize exits.
+See [phase seven](docs/PHASE_7.md) for the exact execution and claim boundary.
 
 Tare is an exposure resolver for nested vault positions. Phase one is a working
 **offline, synthetic-data resolver** with local watch-only wallet profiles. An

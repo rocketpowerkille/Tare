@@ -7,9 +7,11 @@ configured Tare service and cannot upgrade Ethereum lending backing to verified 
 The separate Base producer pins two differently hosted RPCs, checks allowlisted contract
 bytecode and reconciles both custody layers at one block before creating eligible evidence.
 `contracts` owns the one-use ERC-4626 exit receiver; its ABI has a shared test vector
-with the workflow. A test-forwarder delivery completed the bounded Base Sepolia exit;
-hosted CRE/DON acceptance remains open and requires a fresh position plus a new receiver
-pinned to the official forwarder and final workflow identity.
+with the workflow. A test-forwarder delivery first exercised deterministic success and
+rejection cases. A separate private-registry CRE workflow then acquired authenticated
+two-provider evidence, produced a confidential consensus report and delivered a bounded
+exit through Chainlink's production Base Sepolia Keystone Forwarder. The one-use permit
+was consumed and the workflow was paused after acceptance.
 See [phase seven](PHASE_7.md).
 
 Phase-five interfaces add `packages/service` for request validation, provider
