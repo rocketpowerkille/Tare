@@ -5,6 +5,7 @@ import { TareService } from '../../../packages/service/src/index.js';
 import { MAX_INPUT_BYTES, ServiceError, publicError } from '../../../packages/service/src/requests.js';
 import { openapi } from './openapi.js';
 import { mcpOpenapi } from './openapi-mcp.js';
+import { compactEvidenceReport } from '../../../packages/receipts/src/compact.js';
 import { ApiAccess } from './access.js';
 import type { HostedConfig } from './access.js';
 
@@ -14,7 +15,7 @@ const assets = new Map([
   ['/report.js', { file: 'report.js', type: 'text/javascript; charset=utf-8' }],
   ['/style.css', { file: 'style.css', type: 'text/css; charset=utf-8' }],
 ]);
-const specificationPaths = new Set(['/openapi.json', '/openapi-mcp.json', '/openapi-mcp-v2.json']);
+const specificationPaths = new Set(['/openapi.json', '/openapi-mcp.json', '/openapi-mcp-v2.json', '/openapi-mcp-v3.json']);
 
 function json(response: ServerResponse, status: number, value: unknown) {
   response.writeHead(status, { 'content-type': 'application/json; charset=utf-8' });
@@ -81,11 +82,13 @@ export function createApiServer(service = new TareService(), hosted?: HostedConf
       return;
     }
     const action = path.slice('/api/'.length);
-    if (!path.startsWith('/api/') || (action !== 'analyze' && action !== 'replay' && action !== 'example' && action !== 'compose')) {
+    const compactAction = action === 'agent-analyze' ? 'analyze' : action === 'agent-example' ? 'example' : null;
+    if (!path.startsWith('/api/') || (action !== 'analyze' && action !== 'replay' && action !== 'example' && action !== 'compose' && !compactAction)) {
       throw new ServiceError(404, 'not-found', 'Unknown route.');
     }
     if (request.method !== 'POST') throw new ServiceError(405, 'method-not-allowed', 'Use POST.');
-    json(response, 200, await service.run(action, await readBody(request)));
+    const result = await service.run(compactAction ?? action as 'analyze' | 'replay' | 'example' | 'compose', await readBody(request));
+    json(response, 200, compactAction ? compactEvidenceReport(result) : result);
   }
   return server;
 }

@@ -26,6 +26,14 @@ test('API examples and uploaded captures preserve the exact resolver reports and
       const replay = await post(url, 'replay', { operation: example.operation, capture });
       assert.deepEqual(await replay.json(), expected);
     }
+    const compactResponse = await post(url, 'agent-example', { id: 'steakhouse-usdc' });
+    const compactText = await compactResponse.text();
+    const compact = JSON.parse(compactText) as Record<string, unknown>;
+    assert.equal(compactResponse.status, 200);
+    assert.ok(Buffer.byteLength(compactText) < 32 * 1024);
+    assert.equal(compact.sourceMode, 'recorded-rpc');
+    assert.equal(compact.captureOmitted, true);
+    assert.ok(!('capture' in compact));
     const capture = await readJsonFile('fixtures/live/ov-usdc-v2.capture.json') as { rpc: { confirmed: boolean } };
     capture.rpc.confirmed = false;
     const response = await post(url, 'replay', { operation: 'resolve-v2', capture });
@@ -83,7 +91,7 @@ test('configuration stays private, OpenAPI describes strict requests, and explor
       paths: Record<string, { post?: { requestBody?: { content?: Record<string, { schema?: unknown }> } } }>;
     };
     assert.equal(schema.openapi, '3.0.3');
-    assert.deepEqual(Object.keys(schema.paths).sort(), ['/api/analyze', '/api/compose', '/api/example', '/api/replay', '/api/status', '/healthz']);
+    assert.deepEqual(Object.keys(schema.paths).sort(), ['/api/agent-analyze', '/api/agent-example', '/api/analyze', '/api/compose', '/api/example', '/api/replay', '/api/status', '/healthz']);
     for (const route of Object.values(schema.paths)) {
       const requestSchema = route.post?.requestBody?.content?.['application/json']?.schema as { type?: string } | undefined;
       if (requestSchema) assert.equal(requestSchema.type, 'object');
@@ -95,9 +103,10 @@ test('configuration stays private, OpenAPI describes strict requests, and explor
       paths: Record<string, unknown>;
     };
     assert.equal(mcpSchema.openapi, '3.0.0');
-    assert.deepEqual(Object.keys(mcpSchema.paths).sort(), ['/api/analyze', '/api/example', '/api/status']);
+    assert.deepEqual(Object.keys(mcpSchema.paths).sort(), ['/api/agent-analyze', '/api/agent-example', '/api/status']);
     assert.ok(!JSON.stringify(mcpSchema).includes('additionalProperties":true'));
     assert.deepEqual(await (await fetch(`${url}/openapi-mcp-v2.json`)).json(), mcpSchema);
+    assert.deepEqual(await (await fetch(`${url}/openapi-mcp-v3.json`)).json(), mcpSchema);
     for (const [path, type] of [['/', 'text/html'], ['/app.js', 'text/javascript'], ['/style.css', 'text/css']]) {
       const response = await fetch(`${url}${path}`);
       assert.equal(response.status, 200);

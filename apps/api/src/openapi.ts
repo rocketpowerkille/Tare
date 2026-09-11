@@ -92,8 +92,10 @@ export const openapi = {
       responses: { '200': { description: 'Capability flags; configured does not mean independently verified.',
         content: { 'application/json': { schema: genericObject } } } } } },
     '/api/analyze': { post: postOperation('tare_analyze', 'Acquire fresh read-only Ethereum or Base Sepolia evidence.', analyzeSchema) },
+    '/api/agent-analyze': { post: postOperation('tare_analyze_compact', 'Acquire a compact agent report from fresh read-only evidence.', analyzeSchema) },
     '/api/replay': { post: postOperation('tare_replay', 'Recalculate an unsigned evidence capture without making network requests.', replaySchema) },
     '/api/example': { post: postOperation('tare_example', 'Replay one retained public evidence example without network requests.', exampleSchema) },
+    '/api/agent-example': { post: postOperation('tare_example_compact', 'Replay a retained example as a compact agent report.', exampleSchema) },
     '/api/compose': { post: postOperation('tare_compose', 'Recompute and join V1 exposure and Graph share evidence.', composeSchema) },
   },
 };

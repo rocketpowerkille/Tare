@@ -22,10 +22,10 @@ export const mcpOpenapi = {
         responses: { '200': success },
       },
     },
-    '/api/analyze': {
+    '/api/agent-analyze': {
       post: {
-        operationId: 'tare_analyze',
-        summary: 'Acquire fresh read-only Ethereum or Base Sepolia evidence.',
+        operationId: 'tare_analyze_compact',
+        summary: 'Acquire a compact, read-only Ethereum or Base Sepolia evidence report for an agent.',
         requestBody: {
           required: true,
           content: {
@@ -50,10 +50,10 @@ export const mcpOpenapi = {
         responses: { '200': success },
       },
     },
-    '/api/example': {
+    '/api/agent-example': {
       post: {
-        operationId: 'tare_example',
-        summary: 'Replay a retained public evidence example.',
+        operationId: 'tare_example_compact',
+        summary: 'Replay a retained public evidence example and return a compact agent report.',
         requestBody: {
           required: true,
           content: {
