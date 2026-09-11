@@ -240,5 +240,11 @@ current Base Sepolia forwarder, the private-registry owner and the CRE-encoded n
 ten ASCII hex characters of the workflow-name SHA-256 digest, not the first ten
 plaintext characters.
 
+`BaseSepoliaHostedHarness` creates a fresh fixed-supply two-layer control and a
+receiver with that hosted identity in one Base Sepolia deployment. The control
+tokens are deliberately non-production test assets. Unlike the simulator harness,
+it contains no mock forwarder and cannot deliver reports itself; only the production
+KeystoneForwarder can call its receiver.
+
 References: [confidential workflow template](https://docs.chain.link/cre-templates/hello-confidential-workflows)
 and [receiver integration](https://docs.chain.link/cre/guides/workflow/using-evm-client/onchain-write/building-consumer-contracts).
