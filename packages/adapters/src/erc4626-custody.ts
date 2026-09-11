@@ -16,7 +16,7 @@ export interface TwoLayerCustodyDeployment {
   terminalAsset: string;
 }
 
-/** Exact ERC-4626 read set for the allowlisted two-layer Sepolia control. */
+/** Exact ERC-4626 read set shared by allowlisted two-layer testnet controls. */
 export async function readTwoLayerCustody(
   reader: ContractReader,
   deployment: TwoLayerCustodyDeployment,
