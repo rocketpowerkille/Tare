@@ -64,7 +64,7 @@ describe('Base Sepolia E2E exit preparation', () => {
     );
     expect(setup.config.evidenceSource).toBe('base-sepolia-custody');
     expect(setup.config.apiUrl).toBe('http://127.0.0.1:4320/api/analyze');
-    expect(setup.config.execution.validUntil).toBe('1300');
+    expect(setup.config.execution.validUntil).toBe('4600');
     expect(setup.arm.permitValidUntil).toBe('4600');
     expect(setup.approval.spender).toBe(manifest.contracts.receiver);
     expect(JSON.stringify(setup)).not.toContain('PRIVATE_KEY');

@@ -246,6 +246,11 @@ tokens are deliberately non-production test assets. Unlike the simulator harness
 it contains no mock forwarder and cannot deliver reports itself; only the production
 KeystoneForwarder can call its receiver.
 
+For hosted execution, `execution.validUntil` is the owner-granted permit ceiling.
+Each confidential run derives a fresh report expiry no later than ten minutes from
+its own clock and no later than that permit ceiling. This avoids making a recurring
+workflow depend on one deployment-time report timestamp.
+
 The hosted control was deployed at
 `0xE4A29c01d197E190503bec2f7953F1044eE7374f` in Base Sepolia transaction
 `0x98afce52a722fa9a5ece13a6bbc521053a8936ae38f62a49051966f258eb4268`.

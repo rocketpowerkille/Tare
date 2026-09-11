@@ -84,6 +84,7 @@ export function createBaseSepoliaSimulationSetup(
   apiUrl = 'http://127.0.0.1:4318/api/analyze',
 ) {
   const plan = createBaseSepoliaExitPlan(report, manifestInput, now);
+  const permitValidUntil = String(now + 3600);
   const config = configSchema.parse({
     schedule: '0 */5 * * * *',
     evidenceSource: 'base-sepolia-custody',
@@ -99,7 +100,7 @@ export function createBaseSepoliaSimulationSetup(
       shares: plan.shares,
       minAssets: plan.minAssets,
       nonce: plan.nonce,
-      validUntil: plan.validUntil,
+      validUntil: permitValidUntil,
     },
   });
   return {
@@ -110,7 +111,7 @@ export function createBaseSepoliaSimulationSetup(
       vault: plan.vault,
       shares: plan.shares,
       minAssets: plan.minAssets,
-      permitValidUntil: String(now + 3600),
+      permitValidUntil,
     },
   };
 }
