@@ -22,7 +22,12 @@ const report = await verifyBaseSepoliaCustody({
   secondaryRpcUrl: process.env.TARE_BASE_SECONDARY_RPC_URL ?? 'https://base-sepolia-rpc.publicnode.com',
   timeoutMs: 20000,
 });
-const setup = createBaseSepoliaSimulationSetup(report, manifestInput, Math.floor(Date.now() / 1000));
+const setup = createBaseSepoliaSimulationSetup(
+  report,
+  manifestInput,
+  Math.floor(Date.now() / 1000),
+  process.env.TARE_CRE_API_URL,
+);
 await mkdir(dirname(configPath), { recursive: true });
 await writeFile(configPath, `${JSON.stringify(setup.config, null, 2)}\n`, { encoding: 'utf8', mode: 0o600 });
 console.log(JSON.stringify({

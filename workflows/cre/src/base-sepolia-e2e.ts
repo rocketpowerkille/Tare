@@ -77,12 +77,17 @@ export function createBaseSepoliaExitPlan(report: unknown, manifestInput: unknow
   };
 }
 
-export function createBaseSepoliaSimulationSetup(report: unknown, manifestInput: unknown, now: number) {
+export function createBaseSepoliaSimulationSetup(
+  report: unknown,
+  manifestInput: unknown,
+  now: number,
+  apiUrl = 'http://127.0.0.1:4318/api/analyze',
+) {
   const plan = createBaseSepoliaExitPlan(report, manifestInput, now);
   const config = configSchema.parse({
     schedule: '0 */5 * * * *',
     evidenceSource: 'base-sepolia-custody',
-    apiUrl: 'http://127.0.0.1:4318/api/analyze',
+    apiUrl,
     owner: plan.owner,
     vault: plan.vault,
     graphDeployment: 'not-used-for-base-sepolia',

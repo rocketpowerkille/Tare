@@ -56,8 +56,14 @@ describe('Base Sepolia E2E exit preparation', () => {
         receiver: manifest.contracts.receiver,
       },
     };
-    const setup = createBaseSepoliaSimulationSetup(report, simulationManifest, 1000);
+    const setup = createBaseSepoliaSimulationSetup(
+      report,
+      simulationManifest,
+      1000,
+      'http://127.0.0.1:4320/api/analyze',
+    );
     expect(setup.config.evidenceSource).toBe('base-sepolia-custody');
+    expect(setup.config.apiUrl).toBe('http://127.0.0.1:4320/api/analyze');
     expect(setup.config.execution.validUntil).toBe('1300');
     expect(setup.arm.permitValidUntil).toBe('4600');
     expect(setup.approval.spender).toBe(manifest.contracts.receiver);

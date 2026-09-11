@@ -20,10 +20,54 @@
   "initialPositionRaw": "100000000000000000000",
   "custodyAllowlist": "deployments/base-sepolia-cre-simulation-custody.json",
   "acceptance": {
-    "approvalTransaction": null,
-    "armTransaction": null,
-    "creDryRun": "pending",
-    "creBroadcast": "pending"
+    "approvalTransaction": "0xa16f37c8ba465bf029187bf30f086619abd04c07e1f05b7d90dcddee00b40e12",
+    "armTransaction": "0x69586898432db58705940de7f7dee5319aae5f85b0d56a7a09a1f3e9c019f2fc",
+    "creDryRun": {
+      "completedAt": "2026-09-11T17:08:17Z",
+      "binaryHash": "fdffd3231828e615756f961a2f87d5dec7abb820199ccae0bb8b494740f6c8fa",
+      "configHash": "a1b5c3780cb49231061ac9dd04597868d03a9ab814d71dce19a4908ee125c14c",
+      "action": "exit",
+      "reason": "verified-multiple-limit",
+      "evidenceDigest": "0x8808fe67558aeb4e79149238aac197693e685505dd6ed896bedb3c8a4d10a4a7",
+      "limits": "none",
+      "broadcast": false,
+      "signer": "0xf1fea08ebba92ed342acc5639db312c3694bc391",
+      "positionUnchanged": true
+    },
+    "creBroadcast": {
+      "completedAt": "2026-09-11T17:12:20Z",
+      "binaryHash": "fdffd3231828e615756f961a2f87d5dec7abb820199ccae0bb8b494740f6c8fa",
+      "configHash": "d2529914730d234f08d28333b749422e466731b711a428c968c6e70898162862",
+      "action": "exit",
+      "reason": "verified-multiple-limit",
+      "evidenceDigest": "0xfecd9e9cacafbc0e5f30907304a67fea7892f1bbb2022f4e3f64d23a343cef84",
+      "limits": "none",
+      "broadcast": true,
+      "signer": "0xf1fea08ebba92ed342acc5639db312c3694bc391",
+      "transactionHash": "0xa83dfb9b9a26894d69976d2cd8f5046442eeb390e4ced0bb6dbd33c9e059a3bd",
+      "blockNumber": "46689226",
+      "blockHash": "0x4c751adf0c40c0d39303b8eb4aac497bba7d4d02a5fcd0a4adfd6f9bf86ad8fd",
+      "postState": {
+        "ownerOuterShares": "0",
+        "ownerInnerShares": "100000000000000000000",
+        "receiverOuterShares": "0",
+        "receiverInnerShares": "0",
+        "remainingAllowance": "0",
+        "remainingPermitShares": "0",
+        "permitNonce": "2"
+      }
+    },
+    "postExitDryRun": {
+      "completedAt": "2026-09-11T17:21:46Z",
+      "binaryHash": "fdffd3231828e615756f961a2f87d5dec7abb820199ccae0bb8b494740f6c8fa",
+      "configHash": "d2529914730d234f08d28333b749422e466731b711a428c968c6e70898162862",
+      "action": "blocked",
+      "reason": "incomplete-or-recorded-evidence",
+      "evidenceDigest": "0x4290029939a0e5c0b2da1547b31d61a6aab0f4d92bfd43a5fa8334358c66b764",
+      "limits": "none",
+      "broadcast": false,
+      "positionUnchanged": true
+    }
   },
   "limitations": [
     "chainlink-mock-forwarder",
