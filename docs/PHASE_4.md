@@ -83,6 +83,19 @@ per-block indexing can be expensive. Select the accounting start block deliberat
 The exact comparison covers 8 vault reads plus 4 per market: 56 for the public V1
 example. This checks raw agreement, not independent IRM accrual or solvency.
 
+For deadline-safe hosted acceptance, `graph/subgraph/subgraph.live.yaml` isolates
+the accounting handler in the separate `tare-live-accounting` Studio project and
+starts near the deployment-time Ethereum head. This produces current accounting
+evidence quickly while the creation-block share ledger continues its independent
+historical backfill. The live-only deployment does not claim historical share
+reconstruction.
+
+Hosted accounting acceptance completed against Studio version `0.1.0`, deployment
+`QmWSiZRvaFzYkohhsM2D9yHD4Nc7ZnZFRWz8pUcwfQi3j2`, at Ethereum block `25953771`.
+The public endpoint reported no indexing errors and Tare matched all 56 Graph
+observations to block-pinned RPC reads with zero mismatches. This closes the live
+accounting gate, but not the separate full-history share-ledger gate.
+
 The WETH metric covers only the canonical wrapper's claim against native ETH
 custody, excluding the holder's other liabilities. Distinct hostnames establish
 provider diversity, not proven organizational independence or cryptographic state
@@ -98,6 +111,8 @@ observed USD valuation.
 - [x] Real three-layer resolution with conserved integer attribution.
 - [x] Explicit debt, wrapper, shared-backing and liquidity treatment.
 - [x] Timestamped valuation, real WETH 1x control, and partial/mismatch tests.
+- [x] Deadline-safe live Studio accounting: 56/56 Graph/RPC reads matched at one
+  canonical Ethereum block with the deployment CID pinned.
 - [ ] Let Graph Studio version `0.1.0` finish the required range, then retain matched
   mainnet share **and** accounting reports at one indexed block.
 - [ ] Broader standardized indexing/multiple-network coverage, if retained as a

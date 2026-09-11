@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "codegen": "graph codegen subgraph.yaml",
-    "build": "graph codegen subgraph.yaml && graph build subgraph.yaml"
+    "build": "graph codegen subgraph.yaml && graph build subgraph.yaml",
+    "codegen:live": "graph codegen subgraph.live.yaml",
+    "build:live": "graph codegen subgraph.live.yaml && graph build subgraph.live.yaml"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "0.98.1",

@@ -1,0 +1,31 @@
+specVersion: 1.3.0
+description: Tare live Ethereum accounting checkpoint for Graph/RPC comparison.
+schema:
+  file: ./schema.graphql
+indexerHints:
+  prune: never
+dataSources:
+  - kind: ethereum
+    name: VaultAccounting
+    network: mainnet
+    source:
+      address: '0xbeef01735c132ada46aa9aa4c54623caa92a64cb'
+      abi: Accounting
+      # Ethereum head observed immediately before the deadline deployment path.
+      # Refresh this value before a later redeployment to avoid historical backfill.
+      startBlock: 25953741
+    context:
+      chainId:
+        type: Int
+        data: 1
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities: [AccountingState, AccountingRead]
+      abis:
+        - name: Accounting
+          file: ./abis/Accounting.json
+      blockHandlers:
+        - handler: handleAccountingBlock
+      file: ./src/accounting.ts

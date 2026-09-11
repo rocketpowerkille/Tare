@@ -14,6 +14,7 @@
     "build": "node node_modules/typescript/bin/tsc -p tsconfig.json",
     "check": "node node_modules/typescript/bin/tsc -p tsconfig.json --noEmit",
     "build:subgraph": "npm run build --prefix graph/subgraph",
+    "build:subgraph:live": "npm run build:live --prefix graph/subgraph",
     "verify:cre": "npm run verify --prefix workflows/cre",
     "test:graph": "node graph/integration/run.mjs",
     "test": "node --test dist/tests/*.test.js",
