@@ -68,3 +68,22 @@ test('Base custody capture replays through the public CLI without claiming live 
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test('Base custody live CLI accepts a deployment allowlist file', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'tare-base-deployment-'));
+  const path = join(directory, 'deployment.json');
+  try {
+    await writeFile(path, JSON.stringify(baseSepoliaCapture().deployment));
+    await withServer(rpcHandler(), async firstUrl => {
+      await withServer(rpcHandler(), async secondUrl => {
+        const result = await runCli(['verify', 'base-custody', '--address', baseOwner,
+          '--deployment', path, '--rpc-url', firstUrl,
+          '--secondary-rpc-url', secondUrl.replace('127.0.0.1', 'localhost')]);
+        assert.equal(result.code, 0, result.stderr);
+        assert.match(result.stdout, /live-rpc \| matched/);
+      });
+    });
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});

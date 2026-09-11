@@ -30,7 +30,7 @@ export function parseCliArgs() {
       'capture-out': { type: 'string' }, 'block-number': { type: 'string' }, 'max-markets': { type: 'string' },
       'max-calls': { type: 'string' }, 'deadline-ms': { type: 'string' },
       'graph-url': { type: 'string' }, 'graph-deployment': { type: 'string' },
-      'secondary-rpc-url': { type: 'string' },
+      deployment: { type: 'string' }, 'secondary-rpc-url': { type: 'string' },
       spkg: { type: 'string' }, 'stop-block-number': { type: 'string' }, 'max-blocks': { type: 'string' },
     },
   });
