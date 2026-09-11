@@ -1,0 +1,80 @@
+{
+  "kind": "tare-cre-hosted-execution-v1",
+  "registry": "private",
+  "donFamily": "zone-a",
+  "workflowName": "tare-confidential-policy",
+  "workflowId": "0024de354e9d08c1e57c1cc4308e3ea462c89580de2ddbef2a3c69e8bd53e3bd",
+  "owner": "0xf7a77f49bf7f9805baa01bee187ca1fed6d64767",
+  "status": "PAUSED",
+  "deployedAt": "2026-09-11T19:48:22Z",
+  "binaryHash": "ec80a3ef16ef6a1bc36ae785fb11a29a6c6fa999a9402ceb4e7f19e2975900e5",
+  "configHash": "30c7759d95beb6f73fc75a9875f4be9283e49c0abad1c3fc92bb5539c8890396",
+  "binaryUrl": "https://storage.cre.chain.link/artifacts/0024de354e9d08c1e57c1cc4308e3ea462c89580de2ddbef2a3c69e8bd53e3bd/binary.wasm",
+  "configUrl": "https://storage.cre.chain.link/artifacts/0024de354e9d08c1e57c1cc4308e3ea462c89580de2ddbef2a3c69e8bd53e3bd/config",
+  "configuration": {
+    "evidenceSource": "base-sepolia-custody",
+    "executionEnabled": true,
+    "apiTransport": "authenticated-https-quick-tunnel",
+    "receiver": "0xec3b0dc653f9150ecde9a6a2c14e9138dfb9e577",
+    "sharesRaw": "100000000000000000000",
+    "minAssetsRaw": "95000000000000000000",
+    "nonce": "1",
+    "permitValidUntil": "1789159185"
+  },
+  "exitExecution": {
+    "executionId": "c0c22aaf520df358ad5358bd5806015fd4335adf790432918d5abdd35654b206",
+    "platformUuid": "c4f30968-5082-4e8f-b696-4cb9679e2c2f",
+    "status": "SUCCESS",
+    "startedAt": "2026-09-11T19:50:02Z",
+    "finishedAt": "2026-09-11T19:50:27Z",
+    "durationSeconds": 25,
+    "successfulCapabilities": [
+      "trigger",
+      "http-actions@1.0.0-alpha:SendRequest",
+      "consensus@1.0.0-alpha:Report",
+      "evm:ChainSelector:10344971235874465080@1.0.0:WriteReport"
+    ],
+    "transactionHash": "0x65549cd7b8c823795ec22ae17f297f8d3d3668ee5278e690ee836ba3d63b95f9",
+    "blockNumber": "46693969",
+    "blockHash": "0x4658fc8aa55b8631bef85c151b241cd626d4b1cb74466baca665c12a6487d5e1",
+    "transactionSender": "0x0d4cfa47c3e398e89a2d45402fa22df90877e87a",
+    "transactionTarget": "0xf8344cfd5c43616a4366c34e3eee75af79a74482",
+    "receiver": "0xec3b0dc653f9150ecde9a6a2c14e9138dfb9e577",
+    "evidenceDigest": "0xd705c942377ee94e653f8e7f24f36620191f968ae116e44631fa4ad4f9edb993",
+    "sharesRedeemedRaw": "100000000000000000000",
+    "assetsReceivedRaw": "100000000000000000000"
+  },
+  "postState": {
+    "ownerOuterSharesRaw": "0",
+    "ownerInnerSharesRaw": "100000000000000000000",
+    "remainingAllowanceRaw": "0",
+    "permitSharesRaw": "0",
+    "permitNonce": "2",
+    "twoProviderStatus": "incomplete",
+    "twoProviderFindings": [
+      "zero-position",
+      "zero-supply",
+      "redemption-rounds-to-zero"
+    ],
+    "twoProviderCaptureDigest": "sha256:7e6962f4bcfb7a9c35ad1cc10d7cb5f3be2c13906fdfe3166078619997e0318f"
+  },
+  "postExitExecution": {
+    "executionId": "78b831548c3386f0ef161661805de8648e95ddcc3f9cd4d0d7d955b35f001561",
+    "platformUuid": "bb0a11d5-cfa0-4982-9ff5-f88a3795c4f5",
+    "status": "SUCCESS",
+    "startedAt": "2026-09-11T19:55:01Z",
+    "finishedAt": "2026-09-11T19:55:20Z",
+    "durationSeconds": 19,
+    "successfulCapabilities": [
+      "trigger",
+      "http-actions@1.0.0-alpha:SendRequest",
+      "consensus@1.0.0-alpha:Report"
+    ],
+    "onchainWriteAttempted": false
+  },
+  "limitations": [
+    "fixed-supply-test-assets",
+    "quick-tunnel-has-no-uptime-guarantee",
+    "not-a-production-security-audit"
+  ]
+}

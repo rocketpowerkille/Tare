@@ -5,7 +5,7 @@
   "workflowName": "tare-confidential-policy",
   "workflowId": "00ef1cc2fd93d6179fea1d2c24f00b64efd373dca39a2fdfef51142a074ef1ff",
   "owner": "0xf7a77f49bf7f9805baa01bee187ca1fed6d64767",
-  "status": "ACTIVE",
+  "status": "SUPERSEDED",
   "binaryHash": "82c2f35c3c6866fff04306ce91eb560236a6367514b3be498a04f5842fe96554",
   "configHash": "3c4d62bd7f3ca958ff7d59d87d1d85f48b3cd28a1e8c0a9b20c27390e5a6cf10",
   "binaryUrl": "https://storage.cre.chain.link/artifacts/00ef1cc2fd93d6179fea1d2c24f00b64efd373dca39a2fdfef51142a074ef1ff/binary.wasm",
@@ -28,10 +28,14 @@
     ],
     "logsExposed": false
   },
+  "supersededBy": {
+    "workflowId": "0024de354e9d08c1e57c1cc4308e3ea462c89580de2ddbef2a3c69e8bd53e3bd",
+    "record": "deployments/cre-hosted-execution.json"
+  },
   "limitations": [
     "onchain-execution-disabled",
     "quick-tunnel-has-no-uptime-guarantee",
     "execution-result-verdict-not-exposed-by-cli",
-    "current-base-sepolia-control-position-is-consumed"
+    "historical-read-only-acceptance"
   ]
 }

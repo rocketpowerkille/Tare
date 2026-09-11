@@ -38,13 +38,24 @@
       "observedBlockHash": "0xad4db11a8316741737a34ddcb7e8e9355ae6a45cb3c4cb2bf85d520f96afcc52",
       "multipleMillionths": "2000000"
     },
-    "approvalTransaction": null,
-    "armTransaction": null,
-    "hostedExecution": null
+    "approvalTransaction": "0x7c99f67274625dc967fb10982ed3e5b4fff20aa72445a53504f05d4f75985380",
+    "armTransaction": "0x66e916525001fd867708deec3ec9efd3a3348b485fc8d2a0d3449b30d2858e0e",
+    "hostedExecution": {
+      "record": "deployments/cre-hosted-execution.json",
+      "workflowId": "0024de354e9d08c1e57c1cc4308e3ea462c89580de2ddbef2a3c69e8bd53e3bd",
+      "executionId": "c0c22aaf520df358ad5358bd5806015fd4335adf790432918d5abdd35654b206",
+      "transactionHash": "0x65549cd7b8c823795ec22ae17f297f8d3d3668ee5278e690ee836ba3d63b95f9",
+      "blockNumber": "46693969",
+      "evidenceDigest": "0xd705c942377ee94e653f8e7f24f36620191f968ae116e44631fa4ad4f9edb993",
+      "sharesRedeemedRaw": "100000000000000000000",
+      "assetsReceivedRaw": "100000000000000000000",
+      "finalPermitNonce": "2",
+      "workflowStatus": "PAUSED"
+    }
   },
   "limitations": [
     "fixed-supply-test-assets",
-    "workflow-execution-currently-disabled",
-    "receiver-not-yet-approved-or-armed"
+    "quick-tunnel-was-temporary",
+    "not-a-production-security-audit"
   ]
 }

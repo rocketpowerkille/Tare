@@ -4,10 +4,10 @@ Local implementation: confidential CRE handler, private policy evaluation, signe
 verdicts, a verified Base Sepolia evidence producer, report submission and an ERC-4626 exit receiver. The official SDK
 compiles the workflow to WASM. SDK harness and Foundry tests exercise the isolated
 paths; the authenticated CRE CLI simulator now also exercises the live local path.
-The bounded receiver and its deterministic control position are deployed on Base
-Sepolia. A read-only CRE workflow is also active in the private hosted registry;
-its first confidential execution completed successfully. Hosted onchain execution
-remains disabled while a production receiver and fresh control position are prepared.
+The bounded receiver and its deterministic control position were deployed on Base
+Sepolia. A private hosted CRE workflow retrieved authenticated evidence, produced a
+confidential consensus report and delivered it through Chainlink's production Base
+Sepolia forwarder. The bounded exit succeeded onchain; the workflow is now paused.
 
 ## Evidence and privacy boundary
 
@@ -170,8 +170,8 @@ Quick Tunnel URLs are temporary, have no uptime guarantee and work only while th
 `cloudflared` process remains running. They are suitable for bounded hosted
 acceptance and demos, not production hosting.
 
-Acceptance on 2026-09-11: 128 root tests plus existing demos/replay; 11 CRE tests;
-18 Solidity tests including 256 fuzz cases; official WASM compilation. The shared
+Acceptance on 2026-09-11: 128 root tests plus existing demos/replay; 12 CRE tests;
+23 Solidity tests including 256 fuzz cases; official WASM compilation. The shared
 synthetic ABI vector is checked by both languages. SDK tests mock HTTP, secrets,
 signing and EVM submission; Foundry tests use a deliberately controllable vault.
 An authenticated CRE CLI v1.33.0 simulation called the loopback Tare API, resolved
@@ -184,24 +184,36 @@ production limits using a user-configured authenticated Ethereum RPC. No transac
 was broadcast. CI repeats the automated checks; a remote CI run has not been
 performed for this change.
 
-## Deferred setup and remaining code
+## Deployment state and remaining code
 
-Account, wallet, endpoint and deployment configuration is deferred by request.
-`config.example.json` contains unusable sample identities and disables execution.
-`secrets.yaml` maps names only, without secret values. The private policy secret
-is JSON with `maxAgeSeconds`, `maxConcentrationBps` and `maxMultipleBps`; basis
-points use 10,000 for 100% or a 1x multiple. The API secret must match the hosted
-Tare access token. Keep real values outside tracked configuration and chat.
+Account, wallet and endpoint values remain only in ignored local configuration.
+`config.example.json` contains unusable sample identities and disables execution;
+`secrets.yaml` maps names only, without secret values. The hosted acceptance used
+private CRE secrets and a temporary authenticated HTTPS origin. The private policy
+secret is JSON with `maxAgeSeconds`, `maxConcentrationBps` and `maxMultipleBps`;
+basis points use 10,000 for 100% or a 1x multiple. The API secret must match the
+hosted Tare access token. Keep real values outside tracked configuration and chat.
 
-Hosted read-only policy acceptance is complete. The protected HTTPS Tare API rejects
+Hosted read-only policy acceptance completed first. The protected HTTPS Tare API rejects
 anonymous traffic, accepts the matching CRE bearer secret and returns live
 two-provider Base Sepolia evidence. The private-registry workflow
 `00ef1cc2fd93d6179fea1d2c24f00b64efd373dca39a2fdfef51142a074ef1ff`
-is active with execution disabled. Its first scheduled run completed in 21 seconds;
+ran with execution disabled. Its first scheduled run completed in 21 seconds;
 the trigger, HTTP action and consensus report events all succeeded and no logs were
 exposed. The CLI does not expose the returned private verdict, so this acceptance
 does not claim one. Public hashes, artifact links and the execution ID are recorded
-in `deployments/cre-hosted-readonly.json`.
+in `deployments/cre-hosted-readonly.json`; that version is now superseded.
+
+Hosted execution acceptance is complete. Workflow
+`0024de354e9d08c1e57c1cc4308e3ea462c89580de2ddbef2a3c69e8bd53e3bd`
+used the production Base Sepolia Keystone Forwarder and completed its trigger,
+authenticated HTTP request, consensus report and EVM `WriteReport` capabilities.
+Transaction `0x65549cd7b8c823795ec22ae17f297f8d3d3668ee5278e690ee836ba3d63b95f9`
+redeemed exactly 100 outer shares for 100 inner shares at block `46693969`.
+The one-use permit advanced to nonce 2 and its shares and allowance became zero.
+A following scheduled run performed no EVM write after observing the consumed
+position. The workflow is paused. Public execution, transaction and post-state
+evidence is recorded in `deployments/cre-hosted-execution.json`.
 
 For end-to-end development without exposing a machine, the CRE configuration may
 use `http://127.0.0.1:<port>/api/analyze` or the equivalent `localhost` URL while
@@ -237,11 +249,10 @@ and a consumed permit at nonce 2. Direct receiver calls, non-owner forwarding,
 malformed payloads, a fresh wrong-share payload and replay of the exact mined
 calldata all reverted with their intended custom errors.
 
-The E2E deployment deliberately uses an owner-only test forwarder because hosted
-CRE access and a production workflow identity are unavailable. It tests the real
-receiver and state transition on Base Sepolia but is not evidence of Chainlink DON
-signature delivery. A later production receiver must pin Chainlink's Base Sepolia
-Keystone Forwarder and the final hosted workflow identity.
+The earlier E2E deployment deliberately uses an owner-only test forwarder and remains
+useful for deterministic success and failure-case testing. It must not be presented
+as Chainlink delivery evidence; the separate hosted deployment below supplies that
+evidence through the production Keystone Forwarder.
 
 The production forwarder's metadata is 64 bytes: workflow ID (32), workflow name
 (10), workflow owner (20), report ID (2). The simulator's MockForwarder may omit
@@ -273,8 +284,12 @@ position, reporting a 2.000000x control multiple. Its public capture digest is
 `sha256:397c4d1756fedd48ca16d8bf8af538e0687785ab6859b9c0ca4c330506b3dec2`.
 The deployment record and allowlisted Tare SHA-256 code digests are in
 `deployments/base-sepolia-hosted.json` and
-`deployments/base-sepolia-hosted-custody.json`. Approval, arming, hosted execution
-and the final state transition remain pending.
+`deployments/base-sepolia-hosted-custody.json`. The owner then approved and armed
+the receiver, and the hosted workflow completed the bounded exit in transaction
+`0x65549cd7b8c823795ec22ae17f297f8d3d3668ee5278e690ee836ba3d63b95f9`.
+The post-exit two-provider capture reports the expected consumed-position findings;
+the exact CRE capabilities, receiver event and final state are retained in
+`deployments/cre-hosted-execution.json`.
 
 References: [confidential workflow template](https://docs.chain.link/cre-templates/hello-confidential-workflows)
 and [receiver integration](https://docs.chain.link/cre/guides/workflow/using-evm-client/onchain-write/building-consumer-contracts).
