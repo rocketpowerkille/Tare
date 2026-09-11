@@ -7,7 +7,9 @@ configured Tare service and cannot upgrade Ethereum lending backing to verified 
 The separate Base producer pins two differently hosted RPCs, checks allowlisted contract
 bytecode and reconciles both custody layers at one block before creating eligible evidence.
 `contracts` owns the one-use ERC-4626 exit receiver; its ABI has a shared test vector
-with the workflow. Deployment-backed Base acceptance and hosted acceptance remain open.
+with the workflow. A test-forwarder delivery completed the bounded Base Sepolia exit;
+hosted CRE/DON acceptance remains open and requires a fresh position plus a new receiver
+pinned to the official forwarder and final workflow identity.
 See [phase seven](PHASE_7.md).
 
 Phase-five interfaces add `packages/service` for request validation, provider
@@ -123,7 +125,7 @@ references are risk dependencies, not holdings to multiply into exposure.
 Complete live receipts cover vault-to-Blue loan receivables only. Verification and
 the metric remain unavailable pending phase four. See [phase three](PHASE_3.md).
 
-## Phase-four share-ledger comparison (local, deployment pending)
+## Phase-four share-ledger comparison (live accounting accepted, history pending)
 
 ```text
 vault Transfer events -> AssemblyScript mapping -> Tare share-ledger subgraph
@@ -140,8 +142,10 @@ and owner shares. `apps/cli/src/verify.ts` exposes comparison and offline replay
 The receipt schema recomputes its checks from captured evidence during validation.
 
 The actual mappings pass a local Graph Node/Anvil indexing and rollback test.
-Mainnet Graph deployment remains pending. Share agreement is not backing
-verification. Remaining acceptance gates are in [phase four](PHASE_4.md).
+The deadline-safe hosted accounting deployment passed all 56 same-block Graph/RPC
+comparisons. The separate creation-block share-ledger deployment still needs to
+finish its historical sync and pass combined share/accounting acceptance. Share
+agreement is not backing verification. Remaining gates are in [phase four](PHASE_4.md).
 
 The accounting mapping runs separately at end of block. `accounting-reads.ts`
 defines the bounded RPC read set; `verification/accounting-capture.ts` validates

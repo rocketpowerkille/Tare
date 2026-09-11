@@ -106,6 +106,31 @@ authenticity. This result cannot be used as the Morpho portfolio's collateral me
 tare verify custody-replay fixtures/live/weth-custody.capture.json --json
 ```
 
+## Base Sepolia two-layer custody control
+
+`base-sepolia-custody.capture.json` records the live pre-exit state of the
+test-only two-layer ERC-4626 deployment from two differently hosted Base Sepolia
+RPC providers. Provider URLs are represented by hashed IDs.
+
+- Chain: Base Sepolia, ID 84532.
+- Owner: `0xf1fea08ebba92ed342acc5639db312c3694bc391`.
+- Outer vault: `0x60407bf755a379d530a5409ac3639ec4bbaa0bbe`.
+- Inner vault: `0x09b7f07f10800064f7db6a262ecff344da0bd867`.
+- Terminal asset: `0x8ee5f47e407006df298f45d0a4dae14d60cbde62`.
+- Block: 46684889 (`0x2c85ad9`), hash
+  `0x75e52d65d5061bdf0d4fc3780d7e19382036bc738620be1f44ddbd3f7e051877`.
+- Each witness includes pinned code, asset links, balances, supplies, conversion
+  previews and final block confirmation. Replay returns a recorded 2.000000x
+  control and cannot authorize execution.
+
+The bounded exit later consumed the owner's outer shares. This capture is retained
+pre-exit evidence, not the current position. See
+`deployments/base-sepolia-e2e.json` for the transaction and post-state acceptance.
+
+```sh
+pnpm cli verify base-custody-replay fixtures/live/base-sepolia-custody.capture.json --json
+```
+
 The Graph Node rollback result belongs in `fixtures/integration/`, clearly labeled
 as a local Anvil test. It is not a mainnet Graph acceptance capture.
 - [Virtual shares](https://github.com/morpho-org/morpho-blue/blob/main/src/libraries/SharesMathLib.sol)

@@ -78,7 +78,7 @@ Artifacts use the existing ignored `.tare/` and `dist/` directories. CRE tooling
 has an isolated package/lockfile because its protobuf and runtime requirements
 differ from the Node CLI/API. No runtime dependencies were added to the root.
 
-Acceptance on 2026-09-11: 127 root tests plus existing demos/replay; 8 CRE tests;
+Acceptance on 2026-09-11: 128 root tests plus existing demos/replay; 10 CRE tests;
 16 Solidity tests including 256 fuzz cases; official WASM compilation. The shared
 synthetic ABI vector is checked by both languages. SDK tests mock HTTP, secrets,
 signing and EVM submission; Foundry tests use a deliberately controllable vault.

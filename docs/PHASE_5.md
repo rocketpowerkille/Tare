@@ -3,7 +3,8 @@
 Tare-side implementation and local acceptance are complete. Full phase-five
 rollout is not complete: the user deferred deployment and Bazantic account setup.
 The platform's native Recipe authoring/registration and a real hosted run remain
-unverified. Phase four's hosted Graph acceptance also remains open.
+unverified. Phase four's deadline-safe hosted accounting acceptance is complete;
+its separate full-history share-ledger acceptance remains open.
 
 ## Delivered
 
@@ -33,7 +34,7 @@ unverified. Phase four's hosted Graph acceptance also remains open.
 - [ ] Hosted deployment, TLS reverse proxy configuration and live acceptance.
 - [ ] Bazantic account, required x402/MPP gateway, second-service binding and native Recipe run.
 
-Local verification: `node --run verify` runs 95 tests plus existing demo/replay
+Local verification: `node --run verify` runs 128 tests plus existing demo/replay
 checks. No new runtime dependency was needed for this completion work. Local
 HTTP source fixtures are not live Graph or Bazantic acceptance evidence.
 

@@ -7,9 +7,10 @@ and [phase three](docs/PHASE_3.md) for acceptance evidence and limitations.
 
 **Phase four implementation and local acceptance are delivered:** share and
 underlying accounting indexing, real Graph Node rollback tests, live V2→V1→Blue
-resolution, timestamped prices and a real WETH custody 1x control. Graph Studio
-version `0.1.0` is deployed and syncing; fully indexed Graph/RPC acceptance is
-still open.
+resolution, timestamped prices and a real WETH custody 1x control. The deadline-safe
+`tare-live-accounting` Graph Studio deployment passed a 56/56 same-block Graph/RPC
+comparison. The separate full-history share ledger is still syncing, so historical
+share acceptance remains open.
 See [phase four](docs/PHASE_4.md) for the exact remaining gates.
 
 **Phase five Tare-side implementation is complete:** API, MCP and the web explorer
@@ -22,11 +23,13 @@ See [phase five](docs/PHASE_5.md) for the implementation and rollout checklist.
 resolution and Graph/RPC checks, with resumable checkpoints, deduplication and
 reorg retractions. Hosted acceptance remains pending; see [monitoring](docs/PHASE_6.md).
 
-**Phase seven has a local confidential policy workflow and Solidity exit receiver:**
-private thresholds drive signed verdicts, with a guarded Base Sepolia execution path.
+**Phase seven has a confidential policy workflow and Solidity exit receiver:** private
+thresholds drive signed verdicts, with a guarded Base Sepolia execution path.
 The Base Sepolia producer independently pins two RPC hosts, checks allowlisted bytecode
-and reconciles direct two-layer custody; deployment-backed live acceptance and hosted
-CRE acceptance remain open. Current Ethereum V1 reports cannot authorize exits.
+and reconciles direct two-layer custody. A test receiver was deployed and a bounded
+100-share exit plus failure cases were accepted onchain. Delivery used an owner-only
+test forwarder; hosted CRE/DON acceptance remains open. Current Ethereum V1 reports
+cannot authorize exits.
 See [phase seven](docs/PHASE_7.md) for verification and deferred setup.
 
 Tare is an exposure resolver for nested vault positions. Phase one is a working
@@ -69,7 +72,7 @@ After building, you can also run
 `node dist/apps/cli/src/main.js --help` directly. The demo command works from any
 working directory. User-provided file paths are relative to the current directory.
 
-## Configure your MetaMask address later
+## Configure a watch-only wallet
 
 Copy the public account address from MetaMask and choose the chain ID. Replace
 `YOUR_PUBLIC_ADDRESS` below; it is deliberately not a usable sample account.
@@ -89,7 +92,7 @@ mixed-case checksum verification and ENS resolution are not implemented.
 Profiles default to `.tare/wallets/` under the current directory, excluded from Git.
 Use `--home <directory>` or `TARE_HOME` for a consistent location across directories.
 Existing profile names are not overwritten. No default profile is silently selected.
-Your real wallet remains unconfigured, as requested.
+The repository does not assume that any profile exists and never stores a private key.
 
 `resolve snapshot.json --wallet metamask` checks that the snapshot's owner and chain
 match the selected local profile. It does **not** discover holdings or prove wallet
@@ -161,7 +164,8 @@ unvisited work; it is not a count of every missing branch. Source health is decl
 by offline input snapshots; live receipts measure requests, failures and elapsed
 time. Export parents must already exist. Live discovery is supplied by Morpho's
 GraphQL API, not The Graph. Phase four adds a separate The Graph client and custom
-subgraph. Its Graph Studio deployment is syncing; live matched validation is pending.
+subgraph. Hosted live accounting has passed; full-history share-ledger validation
+is still pending.
 
 ## Repository structure
 
@@ -183,6 +187,7 @@ packages/verification/    Block-aligned Graph/RPC share checks and evidence repl
 graph/subgraph/           AssemblyScript share ledger, schema, manifest and isolated tooling
 workflows/cre/            Confidential CRE workflow and isolated Bun/SDK tooling
 contracts/                Base-Sepolia-only Solidity exit receiver and Foundry tests
+deployments/              Public test deployment identities and acceptance manifests
 fixtures/synthetic/       Control, deep, degraded, and cycle inputs
 fixtures/recordings/      Synthetic adapter responses and multi-position cases
 fixtures/live/            Real public RPC capture, receipt and provenance
@@ -203,6 +208,7 @@ See [phase-one steps and exit criteria](docs/PHASE_1.md),
 [phase-two implementation](docs/PHASE_2.md),
 [phase-three implementation](docs/PHASE_3.md),
 [phase-four progress and acceptance](docs/PHASE_4.md),
+[current team handoff](docs/TEAM_HANDOFF.md),
 [architecture](docs/ARCHITECTURE.md), [accounting](docs/ACCOUNTING.md),
 [language strategy and Rust boundary](docs/LANGUAGE_STRATEGY.md),
 [scope](SCOPE.md), and [field notes](FIELD_NOTES.md).
