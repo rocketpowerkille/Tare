@@ -1,4 +1,4 @@
-# Tare share ledger and accounting — hosted deployment pending
+# Tare share ledger and accounting — hosted deployment syncing
 
 This AssemblyScript subgraph reconstructs the ERC-20 share ledger of the Ethereum
 Steakhouse USDC MetaMorpho V1 vault. A separate end-of-block mapping observes its
@@ -56,11 +56,14 @@ market parameters/state and positions at every block from 25937756.
 expensive and require archive access. Identity and read failures stop indexing;
 stale state is never silently treated as current.
 
-The user deferred deployment configuration. When it is ready, use the compiled
-artifact in a reviewed Graph Studio/Graph Node deployment, wait for indexing,
-then set `TARE_GRAPH_URL` and optionally `GRAPH_API_KEY` and
-`TARE_GRAPH_DEPLOYMENT` for `tare verify shares`. Keep tokens local. See the
-[phase-four acceptance checklist](../../docs/PHASE_4.md).
+Graph Studio version `0.1.0` is deployed at
+`tare-steakhouse-usdc-ethereum` with manifest CID
+`QmZrGd5mh9V5x57J4ETN9sWVP2P3VMVpRgQ7p5XK9CW1hw`. It is still syncing, so this
+does not yet satisfy hosted acceptance. After it reaches the required accounting
+block, set `TARE_GRAPH_URL` and `TARE_GRAPH_DEPLOYMENT` from `.env.example` and
+run the matched Graph/RPC checks. `GRAPH_API_KEY` is optional when the endpoint
+does not require one. Keep any key local. See the [phase-four acceptance
+checklist](../../docs/PHASE_4.md).
 
 References: [Graph manifests](https://thegraph.com/docs/en/subgraphs/developing/creating/subgraph-manifest/),
 [AssemblyScript mappings](https://thegraph.com/docs/en/subgraphs/developing/creating/graph-ts/api/),
