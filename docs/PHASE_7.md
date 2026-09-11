@@ -115,7 +115,12 @@ workflow or production HTTPS authentication.
 
 Local production-limit acceptance is complete with the configured low-latency
 Ethereum RPC. A protected HTTPS Tare deployment and CRE deployment approval remain
-required for hosted acceptance; the access request is pending review.
+required for hosted acceptance; the access request is pending review. Chainlink
+staff estimated the review at 24–48 hours and clarified that an end-to-end local
+simulation, not a deployed workflow, is the relevant bounty/judging evidence. Hosted
+deployment therefore remains a follow-up acceptance gate rather than a submission
+blocker. Simulator output must still be labeled as simulation and cannot be described
+as DON execution.
 
 The verified Base Sepolia producer is implemented and wired through the CLI,
 protected API and confidential workflow. The allowlisted E2E control and actual

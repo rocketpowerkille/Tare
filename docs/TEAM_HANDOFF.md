@@ -24,7 +24,7 @@ needs final product integration and polish.
 | --- | --- | --- |
 | Core resolver | Implemented for synthetic schemas and the documented Ethereum MetaMorpho V1 plus V2→V1→Blue scope. Integer accounting, partial evidence and replay are tested. | Broader protocol/network coverage is optional future scope, not part of the verified MVP. |
 | The Graph | Custom share/accounting mappings build and pass real local Graph Node rollback tests. The deadline-safe `tare-live-accounting` Studio deployment matched all 56 Graph observations to same-block RPC at Ethereum block `25953771`, with zero mismatches. | The original `tare-steakhouse-usdc-ethereum` full-history share ledger was last observed around 73% sync. When it completes, retain one same-block share **and** accounting acceptance report. |
-| Chainlink CRE | TypeScript workflow, private policy, redacted report, Base evidence producer and ABI payload are implemented. The official SDK compiles to WASM; local authenticated simulation works. | Deployment access is pending. Hosted execution, enclave secrets, production workflow identity and DON-signed delivery have not been accepted. |
+| Chainlink CRE | TypeScript workflow, private policy, redacted report, Base evidence producer and ABI payload are implemented. The official SDK compiles to WASM; local authenticated simulation works. Chainlink staff confirmed that end-to-end simulation, rather than deployment, is what they look for in bounty judging. | Deployment access is pending. Hosted execution, enclave secrets, production workflow identity and DON-signed delivery have not been accepted. |
 | Base Sepolia execution | Receiver/control harness deployed. Two-provider, allowlisted-bytecode custody verification matched a 2.000000x control. A bounded 100-share exit succeeded, and five failure/replay cases reverted. | The accepted control position is consumed. A hosted CRE test needs a fresh position and a new receiver pinned to the official Chainlink forwarder and final workflow identity. |
 | Bazantic | Tare's deterministic composition API/MCP operation is implemented and rejects contradictory evidence. | Account/gateway setup, second-service binding, native Recipe authoring and a hosted run are not done. |
 | Monitoring | Local TypeScript Substreams consumer, checkpoints, deduplication, reorg rollback and evidence evaluation are implemented. | Hosted provider credentials, deployment and operational acceptance are pending. |
@@ -101,10 +101,24 @@ as a fresh executable position.
 
 ## Ordered next work
 
-### 1. Finish hosted Chainlink CRE acceptance
+### 1. Produce the prize-ready Chainlink CRE simulation
 
-1. Check `cre whoami` until deployment access is enabled. The request has already
-   been submitted and acknowledged as queued by Chainlink support.
+1. Record a clean authenticated local simulator run that demonstrates evidence
+   acquisition, private policy evaluation, redacted output and the intended bounded
+   write path. Include both an allowed/review path and a blocked/failure path.
+2. Keep the simulator secrets local. Chainlink staff explicitly advised that
+   simulator secrets do not leave the machine.
+3. Pair the simulator record with the already retained Base Sepolia success and
+   failure transactions, while clearly stating that the transaction used the test
+   forwarder and was not DON-delivered.
+
+Chainlink support estimated deployment-access review at **24–48 hours** and said
+the queued access request is not a bounty blocker. Do not delay the submission or
+represent deployment as required judging evidence.
+
+### 2. Deploy hosted CRE if access arrives
+
+1. Check `cre whoami` periodically until deployment access is enabled.
 2. Host the Tare API behind HTTPS with authentication and configure CRE secrets
    outside the repository.
 3. Obtain the final hosted workflow ID/name/owner and confirm Chainlink's official
@@ -112,10 +126,10 @@ as a fresh executable position.
 4. Create a fresh test position and deploy a **new** production-path receiver pinned
    to that official forwarder and final workflow identity. Do not reuse the consumed
    control or the owner-only test-forwarder receiver.
-5. Deploy the workflow, run `hold` and `review` policy cases, then execute at most
-   one newly armed bounded test exit. Retain CRE execution and onchain records.
+5. Deploy the workflow, repeat the policy cases and execute at most one newly armed
+   bounded test exit. Retain CRE execution and onchain records.
 
-### 2. Finish hosted monitoring and Bazantic
+### 3. Finish hosted monitoring and Bazantic
 
 1. Deploy the API/monitor with bounded provider configuration, durable state,
    TLS/auth and explicit live-source labels.
@@ -124,7 +138,7 @@ as a fresh executable position.
 3. Let the historical Graph share ledger continue independently. Once fully
    indexed, run the same-block share plus accounting comparison and retain it.
 
-### 3. Complete the UI last
+### 4. Complete the UI last
 
 Connect the explorer to the chosen hosted API and surface provenance, block,
 deployment identity, completeness, verification status and execution eligibility.
@@ -158,4 +172,3 @@ Do **not** claim yet:
 - [Phase seven — confidential policy and bounded exit](PHASE_7.md)
 - [Architecture](ARCHITECTURE.md)
 - [Live capture provenance](../fixtures/live/README.md)
-
