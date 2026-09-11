@@ -56,8 +56,9 @@ export function createApiServer(service = new TareService(), hosted?: HostedConf
   async function route(request: IncomingMessage, response: ServerResponse) {
     const path = request.url ?? '';
     access.check(request, path.startsWith('/api/'));
-    if (path === '/api/status' || path === '/openapi.json' || assets.has(path)) {
+    if (path === '/healthz' || path === '/api/status' || path === '/openapi.json' || assets.has(path)) {
       if (request.method !== 'GET') throw new ServiceError(405, 'method-not-allowed', 'Use GET.');
+      if (path === '/healthz') return json(response, 200, { status: 'ok' });
       if (path === '/api/status') return json(response, 200, service.capabilities());
       if (path === '/openapi.json') return json(response, 200, access.origin ? {
         ...openapi, servers: [{ url: access.origin }], security: [{ bearerAuth: [] }],

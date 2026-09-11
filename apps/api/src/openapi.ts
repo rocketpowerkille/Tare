@@ -12,6 +12,8 @@ export const openapi = {
   openapi: '3.1.0', info: { title: 'Tare read-only evidence API', version: '1.0.0',
     description: 'Raw integer amounts are decimal strings. Read status, sourceMode, findings and metric scope before using a result.' },
   paths: {
+    '/healthz': { get: { operationId: 'tare_health', summary: 'Public process health check',
+      security: [], responses: { '200': { description: 'The API process is accepting requests' } } } },
     '/api/status': { get: { operationId: 'tare_status', summary: 'Configuration flags, limits and retained examples',
       responses: { '200': { description: 'Capabilities; configured does not mean independently verified' } } } },
     ...Object.fromEntries(Object.entries(operations).map(([name, { schema, summary }]) => [`/api/${name}`, {

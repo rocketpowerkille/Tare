@@ -70,13 +70,16 @@ test('API rejects cross-origin requests, URLs, paths, invalid bodies and unsuppo
 test('configuration stays private, OpenAPI describes strict requests, and explorer assets are served', async () => {
   const service = new TareService(configFromEnv({ TARE_RPC_URL: 'https://rpc.invalid/SECRET', GRAPH_API_KEY: 'SECRET' }));
   await withApi(async url => {
+    const health = await fetch(`${url}/healthz`);
+    assert.equal(health.status, 200);
+    assert.deepEqual(await health.json(), { status: 'ok' });
     const status = await fetch(`${url}/api/status`);
     const text = await status.text();
     assert.ok(!text.includes('SECRET'));
     assert.equal(JSON.parse(text).live['resolve-v1'], true);
     assert.equal(JSON.parse(text).live['verify-shares'], false);
     const schema = await (await fetch(`${url}/openapi.json`)).json() as { paths: Record<string, unknown> };
-    assert.deepEqual(Object.keys(schema.paths).sort(), ['/api/analyze', '/api/compose', '/api/example', '/api/replay', '/api/status']);
+    assert.deepEqual(Object.keys(schema.paths).sort(), ['/api/analyze', '/api/compose', '/api/example', '/api/replay', '/api/status', '/healthz']);
     for (const [path, type] of [['/', 'text/html'], ['/app.js', 'text/javascript'], ['/style.css', 'text/css']]) {
       const response = await fetch(`${url}${path}`);
       assert.equal(response.status, 200);

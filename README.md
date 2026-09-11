@@ -15,8 +15,9 @@ See [phase four](docs/PHASE_4.md) for the exact remaining gates.
 
 **Phase five Tare-side implementation is complete:** API, MCP and the web explorer
 share the existing resolver. Hosted access controls and deterministic Recipe
-composition are tested; public recordings need no configuration. Deployment,
-Bazantic platform authoring/registration and live acceptance remain deferred.
+composition are tested; public recordings need no configuration. A tested
+Docker/Render package is ready; permanent deployment, Bazantic platform authoring
+and live acceptance remain deferred.
 See [phase five](docs/PHASE_5.md) for the implementation and rollout checklist.
 
 **Phase six local V1 monitoring is implemented:** Substreams events trigger existing

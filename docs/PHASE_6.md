@@ -68,7 +68,7 @@ for each relevant new block. Replayed duplicates and undo need no new evidence.
 
 ## Verification
 
-`pnpm verify` passes 109 tests, including protobuf decoding, local gRPC request/response acceptance,
+`pnpm verify` passes 131 tests, including protobuf decoding, local gRPC request/response acceptance,
 reconnect, restart, event deduplication, rollback, retained-history limits, failed
 reads/writes and CLI replay. These are local tests, not hosted execution evidence.
 The published package checksum, descriptor and request construction were also

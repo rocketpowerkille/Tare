@@ -28,13 +28,15 @@ its separate full-history share-ledger acceptance remains open.
 - [x] Recipe composition endpoint/tool recomputes captures and checks the direct
   Graph response, identities, block context, deployment and share accounting.
   Missing sources, GraphQL partial errors and contradictions cannot pass.
+- [x] Portable multi-stage Docker image, fail-closed external bind, public health
+  endpoint and Render Blueprint. The built image passed a local hosted smoke test.
 
 ## Deferred rollout gates
 
 - [ ] Hosted deployment, TLS reverse proxy configuration and live acceptance.
 - [ ] Bazantic account, required x402/MPP gateway, second-service binding and native Recipe run.
 
-Local verification: `node --run verify` runs 128 tests plus existing demo/replay
+Local verification: `node --run verify` runs 131 tests plus existing demo/replay
 checks. No new runtime dependency was needed for this completion work. Local
 HTTP source fixtures are not live Graph or Bazantic acceptance evidence.
 
@@ -102,19 +104,27 @@ checks their common position, block, quantities and expected deployment. Its
 `recorded-composition` result never claims fresh or authenticated evidence.
 Graph error presence survives replay; arbitrary provider error messages do not.
 
-## Hosted access configuration — later
+## Hosted access and deployment
 
 Set `TARE_PUBLIC_ORIGIN` to an exact HTTPS origin and `TARE_API_KEYS` to a JSON
 object mapping client IDs to distinct random tokens of 32–128 base64url characters.
 Both are required together; malformed configuration fails startup. Configure
 these through the hosting environment's secret store, not checked-in files.
 `TARE_REQUESTS_PER_MINUTE` defaults to 60 per client (range 1–600).
+On Render, the trusted platform-provided `RENDER_EXTERNAL_URL` supplies the origin
+when `TARE_PUBLIC_ORIGIN` is absent. Set the latter explicitly for a custom domain.
 
-The process always binds `127.0.0.1`. Terminate TLS at a reverse proxy on that
-host, preserve the public Host header, and forward to the local `TARE_PORT`.
-Do not publish the Node port directly. The application ignores forwarded-host
-and forwarded-IP headers; configure proxy-level connection/body limits and a
-response timeout longer than five minutes before public launch.
+The process binds `127.0.0.1` by default. `TARE_BIND_HOST=0.0.0.0` is accepted only
+when hosted authentication is valid, allowing a managed ingress to reach the
+container without weakening local defaults. Preserve the public Host header.
+The application ignores forwarded-host and forwarded-IP headers; configure
+ingress connection/body limits and a response timeout longer than five minutes.
+
+The repository-root `render.yaml` provisions the API/explorer as a Singapore
+Docker web service with `/healthz` readiness checks. Render supplies HTTPS and its
+external origin. During Blueprint creation, provide `TARE_API_KEYS` and the
+read-only provider settings requested by the Blueprint. Never paste a wallet key,
+CRE private policy or CRE secret into this service: the API remains read-only.
 
 Every `/api/*` request requires `Authorization: Bearer <token>` in hosted mode.
 The explorer prompts for a token only after a 401 and keeps it in memory, clearing

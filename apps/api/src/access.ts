@@ -17,7 +17,9 @@ const HostedSchema = z.strictObject({
 export type HostedConfig = z.input<typeof HostedSchema>;
 
 export function accessFromEnv(env: NodeJS.ProcessEnv = process.env): HostedConfig | undefined {
-  const { TARE_PUBLIC_ORIGIN: origin, TARE_API_KEYS: keys, TARE_REQUESTS_PER_MINUTE: rate } = env;
+  const renderOrigin = env.RENDER === 'true' ? env.RENDER_EXTERNAL_URL : undefined;
+  const origin = env.TARE_PUBLIC_ORIGIN ?? renderOrigin;
+  const { TARE_API_KEYS: keys, TARE_REQUESTS_PER_MINUTE: rate } = env;
   if (origin === undefined && keys === undefined && rate === undefined) return undefined;
   try {
     return HostedSchema.parse({ origin, keys: JSON.parse(keys ?? ''),

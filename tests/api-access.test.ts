@@ -40,6 +40,9 @@ test('hosted API authenticates before parsing bodies and isolates client quotas'
     assert.equal(limited.headers['retry-after'], '60');
     assert.equal((await send(url, '/api/status', second)).status, 200);
     const contract = await send(url, '/openapi.json');
+    const health = await send(url, '/healthz');
+    assert.equal(health.status, 200);
+    assert.deepEqual(JSON.parse(health.body), { status: 'ok' });
     const schema = JSON.parse(contract.body);
     assert.deepEqual(schema.security, [{ bearerAuth: [] }]);
     assert.deepEqual(schema.servers, [{ url: hosted.origin }]);
@@ -82,4 +85,8 @@ test('client quotas reset without accumulating arbitrary identities; access conf
     { TARE_PUBLIC_ORIGIN: hosted.origin, TARE_API_KEYS: JSON.stringify({ alpha: 'short' }) },
     { TARE_PUBLIC_ORIGIN: hosted.origin, TARE_API_KEYS: JSON.stringify({ ...hosted.keys, beta: hosted.keys.alpha }) },
   ]) assert.throws(() => accessFromEnv(input), (error: unknown) => error instanceof Error && !error.message.includes('SECRET'));
+  assert.deepEqual(accessFromEnv({
+    RENDER: 'true', RENDER_EXTERNAL_URL: 'https://tare-api.onrender.com',
+    TARE_API_KEYS: JSON.stringify(hosted.keys),
+  })?.origin, 'https://tare-api.onrender.com');
 });

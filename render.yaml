@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: tare-api
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    maxShutdownDelaySeconds: 30
+    envVars:
+      - key: TARE_BIND_HOST
+        value: 0.0.0.0
+      - key: TARE_API_KEYS
+        sync: false
+      - key: TARE_REQUESTS_PER_MINUTE
+        value: "60"
+      - key: TARE_RPC_URL
+        sync: false
+      - key: TARE_SECONDARY_RPC_URL
+        sync: false
+      - key: TARE_GRAPH_URL
+        sync: false
+      - key: TARE_GRAPH_DEPLOYMENT
+        sync: false
+      - key: GRAPH_API_KEY
+        sync: false
+      - key: TARE_BASE_RPC_URL
+        sync: false
+      - key: TARE_BASE_SECONDARY_RPC_URL
+        sync: false
+      - key: TARE_BASE_CUSTODY_DEPLOYMENT
+        sync: false
