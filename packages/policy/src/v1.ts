@@ -25,6 +25,26 @@ const Shares = z.object({
   checks: z.array(z.object({ field: z.string(), rpc: z.string(), graph: z.string(), status: z.enum(['matched', 'mismatch']) })).max(4),
   findings: z.array(z.unknown()).max(30),
 });
+const Accounting = z.object({
+  reportType: z.literal('accounting-verification'),
+  sourceMode: z.enum(['live-graph-rpc', 'recorded-graph-rpc']),
+  status: z.enum(['matched', 'mismatch', 'incomplete']),
+  capture: z.object({
+    chainId: z.literal(1), vault: Address, expectedDeployment: z.string().nullable(),
+    rpc: z.object({ block: Block.nullable(), confirmed: z.boolean() }),
+    graph: z.object({
+      _meta: z.object({ block: z.object({ number: z.number().int(), hash: Hash.nullable() }),
+        deployment: z.string(), hasIndexingErrors: z.boolean() }),
+      accountingState: z.object({ id: Address, chainId: z.literal(1), blockNumber: Raw,
+        blockHash: Hash, timestamp: Raw,
+        reads: z.array(z.object({ to: Address, data: z.string(), result: z.string() })).max(264),
+      }).nullable(),
+    }).nullable(),
+  }),
+  checks: z.array(z.object({ to: Address, data: z.string(), rpc: z.string(), graph: z.string().nullable(),
+    status: z.enum(['matched', 'mismatch', 'missing']) })).max(264),
+  findings: z.array(z.unknown()).max(100),
+});
 
 /** A projection of the configured Tare service's reports, not independent source authentication. */
 export function v1Evidence(resolution: unknown, verification: unknown,
@@ -57,5 +77,51 @@ export function v1Evidence(resolution: unknown, verification: unknown,
     live: report.sourceMode === 'live-rpc' && shares.sourceMode === 'live-graph-rpc', complete,
     backingVerified: false, multiple: null,
     largestMarketBps: total > 0n && largest <= total ? Number((largest * 10000n + total - 1n) / total) : null,
+  });
+}
+
+/** Project a live accounting cross-check into non-executable confidential policy evidence. */
+export function v1AccountingEvidence(resolution: unknown, verification: unknown,
+  expected: { owner: string; vault: string; deployment: string }): Evidence {
+  const report = V1.parse(resolution);
+  const accounting = Accounting.parse(verification);
+  const block = report.capture.block;
+  if (!block) throw new Error('Tare report has no block evidence');
+  const graph = accounting.capture.graph;
+  const state = graph?.accountingState;
+  const expectedOwner = expected.owner.toLowerCase();
+  const expectedVault = expected.vault.toLowerCase();
+  const aligned = report.owner === expectedOwner && report.capture.owner === expectedOwner
+    && report.capture.vault === expectedVault && report.vault?.address === expectedVault
+    && accounting.capture.vault === expectedVault && accounting.capture.expectedDeployment === expected.deployment
+    && accounting.capture.rpc.block?.hash === block.hash
+    && BigInt(accounting.capture.rpc.block?.number ?? '-1') === BigInt(block.number)
+    && BigInt(accounting.capture.rpc.block?.timestamp ?? '-1') === BigInt(block.timestamp)
+    && graph?._meta.deployment === expected.deployment && graph._meta.block.hash === block.hash
+    && BigInt(graph._meta.block.number) === BigInt(block.number)
+    && state?.id === expectedVault && state.blockHash === block.hash
+    && BigInt(state.blockNumber) === BigInt(block.number) && BigInt(state.timestamp) === BigInt(block.timestamp);
+  const indexed = new Map(state?.reads.map(read => [`${read.to}:${read.data}`, read.result]) ?? []);
+  const keys = new Set(accounting.checks.map(check => `${check.to}:${check.data}`));
+  const checksMatch = accounting.checks.length === 56 && keys.size === 56 && indexed.size === 56
+    && accounting.checks.every(check => check.status === 'matched' && check.graph === check.rpc
+      && indexed.get(`${check.to}:${check.data}`) === check.rpc);
+  const amounts = report.markets.map(market => BigInt(market.attributedAssetsRaw ?? '0'));
+  const total = BigInt(report.vault?.convertToAssetsRaw ?? '0');
+  const largest = amounts.reduce((max, value) => value > max ? value : max, 0n);
+  const conserved = amounts.reduce((sum, value) => sum + value, 0n)
+    + BigInt(report.unattributedAssetsRaw ?? '0') === total;
+  const complete = aligned && checksMatch && conserved && report.kind === 'complete' && report.findings.length === 0
+    && report.capture.blockConfirmed && accounting.capture.rpc.confirmed && accounting.status === 'matched'
+    && accounting.findings.length === 0 && graph?._meta.hasIndexingErrors === false
+    && report.unattributedAssetsRaw !== null && report.markets.every(market => market.attributedAssetsRaw !== null)
+    && new Set(report.markets.map(market => market.marketId)).size === report.markets.length;
+  return Evidence.parse({ chainId: 1, owner: report.owner, vault: report.capture.vault,
+    blockNumber: BigInt(block.number).toString(), blockHash: block.hash,
+    blockTimestamp: BigInt(block.timestamp).toString(),
+    live: report.sourceMode === 'live-rpc' && accounting.sourceMode === 'live-graph-rpc', complete,
+    backingVerified: false, multiple: null,
+    largestMarketBps: total > 0n && largest <= total
+      ? Number((largest * 10000n + total - 1n) / total) : null,
   });
 }

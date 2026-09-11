@@ -32,8 +32,8 @@ async function harness(threshold = 5000) {
     assert.deepEqual(request.multiHeaders.Authorization?.values, [`Bearer ${token}`]);
     const body = JSON.parse(new TextDecoder().decode(request.body));
     requests.push(body);
-    if (body.operation === 'verify-shares') assert.equal(body.blockNumber, String(BigInt(fixture.resolution.capture.block!.number)));
-    return { statusCode: 200, body: Buffer.from(JSON.stringify(body.operation === 'resolve-v1' ? fixture.resolution : fixture.verification)).toString('base64') };
+    if (body.operation === 'verify-accounting') assert.equal(body.blockNumber, String(BigInt(fixture.resolution.capture.block!.number)));
+    return { statusCode: 200, body: Buffer.from(JSON.stringify(body.operation === 'resolve-v1' ? fixture.resolution : fixture.accounting)).toString('base64') };
   };
   return { fixture, runtime, config, signed, requests, token, policyText, base };
 }

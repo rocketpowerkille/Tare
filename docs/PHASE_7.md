@@ -15,7 +15,7 @@ This trusts the configured HTTPS Tare service's reports; it does not independent
 authenticate providers or recompute the complete captures inside the enclave.
 
 `workflows/cre/src/workflow.ts` runs through `handlerInTee`. It obtains the policy
-and API token using enclave secrets, calls `resolve-v1`, then `verify-shares` at
+and API token using enclave secrets, calls `resolve-v1`, then `verify-accounting` at
 the resolution block. Recorded, partial, stale or inconsistent evidence blocks
 action. A private concentration threshold changes the review/hold verdict.
 V1 lending backing is always unverified and its multiple remains unavailable:

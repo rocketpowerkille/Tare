@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { decide } from '../packages/policy/src/decision.js';
-import { v1Evidence } from '../packages/policy/src/v1.js';
+import { v1AccountingEvidence, v1Evidence } from '../packages/policy/src/v1.js';
 import { policyFixture, privatePolicy, testnetEvidence } from './helpers/policy.js';
 
 test('real V1 evidence never becomes verified backing or an executable multiple', async () => {
@@ -51,4 +51,21 @@ test('policy rejects contradictory share checks and nonconserved allocations', a
   const resolution = structuredClone(f.resolution);
   resolution.markets[0]!.attributedAssetsRaw = String(BigInt(resolution.markets[0]!.attributedAssetsRaw!) + 1n);
   assert.equal(v1Evidence(resolution, f.verification, f.expected).complete, false);
+});
+
+test('live accounting evidence supports confidential review but never execution', async () => {
+  const f = await policyFixture();
+  const evidence = v1AccountingEvidence(f.resolution, f.accounting, f.expected);
+  assert.equal(evidence.live, true);
+  assert.equal(evidence.complete, true);
+  assert.equal(evidence.backingVerified, false);
+  assert.equal(evidence.multiple, null);
+  assert.equal(decide(evidence, { ...privatePolicy, maxConcentrationBps: 1 }, f.now, true).action, 'review');
+
+  const missing = structuredClone(f.accounting);
+  missing.checks.pop();
+  assert.equal(v1AccountingEvidence(f.resolution, missing, f.expected).complete, false);
+  const substituted = structuredClone(f.accounting);
+  substituted.capture.graph!._meta.deployment = 'different-deployment';
+  assert.equal(v1AccountingEvidence(f.resolution, substituted, f.expected).complete, false);
 });

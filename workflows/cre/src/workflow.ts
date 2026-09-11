@@ -1,6 +1,6 @@
 import { cre, bytesToBase64, ok, text, type TeeRuntime } from '@chainlink/cre-sdk';
 import { PrivatePolicy } from '../../../packages/policy/src/decision.js';
-import { v1Evidence } from '../../../packages/policy/src/v1.js';
+import { v1AccountingEvidence } from '../../../packages/policy/src/v1.js';
 import { configSchema, type Config } from './config.js';
 import { publishDecision } from './publish.js';
 export { configSchema } from './config.js';
@@ -28,9 +28,9 @@ export function onCronTrigger(runtime: TeeRuntime<Config>) {
     const selector = resolution as { capture?: { block?: { number?: unknown } } };
     const number = selector?.capture?.block?.number;
     if (typeof number !== 'string' || !/^0x[0-9a-fA-F]{1,8}$/.test(number)) throw new Error('Missing Tare block');
-    const verification = request(runtime, token, { operation: 'verify-shares', owner: config.owner, vault: config.vault,
+    const verification = request(runtime, token, { operation: 'verify-accounting', vault: config.vault,
       blockNumber: BigInt(number).toString() });
-    const evidence = v1Evidence(resolution, verification, { ...config, deployment: config.graphDeployment });
+    const evidence = v1AccountingEvidence(resolution, verification, { ...config, deployment: config.graphDeployment });
     const now = Math.floor(runtime.now().getTime() / 1000);
     return publishDecision(runtime, evidence, policy, now);
   } catch {
