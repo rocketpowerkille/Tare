@@ -5,9 +5,12 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "compile": "bun node_modules/@chainlink/cre-sdk/bin/cre-compile.ts src/main.ts ../../.tare/cre/tare-policy.wasm",
+    "configure:hosted": "node scripts/configure-hosted-env.mjs",
     "prepare:e2e": "bun scripts/prepare-base-sepolia-e2e.ts",
+    "prepare:hosted": "node scripts/prepare-hosted-config.mjs",
     "prepare:simulation": "bun scripts/prepare-base-sepolia-simulation.ts",
     "test": "cd ../.. && bun test ./workflows/cre/test",
+    "verify:hosted": "node scripts/verify-hosted-api.mjs",
     "verify": "npm run build && npm test"
   },
   "dependencies": {

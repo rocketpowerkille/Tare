@@ -106,6 +106,53 @@ armed, approved, disposable Base Sepolia position:
 bash workflows/cre/scripts/simulate-base-sepolia.sh --broadcast
 ```
 
+### Authenticated Quick Tunnel
+
+For a temporary hosted CRE test, start a Cloudflare Quick Tunnel to the loopback
+API before starting Tare. Keep the tunnel terminal open and pass its exact public
+origin to the setup helper:
+
+```sh
+cloudflared tunnel --url http://127.0.0.1:4320
+npm run configure:hosted --prefix workflows/cre -- https://example.trycloudflare.com
+```
+
+The helper generates a random token locally and updates only the ignored root
+`.env`. It sets the public origin, protected API key map, matching CRE API secret
+and public analysis URL without printing the token. Re-running it rotates the
+token, so restart the API and update deployed CRE secrets after any rerun.
+
+Start the authenticated API in a second Git Bash terminal:
+
+```sh
+bash workflows/cre/scripts/serve-base-sepolia.sh
+```
+
+With both processes running, verify that anonymous traffic is rejected and the
+authenticated HTTPS endpoint can acquire fresh Base Sepolia evidence:
+
+```sh
+npm run verify:hosted --prefix workflows/cre
+```
+
+The verifier reads the token internally from `.env` and prints only public status
+and evidence fields.
+
+Generate the ignored hosted workflow configuration only after the HTTPS check
+passes:
+
+```sh
+npm run prepare:hosted --prefix workflows/cre
+```
+
+This first hosted configuration selects verified Base Sepolia evidence but keeps
+onchain execution disabled. It is an acceptance deployment for the confidential
+policy, secret retrieval and HTTPS boundary; it cannot submit an exit report.
+
+Quick Tunnel URLs are temporary, have no uptime guarantee and work only while the
+`cloudflared` process remains running. They are suitable for bounded hosted
+acceptance and demos, not production hosting.
+
 Acceptance on 2026-09-11: 128 root tests plus existing demos/replay; 10 CRE tests;
 16 Solidity tests including 256 fuzz cases; official WASM compilation. The shared
 synthetic ABI vector is checked by both languages. SDK tests mock HTTP, secrets,
