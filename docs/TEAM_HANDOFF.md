@@ -15,8 +15,10 @@ implemented and tested. Both the deterministic test-forwarder path and a hosted
 Chainlink production-forwarder path completed bounded Base Sepolia exits.
 
 The technical MVP is complete for the implemented Chainlink path, and the
-authenticated API/explorer is permanently hosted on Render. The project is **not
-submission-complete**: Bazantic has not been connected on its platform, hosted
+authenticated API/explorer is permanently hosted on Render. Tare is also live as
+a Bazantic gateway and MCP server, with a published evidence-evaluation Recipe
+that completed a retained-evidence test. The project is **not submission-complete**:
+the required raw-API-versus-Recipe comparison and recording remain, hosted
 monitoring remains pending, the historical Graph share ledger has not completed
 its backfill, and the UI still needs final product integration and polish.
 
@@ -28,7 +30,7 @@ its backfill, and the UI still needs final product integration and polish.
 | The Graph | Custom share/accounting mappings build and pass real local Graph Node rollback tests. The deadline-safe `tare-live-accounting` Studio deployment matched all 56 Graph observations to same-block RPC at Ethereum block `25953771`, with zero mismatches. | The original `tare-steakhouse-usdc-ethereum` full-history share ledger was last observed around 73% sync. When it completes, retain one same-block share **and** accounting acceptance report. |
 | Chainlink CRE | The TypeScript workflow compiles to WASM, reads private secrets, acquires authenticated HTTPS evidence and submits a confidential consensus report. Private-registry revision `0024de…e3bd` completed an EVM write through the production Base Sepolia Keystone Forwarder. Current paused revision `00fe…0a48` points to the permanent Render API with execution disabled. | Preserve both the historical exit record and current safe hosted binding. A security audit and mainnet use are explicitly outside the current claim. |
 | Base Sepolia execution | Two-provider allowlisted-bytecode verification matched a 2.000000x control. Five deterministic failure/replay cases reverted. A separate hosted receiver redeemed exactly 100 outer shares for 100 inner shares through Chainlink transaction `0x65549c…b95f9`; allowance and permit shares became zero and nonce advanced to 2. | Both disposable control positions are consumed. Create another only if a new live demo is genuinely required. The contracts use test assets and are not production audited. |
-| Bazantic | Tare's deterministic composition API/MCP operation is implemented and rejects contradictory evidence. | Account/gateway setup, second-service binding, native Recipe authoring and a hosted run are not done. |
+| Bazantic | Gateway `zvnss2njirhqjllnbfsv3sneca` is live against the Render API. Its generated MCP server exposes status plus compact analyze/example tools. The published `DeFi Vault Backing Evidence Evaluator` Recipe completed a retained Steakhouse USDC run and conservatively returned `needs_review`. Recipe tests used Bazantic's operator credential and made no payment. | Capture the required controlled comparison using the same task, model, settings and API access with and without the Recipe. Record both results and the improvement. A second sponsor service is still required only for the separate multi-service Recipe prize. Do not fund the Base-mainnet payment account while testnet support remains unresolved. |
 | Monitoring | Local TypeScript Substreams consumer, checkpoints, deduplication, reorg rollback and evidence evaluation are implemented. | Hosted provider credentials, deployment and operational acceptance are pending. |
 | Interfaces/UI | CLI, protected HTTP API, stdio MCP server and explorer are functional. The API/explorer is live at `https://tare-api.onrender.com`; anonymous rejection, authenticated access and Base Sepolia acquisition passed. | Complete UI product polish last, with clear live/recorded and verified/unverified labels. Render's free instance may cold-start. |
 
@@ -52,6 +54,11 @@ Latest local acceptance in this workspace:
   and rejected caller/payload/replay cases are recorded in the deployment manifests.
 - Hosted CRE: trigger, authenticated HTTP, consensus report and Base Sepolia
   `WriteReport` capabilities succeeded. The following post-exit run made no EVM write.
+- Bazantic: the hosted gateway generated a live four-tool MCP surface. The
+  published Recipe called `/api/status` and `/api/agent-example` successfully;
+  its retained report kept the recorded-source and unverified-backing limitations
+  and returned `needs_review`. The agent projection stays below 4 KiB for all
+  three retained examples while the original full API receipts remain unchanged.
 
 Useful verification commands:
 
@@ -124,13 +131,16 @@ and [phase seven](PHASE_7.md).
 
 ## Ordered next work
 
-### 1. Finish hosted monitoring and Bazantic
+### 1. Finish Bazantic submission evidence and hosted monitoring
 
-1. Deploy the API/monitor with bounded provider configuration, durable state,
+1. Run the Bazantic raw-API baseline and published-Recipe case with the exact same
+   user task, model, settings and Tare API access. Preserve both inputs and outputs,
+   state the repeatable improvement, and record the comparison for the submission.
+2. If pursuing Bazantic's separate multi-service prize, bind a second existing or
+   sponsor service and make the final result depend materially on both services.
+3. Deploy the monitor with bounded provider configuration, durable state,
    TLS/auth and explicit live-source labels.
-2. Complete Bazantic account and gateway setup, bind Tare plus the required second
-   service, author the native Recipe and retain a hosted successful/failed run.
-3. Let the historical Graph share ledger continue independently. Once fully
+4. Let the historical Graph share ledger continue independently. Once fully
    indexed, run the same-block share plus accounting comparison and retain it.
 
 ### 2. Complete the UI last
@@ -159,11 +169,14 @@ Safe claims today:
 - The CRE workflow compiles and runs in the authenticated local simulator.
 - A private-registry CRE workflow completed authenticated HTTP, confidential report
   consensus and production-forwarder Base Sepolia delivery; it is paused afterward.
+- The hosted Tare API is agent-accessible through a live Bazantic gateway and MCP
+  server, and its published Recipe completed a no-payment retained-evidence test
+  without overstating recorded evidence as verified backing.
 
 Do **not** claim yet:
 
 - production readiness, a security audit or mainnet execution;
-- completed Bazantic integration;
+- a completed Bazantic paid request or any Bazantic testnet payment path;
 - fully indexed historical share acceptance or broad multi-chain coverage;
 - Ethereum mainnet execution, independently verified Morpho loan backing, or that
   two public RPC hosts are cryptographic proof of state.
