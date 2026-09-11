@@ -1,10 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { z } from 'zod/v4';
 import { ERC4626_SELECTOR } from '../packages/adapters/src/erc4626-custody.js';
 import { word } from '../packages/sources/src/evm.js';
 import { evidenceDigest } from '../packages/sources/src/recorded.js';
 import { SepoliaCustodyCaptureSchema } from '../packages/verification/src/sepolia-custody-capture.js';
-import { replaySepoliaCustody } from '../packages/verification/src/sepolia-custody.js';
+import { replaySepoliaCustody, verifySepoliaCustody } from '../packages/verification/src/sepolia-custody.js';
+import { json, withServer } from './helpers/http.js';
 
 const owner = `0x${'11'.repeat(20)}`;
 const outerVault = `0x${'22'.repeat(20)}`;
@@ -62,6 +64,27 @@ function capture() {
   };
 }
 
+const RpcRequest = z.object({ id: z.number(), method: z.string(), params: z.array(z.unknown()) });
+function rpcHandler() {
+  const evidence = capture();
+  const witness = evidence.witnesses[0]!;
+  return (body: unknown, response: Parameters<typeof json>[0]) => {
+    const request = RpcRequest.parse(body);
+    let result: unknown;
+    if (request.method === 'eth_chainId') result = '0xaa36a7';
+    else if (request.method === 'eth_getBlockByNumber') result = block;
+    else if (request.method === 'eth_getCode') {
+      const address = z.string().parse(request.params[0]).toLowerCase();
+      result = witness.codes.find(item => item.address === address)?.code;
+    } else if (request.method === 'eth_call') {
+      const call = z.object({ to: z.string(), data: z.string() }).parse(request.params[0]);
+      result = witness.rpc.calls.find(item => item.to === call.to.toLowerCase() && item.data === call.data.toLowerCase())?.result;
+    }
+    assert.notEqual(result, undefined, `Unhandled ${request.method} fixture request`);
+    json(response, { jsonrpc: '2.0', id: request.id, result });
+  };
+}
+
 test('two-layer Sepolia custody replay produces a recorded 2x control', async () => {
   const report = await replaySepoliaCustody(capture());
   assert.equal(report.status, 'matched');
@@ -104,4 +127,32 @@ test('Sepolia custody captures reject mixed-block or substituted code evidence',
   const substituted = capture();
   substituted.witnesses[0]!.codes[0]!.address = `0x${'55'.repeat(20)}`;
   assert.throws(() => SepoliaCustodyCaptureSchema.parse(substituted), /Unexpected code observation/);
+});
+
+test('live Sepolia custody acquisition pins and confirms two differently hosted providers', async () => {
+  await withServer(rpcHandler(), async firstUrl => {
+    await withServer(rpcHandler(), async secondUrl => {
+      const report = await verifySepoliaCustody({
+        owner,
+        deployment: capture().deployment,
+        rpcUrl: firstUrl,
+        secondaryRpcUrl: secondUrl.replace('127.0.0.1', 'localhost'),
+      });
+      assert.equal(report.status, 'matched');
+      assert.equal(report.sourceMode, 'live-rpc');
+      assert.deepEqual(report.findings, []);
+      assert.equal(report.capture.witnesses[0].rpc.confirmed, true);
+      assert.equal(report.capture.witnesses[1].codes.length, 3);
+      assert.ok(!report.limitations.includes('recorded-evidence-is-not-fresh'));
+    });
+  });
+});
+
+test('live Sepolia custody acquisition rejects the same provider hostname', async () => {
+  await assert.rejects(verifySepoliaCustody({
+    owner,
+    deployment: capture().deployment,
+    rpcUrl: 'http://127.0.0.1:8545',
+    secondaryRpcUrl: 'http://127.0.0.1:9545',
+  }), /different RPC hostnames/);
 });

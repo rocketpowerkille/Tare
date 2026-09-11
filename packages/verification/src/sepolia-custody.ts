@@ -1,7 +1,12 @@
+import { z } from 'zod/v4';
+import { AddressSchema } from '../../domain/src/index.js';
+import { UintSchema } from '../../domain/src/live.js';
 import { readTwoLayerCustody } from '../../adapters/src/erc4626-custody.js';
-import { SourceFailure } from '../../sources/src/http.js';
+import { PinnedRpc, settleReads } from '../../sources/src/evm.js';
+import { SourceFailure, validateHttpUrl } from '../../sources/src/http.js';
 import { evidenceDigest, RecordedReader } from '../../sources/src/recorded.js';
-import { SepoliaCustodyCaptureSchema } from './sepolia-custody-capture.js';
+import { SepoliaCustodyCaptureSchema, SepoliaCustodyDeploymentSchema } from './sepolia-custody-capture.js';
+import type { SepoliaCustodyCapture } from './sepolia-custody-capture.js';
 
 const MAX_UINT256 = 2n ** 256n - 1n;
 
@@ -43,7 +48,7 @@ function accountingFindings(
   return findings;
 }
 
-export async function replaySepoliaCustody(input: unknown) {
+async function evaluateSepoliaCustody(input: unknown, sourceMode: 'live-rpc' | 'recorded-rpc') {
   const capture = SepoliaCustodyCaptureSchema.parse(input);
   const findings = [...capture.failures];
   const [first, second] = capture.witnesses;
@@ -70,7 +75,7 @@ export async function replaySepoliaCustody(input: unknown) {
   return {
     reportType: 'sepolia-custody' as const,
     schemaVersion: 1,
-    sourceMode: 'recorded-rpc' as const,
+    sourceMode,
     status: findings.length ? 'incomplete' as const : 'matched' as const,
     captureDigest: evidenceDigest(capture),
     capture,
@@ -83,6 +88,75 @@ export async function replaySepoliaCustody(input: unknown) {
         terminalAsset: capture.deployment.terminalAsset,
         numeratorRaw: (terminal * 2n).toString(), denominatorRaw: terminal.toString(),
         multipleMillionths: '2000000' },
-    limitations: ['recorded-evidence-is-not-fresh', 'approved-testnet-control-only', 'provider-independence-not-proven'],
+    limitations: sourceMode === 'live-rpc'
+      ? ['approved-testnet-control-only', 'provider-independence-not-proven']
+      : ['recorded-evidence-is-not-fresh', 'approved-testnet-control-only', 'provider-independence-not-proven'],
   };
+}
+
+export function replaySepoliaCustody(input: unknown) {
+  return evaluateSepoliaCustody(input, 'recorded-rpc');
+}
+
+const VerifyOptionsSchema = z.strictObject({
+  owner: AddressSchema,
+  deployment: SepoliaCustodyDeploymentSchema,
+  rpcUrl: z.string().min(1),
+  secondaryRpcUrl: z.string().min(1),
+  blockNumber: UintSchema.optional(),
+  timeoutMs: z.number().int().min(100).max(60000).default(10000),
+});
+
+function failureCode(error: unknown): string {
+  if (error instanceof SourceFailure) return error.code;
+  if (error instanceof z.ZodError) return 'invalid-response';
+  throw error;
+}
+
+/** Acquire the allowlisted Sepolia control from two independently hosted RPC endpoints. */
+export async function verifySepoliaCustody(input: z.input<typeof VerifyOptionsSchema>) {
+  const options = VerifyOptionsSchema.parse(input);
+  const urls = [options.rpcUrl, options.secondaryRpcUrl].map(validateHttpUrl);
+  const providerIds = urls.map(url => evidenceDigest(new URL(url).hostname));
+  if (providerIds[0] === providerIds[1]) {
+    throw new Error('Sepolia custody verification requires different RPC hostnames');
+  }
+  const readers = urls.map(url => new PinnedRpc(url, options.timeoutMs, 20, 120000)) as [PinnedRpc, PinnedRpc];
+  const capture: SepoliaCustodyCapture = {
+    captureVersion: 1,
+    scope: 'sepolia-two-layer-erc4626-custody',
+    chainId: 11155111,
+    owner: options.owner,
+    deployment: options.deployment,
+    capturedAt: new Date().toISOString(),
+    witnesses: readers.map((reader, index) => ({
+      providerId: providerIds[index]!,
+      rpc: { block: null, confirmed: false, calls: reader.observations, failedCalls: reader.failedCalls },
+      codes: reader.codes,
+    })) as SepoliaCustodyCapture['witnesses'],
+    failures: [],
+  };
+
+  try {
+    await readers[0].pin(11155111, options.blockNumber);
+    await readers[1].pin(11155111, BigInt(readers[0].block.number).toString());
+    const results = await Promise.allSettled(readers.map(async (reader, index) => {
+      capture.witnesses[index]!.rpc.block = reader.block;
+      await settleReads<unknown>([
+        reader.code(options.deployment.outerVault),
+        reader.code(options.deployment.innerVault),
+        reader.code(options.deployment.terminalAsset),
+        readTwoLayerCustody(reader, options.deployment, options.owner),
+      ]);
+      await reader.confirm();
+      capture.witnesses[index]!.rpc.confirmed = true;
+    }));
+    for (const result of results) {
+      if (result.status === 'rejected') capture.failures.push(failureCode(result.reason));
+    }
+  } catch (error) {
+    capture.failures.push(failureCode(error));
+  }
+
+  return evaluateSepoliaCustody(SepoliaCustodyCaptureSchema.parse(capture), 'live-rpc');
 }

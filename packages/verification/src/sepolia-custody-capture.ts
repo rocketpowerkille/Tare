@@ -4,7 +4,7 @@ import { CodeObservationSchema } from '../../sources/src/evm.js';
 import { RpcEvidenceSchema } from '../../sources/src/recorded.js';
 
 const DigestSchema = z.string().regex(/^sha256:[0-9a-f]{64}$/);
-const DeploymentSchema = z.strictObject({
+export const SepoliaCustodyDeploymentSchema = z.strictObject({
   outerVault: AddressSchema,
   innerVault: AddressSchema,
   terminalAsset: AddressSchema,
@@ -17,7 +17,7 @@ const DeploymentSchema = z.strictObject({
 const WitnessSchema = z.strictObject({
   providerId: DigestSchema,
   rpc: RpcEvidenceSchema,
-  codes: z.array(CodeObservationSchema).length(3),
+  codes: z.array(CodeObservationSchema).max(3),
 }).superRefine((witness, context) => {
   const addresses = new Set<string>();
   for (const code of witness.codes) {
@@ -32,7 +32,7 @@ export const SepoliaCustodyCaptureSchema = z.strictObject({
   scope: z.literal('sepolia-two-layer-erc4626-custody'),
   chainId: z.literal(11155111),
   owner: AddressSchema,
-  deployment: DeploymentSchema,
+  deployment: SepoliaCustodyDeploymentSchema,
   capturedAt: z.iso.datetime(),
   witnesses: z.tuple([WitnessSchema, WitnessSchema]),
   failures: z.array(z.string().max(80)).max(10),
@@ -46,9 +46,10 @@ export const SepoliaCustodyCaptureSchema = z.strictObject({
     if (witness.codes.some(code => !expected.has(code.address))) {
       context.addIssue({ code: 'custom', message: 'Unexpected code observation' });
     }
-    if (new Set(witness.codes.map(code => code.address)).size !== expected.size) {
+    if (capture.failures.length === 0 && new Set(witness.codes.map(code => code.address)).size !== expected.size) {
       context.addIssue({ code: 'custom', message: 'Missing deployment code observation' });
     }
   }
 });
 export type SepoliaCustodyCapture = z.infer<typeof SepoliaCustodyCaptureSchema>;
+export type SepoliaCustodyDeployment = z.infer<typeof SepoliaCustodyDeploymentSchema>;
