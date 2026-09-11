@@ -1,0 +1,10 @@
+{
+  "outerVault": "0x22ba7da38495e20fe7aafe265ca75e258d7f84b2",
+  "innerVault": "0xd4f802c1d09283fc74f4bb52911d0f1d906e7241",
+  "terminalAsset": "0xc1b52fd7e7d18cc0b8e1618e8df1a851b96b13a6",
+  "codeDigests": {
+    "outerVault": "sha256:793eb5188a1c7c4963a3fe61679d36a714d8fdb000af3035d5f4426245728b0d",
+    "innerVault": "sha256:d7efe5d8a3d7964ceb245442aa61e30eef169474b8d6e79821837d88e06537a0",
+    "terminalAsset": "sha256:6a744f76184350f29b14b51f67d774874b2f31da9d783ba023d55b2590c217a3"
+  }
+}

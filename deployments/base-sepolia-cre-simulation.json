@@ -1,0 +1,34 @@
+{
+  "kind": "tare-base-sepolia-cre-simulation-v1",
+  "network": "base-sepolia",
+  "chainId": 84532,
+  "production": false,
+  "simulationOnly": true,
+  "deployer": "0xf1fea08ebba92ed342acc5639db312c3694bc391",
+  "positionOwner": "0xf1fea08ebba92ed342acc5639db312c3694bc391",
+  "transactionHash": "0xdb22395579419851cc8d8703ae17ba6a350161f2f8a823272c1a9eb865b83642",
+  "blockNumber": "46687037",
+  "blockHash": "0x9969d5a091894c7be86ba1423cc8e0a585d9d1504b521ef3748355133138cbdd",
+  "harness": "0xbcf93e24c6a348323f3a81721974b78111648e78",
+  "contracts": {
+    "terminalAsset": "0xc1b52fd7e7d18cc0b8e1618e8df1a851b96b13a6",
+    "innerVault": "0xd4f802c1d09283fc74f4bb52911d0f1d906e7241",
+    "outerVault": "0x22ba7da38495e20fe7aafe265ca75e258d7f84b2",
+    "mockForwarder": "0x82300bd7c3958625581cc2f77bc6464dcecdf3e5",
+    "receiver": "0xef83c72579d791230372531743889fbf0347edaa"
+  },
+  "initialPositionRaw": "100000000000000000000",
+  "custodyAllowlist": "deployments/base-sepolia-cre-simulation-custody.json",
+  "acceptance": {
+    "approvalTransaction": null,
+    "armTransaction": null,
+    "creDryRun": "pending",
+    "creBroadcast": "pending"
+  },
+  "limitations": [
+    "chainlink-mock-forwarder",
+    "simulation-metadata-omitted",
+    "not-a-hosted-cre-deployment",
+    "not-production-assets"
+  ]
+}
