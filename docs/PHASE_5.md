@@ -123,8 +123,10 @@ ingress connection/body limits and a response timeout longer than five minutes.
 The repository-root `render.yaml` provisions the API/explorer as a Singapore
 Docker web service with `/healthz` readiness checks. Render supplies HTTPS and its
 external origin. During Blueprint creation, provide `TARE_API_KEYS` and the
-read-only provider settings requested by the Blueprint. Never paste a wallet key,
-CRE private policy or CRE secret into this service: the API remains read-only.
+Blueprint supplies the public read-only provider settings. Add `GRAPH_API_KEY`
+later through Render's secret environment settings only if the Graph endpoint
+requires one. Never paste a wallet key, CRE private policy or CRE secret into this
+service: the API remains read-only.
 
 Every `/api/*` request requires `Authorization: Bearer <token>` in hosted mode.
 The explorer prompts for a token only after a 401 and keeps it in memory, clearing
