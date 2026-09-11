@@ -26,14 +26,17 @@ test('API examples and uploaded captures preserve the exact resolver reports and
       const replay = await post(url, 'replay', { operation: example.operation, capture });
       assert.deepEqual(await replay.json(), expected);
     }
-    const compactResponse = await post(url, 'agent-example', { id: 'steakhouse-usdc' });
-    const compactText = await compactResponse.text();
-    const compact = JSON.parse(compactText) as Record<string, unknown>;
-    assert.equal(compactResponse.status, 200);
-    assert.ok(Buffer.byteLength(compactText) < 32 * 1024);
-    assert.equal(compact.sourceMode, 'recorded-rpc');
-    assert.equal(compact.captureOmitted, true);
-    assert.ok(!('capture' in compact));
+    for (const example of examples) {
+      const compactResponse = await post(url, 'agent-example', { id: example.id });
+      const compactText = await compactResponse.text();
+      const compact = JSON.parse(compactText) as Record<string, unknown>;
+      assert.equal(compactResponse.status, 200);
+      assert.ok(Buffer.byteLength(compactText) < 4 * 1024);
+      assert.equal(compact.sourceMode, 'recorded-rpc');
+      assert.equal(compact.captureOmitted, true);
+      assert.ok(!('capture' in compact));
+      if (example.id === 'steakhouse-usdc') assert.equal((compact.markets as { count: number }).count, 12);
+    }
     const capture = await readJsonFile('fixtures/live/ov-usdc-v2.capture.json') as { rpc: { confirmed: boolean } };
     capture.rpc.confirmed = false;
     const response = await post(url, 'replay', { operation: 'resolve-v2', capture });
