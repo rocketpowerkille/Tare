@@ -1,0 +1,37 @@
+{
+  "kind": "tare-cre-hosted-readonly-v1",
+  "registry": "private",
+  "donFamily": "zone-a",
+  "workflowName": "tare-confidential-policy",
+  "workflowId": "00ef1cc2fd93d6179fea1d2c24f00b64efd373dca39a2fdfef51142a074ef1ff",
+  "owner": "0xf7a77f49bf7f9805baa01bee187ca1fed6d64767",
+  "status": "ACTIVE",
+  "binaryHash": "82c2f35c3c6866fff04306ce91eb560236a6367514b3be498a04f5842fe96554",
+  "configHash": "3c4d62bd7f3ca958ff7d59d87d1d85f48b3cd28a1e8c0a9b20c27390e5a6cf10",
+  "binaryUrl": "https://storage.cre.chain.link/artifacts/00ef1cc2fd93d6179fea1d2c24f00b64efd373dca39a2fdfef51142a074ef1ff/binary.wasm",
+  "configUrl": "https://storage.cre.chain.link/artifacts/00ef1cc2fd93d6179fea1d2c24f00b64efd373dca39a2fdfef51142a074ef1ff/config",
+  "configuration": {
+    "evidenceSource": "base-sepolia-custody",
+    "executionEnabled": false,
+    "apiTransport": "authenticated-https-quick-tunnel"
+  },
+  "firstExecution": {
+    "executionId": "2b8935686998b6b513eb41a618c1f5fb7d99a2e1ff281037121a27f18f07a04b",
+    "status": "SUCCESS",
+    "startedAt": "2026-09-11T18:50:02Z",
+    "finishedAt": "2026-09-11T18:50:23Z",
+    "durationSeconds": 21,
+    "successfulEvents": [
+      "trigger",
+      "http-actions@1.0.0-alpha:SendRequest",
+      "consensus@1.0.0-alpha:Report"
+    ],
+    "logsExposed": false
+  },
+  "limitations": [
+    "onchain-execution-disabled",
+    "quick-tunnel-has-no-uptime-guarantee",
+    "execution-result-verdict-not-exposed-by-cli",
+    "current-base-sepolia-control-position-is-consumed"
+  ]
+}

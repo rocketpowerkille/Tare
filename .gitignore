@@ -8,4 +8,5 @@ dist/
 !.env.example
 *.tsbuildinfo
 workflows/cre/src/.cre_build_tmp.js
+workflows/cre/binary.wasm.br.b64
 tmp

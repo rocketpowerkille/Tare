@@ -4,9 +4,10 @@ Local implementation: confidential CRE handler, private policy evaluation, signe
 verdicts, a verified Base Sepolia evidence producer, report submission and an ERC-4626 exit receiver. The official SDK
 compiles the workflow to WASM. SDK harness and Foundry tests exercise the isolated
 paths; the authenticated CRE CLI simulator now also exercises the live local path.
-The bounded receiver and its deterministic control position are now deployed on
-Base Sepolia. The CRE workflow remains a simulator build, not a deployed TEE
-workflow.
+The bounded receiver and its deterministic control position are deployed on Base
+Sepolia. A read-only CRE workflow is also active in the private hosted registry;
+its first confidential execution completed successfully. Hosted onchain execution
+remains disabled while a production receiver and fresh control position are prepared.
 
 ## Evidence and privacy boundary
 
@@ -153,8 +154,8 @@ Quick Tunnel URLs are temporary, have no uptime guarantee and work only while th
 `cloudflared` process remains running. They are suitable for bounded hosted
 acceptance and demos, not production hosting.
 
-Acceptance on 2026-09-11: 128 root tests plus existing demos/replay; 10 CRE tests;
-16 Solidity tests including 256 fuzz cases; official WASM compilation. The shared
+Acceptance on 2026-09-11: 128 root tests plus existing demos/replay; 11 CRE tests;
+18 Solidity tests including 256 fuzz cases; official WASM compilation. The shared
 synthetic ABI vector is checked by both languages. SDK tests mock HTTP, secrets,
 signing and EVM submission; Foundry tests use a deliberately controllable vault.
 An authenticated CRE CLI v1.33.0 simulation called the loopback Tare API, resolved
@@ -176,10 +177,15 @@ is JSON with `maxAgeSeconds`, `maxConcentrationBps` and `maxMultipleBps`; basis
 points use 10,000 for 100% or a 1x multiple. The API secret must match the hosted
 Tare access token. Keep real values outside tracked configuration and chat.
 
-Before hosted policy acceptance, configure a protected HTTPS Tare API, CRE
-deployment access and enclave secrets. Repeat the two private-threshold cases on
-the deployed workflow and retain the execution records. Local simulation does not
-satisfy this hosted acceptance step.
+Hosted read-only policy acceptance is complete. The protected HTTPS Tare API rejects
+anonymous traffic, accepts the matching CRE bearer secret and returns live
+two-provider Base Sepolia evidence. The private-registry workflow
+`00ef1cc2fd93d6179fea1d2c24f00b64efd373dca39a2fdfef51142a074ef1ff`
+is active with execution disabled. Its first scheduled run completed in 21 seconds;
+the trigger, HTTP action and consensus report events all succeeded and no logs were
+exposed. The CLI does not expose the returned private verdict, so this acceptance
+does not claim one. Public hashes, artifact links and the execution ID are recorded
+in `deployments/cre-hosted-readonly.json`.
 
 For end-to-end development without exposing a machine, the CRE configuration may
 use `http://127.0.0.1:<port>/api/analyze` or the equivalent `localhost` URL while
@@ -189,13 +195,12 @@ and confidential policy execution, but it is not evidence of a deployed CRE
 workflow or production HTTPS authentication.
 
 Local production-limit acceptance is complete with the configured low-latency
-Ethereum RPC. A protected HTTPS Tare deployment and CRE deployment approval remain
-required for hosted acceptance; the access request is pending review. Chainlink
-staff estimated the review at 24–48 hours and clarified that an end-to-end local
-simulation, not a deployed workflow, is the relevant bounty/judging evidence. Hosted
-deployment therefore remains a follow-up acceptance gate rather than a submission
-blocker. Simulator output must still be labeled as simulation and cannot be described
-as DON execution.
+Ethereum RPC. CRE deployment access was approved, the two workflow secrets were
+uploaded through browser-authenticated private-registry access, and hosted read-only
+acceptance subsequently passed. Chainlink staff also clarified that an end-to-end
+local simulation is relevant bounty/judging evidence even without hosted deployment.
+Simulator output must still be labeled as simulation and distinguished from the
+separate hosted execution record.
 
 The verified Base Sepolia producer is implemented and wired through the CLI,
 protected API and confidential workflow. The allowlisted E2E control and actual
