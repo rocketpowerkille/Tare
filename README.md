@@ -23,8 +23,8 @@ resolution and Graph/RPC checks, with resumable checkpoints, deduplication and
 reorg retractions. Hosted acceptance remains pending; see [monitoring](docs/PHASE_6.md).
 
 **Phase seven has a local confidential policy workflow and Solidity exit receiver:**
-private thresholds drive signed verdicts, with a guarded Sepolia execution path
-tested using synthetic evidence. A verified Sepolia evidence producer and hosted
+private thresholds drive signed verdicts, with a guarded Base Sepolia execution path
+tested using synthetic evidence. A verified Base Sepolia evidence producer and hosted
 acceptance remain open. Current V1 reports cannot authorize exits.
 See [phase seven](docs/PHASE_7.md) for verification and deferred setup.
 
@@ -179,7 +179,7 @@ packages/receipts/src/    JSON serialization and terminal formatting
 packages/verification/    Block-aligned Graph/RPC share checks and evidence replay
 graph/subgraph/           AssemblyScript share ledger, schema, manifest and isolated tooling
 workflows/cre/            Confidential CRE workflow and isolated Bun/SDK tooling
-contracts/                Sepolia-only Solidity exit receiver and Foundry tests
+contracts/                Base-Sepolia-only Solidity exit receiver and Foundry tests
 fixtures/synthetic/       Control, deep, degraded, and cycle inputs
 fixtures/recordings/      Synthetic adapter responses and multi-position cases
 fixtures/live/            Real public RPC capture, receipt and provenance

@@ -11,8 +11,9 @@ interface IAssetBalance {
     function balanceOf(address owner) external view returns (uint256);
 }
 
-/// @notice Sepolia-only, one-use ERC-4626 exit authorization. Never holds user funds.
+/// @notice Base-Sepolia-only, one-use ERC-4626 exit authorization. Never holds user funds.
 contract BoundedVaultExit {
+    uint256 public constant EXECUTION_CHAIN_ID = 84532;
     struct Permit {
         address vault;
         address asset;
@@ -61,7 +62,7 @@ contract BoundedVaultExit {
         address expectedWorkflowOwner
     ) {
         if (
-            block.chainid != 11155111 || trustedForwarder == address(0) || expectedWorkflowId == bytes32(0)
+            block.chainid != EXECUTION_CHAIN_ID || trustedForwarder == address(0) || expectedWorkflowId == bytes32(0)
                 || expectedWorkflowName == bytes10(0) || expectedWorkflowOwner == address(0)
         ) revert Unauthorized();
         forwarder = trustedForwarder;
@@ -108,7 +109,7 @@ contract BoundedVaultExit {
         Report memory report = abi.decode(payload, (Report));
         Permit storage permit = permits[report.owner];
         if (
-            block.chainid != 11155111 || report.chainId != block.chainid || report.receiver != address(this)
+            block.chainid != EXECUTION_CHAIN_ID || report.chainId != block.chainid || report.receiver != address(this)
                 || report.vault != permit.vault || report.shares == 0 || report.shares != permit.shares
                 || report.minAssets < permit.minAssets || report.nonce != permit.nonce
                 || report.evidenceDigest == bytes32(0)

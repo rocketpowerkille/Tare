@@ -23,12 +23,13 @@ contract BoundedVaultExitTest {
     bytes32 private constant WORKFLOW = keccak256("tare-policy");
     bytes10 private constant NAME = bytes10("tare-exit");
     bytes32 private constant BLOCK_HASH = keccak256("canonical-block");
+    uint256 private constant BASE_SEPOLIA_CHAIN_ID = 84532;
     BoundedVaultExit private exit;
     TestVault private vault;
     TestAsset private token;
 
     function setUp() public {
-        vm.chainId(11155111);
+        vm.chainId(BASE_SEPOLIA_CHAIN_ID);
         vm.warp(1000);
         vm.roll(100);
         vm.setBlockhash(99, BLOCK_HASH);
@@ -44,7 +45,7 @@ contract BoundedVaultExitTest {
 
     function report() private view returns (BoundedVaultExit.Report memory) {
         return BoundedVaultExit.Report(
-            11155111, address(exit), OWNER, address(vault), 100, 95, 1, 1400, 99, BLOCK_HASH, keccak256("evidence")
+            BASE_SEPOLIA_CHAIN_ID, address(exit), OWNER, address(vault), 100, 95, 1, 1400, 99, BLOCK_HASH, keccak256("evidence")
         );
     }
 
@@ -73,7 +74,7 @@ contract BoundedVaultExitTest {
         bytes memory payload = vm.parseJsonBytes(vm.readFile("test/fixtures/exit-report.json"), ".payload");
         require(payload.length == 352);
         BoundedVaultExit.Report memory r = abi.decode(payload, (BoundedVaultExit.Report));
-        require(r.chainId == 11155111 && r.observedBlock == 99);
+        require(r.chainId == BASE_SEPOLIA_CHAIN_ID && r.observedBlock == 99);
         require(r.owner == 0x1111111111111111111111111111111111111111);
         require(r.vault == 0x2222222222222222222222222222222222222222);
         require(r.receiver == 0x3333333333333333333333333333333333333333);
@@ -187,8 +188,12 @@ contract BoundedVaultExitTest {
         require(vault.balanceOf(OWNER) == 0);
     }
 
-    function testMainnetDeploymentIsRejected() public {
+    function testOtherChainsAreRejected() public {
         vm.chainId(1);
+        vm.expectRevert(BoundedVaultExit.Unauthorized.selector);
+        new BoundedVaultExit(FORWARDER, WORKFLOW, NAME, OWNER);
+
+        vm.chainId(11155111);
         vm.expectRevert(BoundedVaultExit.Unauthorized.selector);
         new BoundedVaultExit(FORWARDER, WORKFLOW, NAME, OWNER);
     }

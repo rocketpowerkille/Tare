@@ -30,7 +30,7 @@ test('policy blocks stale, future, recorded, partial and mismatched input', asyn
   assert.equal(v1Evidence(f.resolution, mismatch, f.expected).complete, false);
 });
 
-test('only opted-in Sepolia evidence can pass the execution policy; threshold arithmetic stays exact', () => {
+test('only opted-in Base Sepolia evidence can pass the execution policy; threshold arithmetic stays exact', () => {
   assert.equal(decide(testnetEvidence, privatePolicy, 1000, true).action, 'exit');
   assert.equal(decide(testnetEvidence, privatePolicy, 1000).action, 'review');
   assert.equal(decide({ ...testnetEvidence, chainId: 1 }, privatePolicy, 1000, true).action, 'review');

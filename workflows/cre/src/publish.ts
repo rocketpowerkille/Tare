@@ -4,6 +4,8 @@ import { decide, type Evidence } from '../../../packages/policy/src/decision.js'
 import { encodeExit, encodeVerdict, evidenceHash } from './report.js';
 import type { Config } from './config.js';
 
+export const BASE_SEPOLIA_CHAIN_SELECTOR = 10344971235874465080n;
+
 /** Receives evidence from the trusted adapter inside the enclave, never arbitrary API input. */
 export function publishDecision(runtime: TeeRuntime<Config>, evidence: Evidence, policy: unknown, now: number) {
   const execution = runtime.config.execution;
@@ -17,7 +19,7 @@ export function publishDecision(runtime: TeeRuntime<Config>, evidence: Evidence,
     encodedPayload: hexToBase64(payload), encoderName: 'evm', signingAlgo: 'ecdsa', hashingAlgo: 'keccak256',
   }).result();
   if (decision.action === 'exit') {
-    const result = new cre.capabilities.EVMClient(16015286601757825753n).writeReport(don, {
+    const result = new cre.capabilities.EVMClient(BASE_SEPOLIA_CHAIN_SELECTOR).writeReport(don, {
       receiver: execution.receiver, report, gasConfig: { gasLimit: '500000' },
     }).result();
     if (result.txStatus !== TxStatus.SUCCESS

@@ -4,7 +4,7 @@ import type { TeeRuntime } from '@chainlink/cre-sdk';
 import { initWorkflow, onCronTrigger } from '../src/workflow.js';
 import { configSchema, type Config } from '../src/config.js';
 import { policyFixture, privatePolicy, testnetEvidence } from '../../../tests/helpers/policy.js';
-import { publishDecision } from '../src/publish.js';
+import { BASE_SEPOLIA_CHAIN_SELECTOR, publishDecision } from '../src/publish.js';
 import { Evidence } from '../../../packages/policy/src/decision.js';
 
 async function harness(threshold = 5000) {
@@ -58,12 +58,12 @@ test('changing only the private threshold changes the verdict', async () => {
   assert.equal(onCronTrigger(h.runtime).action, 'hold');
 });
 
-test('synthetic eligible Sepolia evidence reaches writeReport; failed or unknown execution is not success', async () => {
+test('synthetic eligible Base Sepolia evidence reaches writeReport; failed or unknown execution is not success', async () => {
   const h = await harness();
   h.config.execution.validUntil = '1400';
   const evidence = Evidence.parse(testnetEvidence);
   let writes = 0;
-  EvmMock.testInstance(16015286601757825753n).writeReport = request => {
+  EvmMock.testInstance(BASE_SEPOLIA_CHAIN_SELECTOR).writeReport = request => {
     writes++;
     assert.equal(Buffer.from(request.receiver).toString('hex'), h.config.execution.receiver.slice(2));
     assert.ok(request.report);
@@ -77,14 +77,14 @@ test('synthetic eligible Sepolia evidence reaches writeReport; failed or unknown
     { txStatus: 'TX_STATUS_SUCCESS' as const },
     { txStatus: 'TX_STATUS_SUCCESS' as const, receiverContractExecutionStatus: 'RECEIVER_CONTRACT_EXECUTION_STATUS_REVERTED' as const },
   ]) {
-    EvmMock.testInstance(16015286601757825753n).writeReport = () => reply;
+    EvmMock.testInstance(BASE_SEPOLIA_CHAIN_SELECTOR).writeReport = () => reply;
     assert.throws(() => publishDecision(h.runtime, evidence, privatePolicy, 1000), /not confirmed successful/);
   }
 });
 
 test('recorded, stale and unverified evidence never calls writeReport', async () => {
   const h = await harness();
-  EvmMock.testInstance(16015286601757825753n).writeReport = () => assert.fail('Ineligible evidence reached execution');
+  EvmMock.testInstance(BASE_SEPOLIA_CHAIN_SELECTOR).writeReport = () => assert.fail('Ineligible evidence reached execution');
   for (const changed of [{ live: false }, { blockTimestamp: '1' }, { backingVerified: false }, { chainId: 1 }]) {
     const result = publishDecision(h.runtime, Evidence.parse({ ...testnetEvidence, ...changed }), privatePolicy, 1000);
     assert.notEqual(result.action, 'exit');

@@ -15,7 +15,7 @@ cannot provide the events required by the monitoring phase.
 | Resolver, accounting, receipts, and verification | TypeScript | None |
 | CLI, API, MCP, web explorer, and Bazantic recipe | TypeScript | None |
 | Chainlink CRE workflow | TypeScript | None |
-| Bounded Sepolia exit receiver | Solidity | None |
+| Bounded Base Sepolia exit receiver | Solidity | None |
 | Substreams consumer, cursor handling, and alerting | TypeScript | None |
 | Custom Substreams block-extraction module | Rust compiled to WebAssembly | Required only if authored |
 

@@ -15,6 +15,7 @@ export const Evidence = z.strictObject({
 });
 export type Evidence = z.infer<typeof Evidence>;
 export type Decision = { action: 'blocked' | 'hold' | 'review' | 'exit'; reason: string };
+export const EXECUTION_CHAIN_ID = 84532;
 
 /** Private thresholds stay inside the caller's confidentiality boundary. No ratio uses floating point. */
 export function decide(rawEvidence: unknown, rawPolicy: unknown, now: number, allowTestnetExit = false): Decision {
@@ -32,7 +33,7 @@ export function decide(rawEvidence: unknown, rawPolicy: unknown, now: number, al
   }
   const breached = BigInt(multiple.numerator) * 10000n > BigInt(multiple.denominator) * BigInt(policy.maxMultipleBps);
   if (!breached) return concentrated ? { action: 'review', reason: 'concentration-limit' } : { action: 'hold', reason: 'within-policy' };
-  return allowTestnetExit && evidence.chainId === 11155111
+  return allowTestnetExit && evidence.chainId === EXECUTION_CHAIN_ID
     ? { action: 'exit', reason: 'verified-multiple-limit' }
     : { action: 'review', reason: 'execution-disabled-or-wrong-chain' };
 }

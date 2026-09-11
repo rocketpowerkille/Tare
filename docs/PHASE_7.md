@@ -1,7 +1,7 @@
 # Phase seven: confidential policy and bounded exit
 
 Local implementation: confidential CRE handler, private policy evaluation, signed
-verdicts, Sepolia report submission and an ERC-4626 exit receiver. The official SDK
+verdicts, Base Sepolia report submission and an ERC-4626 exit receiver. The official SDK
 compiles the workflow to WASM. SDK harness and Foundry tests exercise the isolated
 paths; the authenticated CRE CLI simulator now also exercises the live local path.
 This remains a simulator run, not a deployed TEE workflow or live transaction.
@@ -33,7 +33,7 @@ submission, inspect the transaction and consumed permit before retrying.
 
 ## Solidity receiver
 
-`contracts/src/BoundedVaultExit.sol` is restricted to chain ID 11155111. Each owner
+`contracts/src/BoundedVaultExit.sol` is restricted to Base Sepolia chain ID 84532. Each owner
 arms an exact share amount, minimum asset return and expiry of at most one day,
 then separately approves those vault shares. Cancel or re-arm invalidates older
 reports by nonce. Redemption returns assets directly to that owner.
@@ -106,7 +106,7 @@ Local production-limit acceptance is complete with the configured low-latency
 Ethereum RPC. A protected HTTPS Tare deployment and CRE deployment approval remain
 required for hosted acceptance; the access request is pending review.
 
-Before live exits, **implement and validate a verified Sepolia evidence producer**.
+Before live exits, **implement and validate a verified Base Sepolia evidence producer**.
 The current V1 adapter is Ethereum-only and cannot supply eligible exit evidence;
 the synthetic test fixture must never replace this missing producer. This is
 remaining implementation work, not an account-setting task. Then deploy the
