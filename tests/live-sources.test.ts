@@ -58,3 +58,28 @@ test('RPC enforces chain, ID and request budgets', async () => {
     await assert.rejects(pinned.pin(1), /cannot be reused/);
   });
 });
+
+test('RPC records contract code at the pinned canonical block and deduplicates reads', async () => {
+  const block = { number: '0x123', hash: `0x${'ab'.repeat(32)}`, timestamp: '0x456' };
+  const address = `0x${'11'.repeat(20)}`;
+  const methods: string[] = [];
+  await withServer((body, response) => {
+    const call = RpcRequest.parse(body);
+    methods.push(call.method);
+    if (call.method === 'eth_chainId') return json(response, { jsonrpc: '2.0', id: call.id, result: '0xaa36a7' });
+    if (call.method === 'eth_getBlockByNumber') return json(response, { jsonrpc: '2.0', id: call.id, result: block });
+    assert.equal(call.method, 'eth_getCode');
+    assert.deepEqual(call.params, [address, { blockHash: block.hash, requireCanonical: true }]);
+    return json(response, { jsonrpc: '2.0', id: call.id, result: '0x600A' });
+  }, async url => {
+    const rpc = new PinnedRpc(url);
+    await rpc.pin(11155111);
+    assert.equal(await rpc.code(address), '0x600a');
+    assert.equal(await rpc.code(address), '0x600a');
+    assert.deepEqual(rpc.codes.map(item => ({ address: item.address, code: item.code, blockHash: item.blockHash })), [
+      { address, code: '0x600a', blockHash: block.hash },
+    ]);
+    await rpc.confirm();
+  });
+  assert.deepEqual(methods, ['eth_chainId', 'eth_getBlockByNumber', 'eth_getCode', 'eth_getBlockByNumber']);
+});

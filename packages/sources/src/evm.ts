@@ -15,6 +15,10 @@ export type CallObservation = z.infer<typeof CallObservationSchema>;
 export const NativeBalanceSchema = z.strictObject({
   address: AddressSchema, balance: HexQuantitySchema, blockHash: HashSchema, observedAt: z.iso.datetime(),
 });
+export const CodeObservationSchema = z.strictObject({
+  address: AddressSchema, code: HexDataSchema, blockHash: HashSchema, observedAt: z.iso.datetime(),
+});
+export type CodeObservation = z.infer<typeof CodeObservationSchema>;
 export const FailedCallSchema = z.strictObject({ to: AddressSchema, data: HexDataSchema, blockHash: HashSchema, code: z.enum(['timeout', 'network', 'http', 'oversized', 'invalid-json', 'invalid-response', 'rpc-error', 'graphql-error', 'budget', 'reorg']) });
 export type FailedCall = z.infer<typeof FailedCallSchema>;
 const EnvelopeSchema = z.object({ jsonrpc: z.literal('2.0'), id: z.number().int(), result: z.unknown().optional(), error: z.unknown().optional() });
@@ -41,6 +45,7 @@ export class PinnedRpc implements ContractReader {
   block!: RpcBlock;
   readonly observations: CallObservation[] = [];
   readonly nativeBalances: z.infer<typeof NativeBalanceSchema>[] = [];
+  readonly codes: CodeObservation[] = [];
   readonly failedCalls: FailedCall[] = [];
   readonly health: Health = { source: 'rpc', status: 'healthy', requests: 0, failures: 0, elapsedMs: 0 };
   private readonly cache = new Map<string, string>();
@@ -57,6 +62,19 @@ export class PinnedRpc implements ContractReader {
     if (!parsed.success) throw new SourceFailure('invalid-response', 'Invalid native balance');
     this.nativeBalances.push({ address, balance: parsed.data, blockHash: this.block.hash, observedAt: new Date().toISOString() });
     return BigInt(parsed.data);
+  }
+  async code(addressInput: string): Promise<string> {
+    if (!this.block) throw new Error('Pin a block before reading contract code');
+    const address = AddressSchema.parse(addressInput);
+    const previous = this.codes.find(item => item.address === address);
+    if (previous) return previous.code;
+    const raw = await this.request('eth_getCode', [address, { blockHash: this.block.hash, requireCanonical: true }]);
+    const parsed = HexDataSchema.safeParse(raw);
+    if (!parsed.success) throw new SourceFailure('invalid-response', 'Invalid contract code');
+    this.codes.push(CodeObservationSchema.parse({
+      address, code: parsed.data, blockHash: this.block.hash, observedAt: new Date().toISOString(),
+    }));
+    return parsed.data;
   }
   private async request(method: string, params: unknown[]): Promise<unknown> {
     if (this.health.requests >= this.maxCalls || Date.now() >= this.deadline) throw new SourceFailure('budget', 'RPC request or deadline budget exhausted');
