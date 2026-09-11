@@ -63,8 +63,8 @@ contract BoundedVaultExit {
         address expectedWorkflowOwner
     ) {
         if (
-            block.chainid != EXECUTION_CHAIN_ID || trustedForwarder == address(0) || expectedWorkflowId == bytes32(0)
-                || expectedWorkflowName == bytes10(0) || expectedWorkflowOwner == address(0)
+            block.chainid != EXECUTION_CHAIN_ID || trustedForwarder == address(0) || expectedWorkflowName == bytes10(0)
+                || expectedWorkflowOwner == address(0)
         ) revert Unauthorized();
         forwarder = trustedForwarder;
         workflowId = expectedWorkflowId;
@@ -108,8 +108,8 @@ contract BoundedVaultExit {
     function _authorizeReport(bytes calldata metadata) internal view virtual {
         if (msg.sender != forwarder || metadata.length != 64) revert Unauthorized();
         if (
-            bytes32(metadata[0:32]) != workflowId || bytes10(metadata[32:42]) != workflowName
-                || address(bytes20(metadata[42:62])) != workflowOwner
+            (workflowId != bytes32(0) && bytes32(metadata[0:32]) != workflowId)
+                || bytes10(metadata[32:42]) != workflowName || address(bytes20(metadata[42:62])) != workflowOwner
         ) revert Unauthorized();
     }
 

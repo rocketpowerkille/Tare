@@ -112,6 +112,38 @@ contract BoundedVaultExitTest {
         exit.onReport(metadata(), hex"1234");
     }
 
+    function testZeroWorkflowIdDisablesOnlyIdCheck() public {
+        BoundedVaultExit ownerAndNameExit = new BoundedVaultExit(FORWARDER, bytes32(0), NAME, OWNER);
+        bytes memory laterWorkflow = abi.encodePacked(keccak256("config-with-receiver"), NAME, OWNER, bytes2(0x0001));
+
+        vm.expectRevert(BoundedVaultExit.InvalidReport.selector);
+        vm.prank(FORWARDER);
+        ownerAndNameExit.onReport(laterWorkflow, hex"1234");
+
+        vm.expectRevert(BoundedVaultExit.Unauthorized.selector);
+        ownerAndNameExit.onReport(laterWorkflow, hex"1234");
+
+        bytes memory wrongName =
+            abi.encodePacked(keccak256("config-with-receiver"), bytes10("other"), OWNER, bytes2(0x0001));
+        vm.expectRevert(BoundedVaultExit.Unauthorized.selector);
+        vm.prank(FORWARDER);
+        ownerAndNameExit.onReport(wrongName, hex"1234");
+
+        bytes memory wrongOwner = abi.encodePacked(keccak256("config-with-receiver"), NAME, address(1), bytes2(0x0001));
+        vm.expectRevert(BoundedVaultExit.Unauthorized.selector);
+        vm.prank(FORWARDER);
+        ownerAndNameExit.onReport(wrongOwner, hex"1234");
+    }
+
+    function testOnlyWorkflowIdMayBeDisabled() public {
+        vm.expectRevert(BoundedVaultExit.Unauthorized.selector);
+        new BoundedVaultExit(address(0), bytes32(0), NAME, OWNER);
+        vm.expectRevert(BoundedVaultExit.Unauthorized.selector);
+        new BoundedVaultExit(FORWARDER, bytes32(0), bytes10(0), OWNER);
+        vm.expectRevert(BoundedVaultExit.Unauthorized.selector);
+        new BoundedVaultExit(FORWARDER, bytes32(0), NAME, address(0));
+    }
+
     function testRejectsChainReceiverOwnerVaultAmountAndPriceChanges() public {
         BoundedVaultExit.Report memory r = report();
         r.chainId = 1;

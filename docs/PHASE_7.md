@@ -51,7 +51,11 @@ then separately approves those vault shares. Cancel or re-arm invalidates older
 reports by nonce. Redemption returns assets directly to that owner.
 
 The receiver authenticates the configured forwarder and all three workflow
-identifiers. It validates chain, receiver, owner/vault, exact shares, minimum output,
+identifiers when a workflow ID is configured. A zero workflow ID disables only that
+check while the nonzero workflow owner and workflow name remain mandatory. This
+owner-plus-name mode breaks the deployment cycle in which the final config contains
+the receiver address and therefore changes the final workflow ID. It validates chain,
+receiver, owner/vault, exact shares, minimum output,
 one-use nonce, permit/report expiry, a nonzero evidence digest and a canonical block
 hash from the previous 64 blocks. Report expiry is bounded by the permit and ten
 minutes. Asset changes, reentrancy, incorrect share consumption and insufficient
@@ -230,7 +234,11 @@ Keystone Forwarder and the final hosted workflow identity.
 The production forwarder's metadata is 64 bytes: workflow ID (32), workflow name
 (10), workflow owner (20), report ID (2). The simulator's MockForwarder may omit
 identity metadata; do not weaken receiver validation to accommodate it. Local
-tests explicitly supply fixture identities.
+tests explicitly supply fixture identities. The production receiver will use Chainlink's
+current Base Sepolia forwarder, the private-registry owner and the CRE-encoded name
+`0x63306563326530663834` for `tare-confidential-policy`. The encoding is the first
+ten ASCII hex characters of the workflow-name SHA-256 digest, not the first ten
+plaintext characters.
 
 References: [confidential workflow template](https://docs.chain.link/cre-templates/hello-confidential-workflows)
 and [receiver integration](https://docs.chain.link/cre/guides/workflow/using-evm-client/onchain-write/building-consumer-contracts).
