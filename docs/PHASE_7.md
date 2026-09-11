@@ -78,6 +78,34 @@ Artifacts use the existing ignored `.tare/` and `dist/` directories. CRE tooling
 has an isolated package/lockfile because its protobuf and runtime requirements
 differ from the Node CLI/API. No runtime dependencies were added to the root.
 
+### Persistent Git Bash configuration
+
+Keep local Base Sepolia RPC settings, CRE simulation secrets and the EVM signing
+key in the repository-root `.env`. Git ignores this file; `.env.example` contains
+the required names and non-production deployment values. A real private key must
+never be added to `.env.example`, committed or shared.
+
+The Git Bash wrappers load `.env` automatically. Start the loopback evidence API
+in one terminal:
+
+```sh
+bash workflows/cre/scripts/serve-base-sepolia.sh
+```
+
+Run a fresh two-provider check followed by a non-broadcast CRE simulation in a
+second terminal:
+
+```sh
+bash workflows/cre/scripts/simulate-base-sepolia.sh
+```
+
+Adding `--broadcast` performs the real testnet write and must only be used with an
+armed, approved, disposable Base Sepolia position:
+
+```sh
+bash workflows/cre/scripts/simulate-base-sepolia.sh --broadcast
+```
+
 Acceptance on 2026-09-11: 128 root tests plus existing demos/replay; 10 CRE tests;
 16 Solidity tests including 256 fuzz cases; official WASM compilation. The shared
 synthetic ABI vector is checked by both languages. SDK tests mock HTTP, secrets,
