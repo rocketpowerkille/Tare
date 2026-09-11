@@ -94,7 +94,11 @@ test('recorded, stale and unverified evidence never calls writeReport', async ()
 test('API failure and invalid private configuration never sign or leak response data', async () => {
   const h = await harness();
   HttpActionsMock.testInstance().sendRequest = () => { throw new Error(h.token); };
-  assert.throws(() => onCronTrigger(h.runtime), error => error instanceof Error && error.message === 'Confidential policy workflow failed; inspect execution status before retrying');
+  assert.throws(() => onCronTrigger(h.runtime), error => error instanceof Error
+    && error.message === 'Confidential policy workflow failed at resolve; inspect execution status before retrying');
   assert.equal(h.signed.length, 0);
+  assert.equal(configSchema.parse({ ...h.config, apiUrl: 'http://127.0.0.1:4318/api/analyze' }).apiUrl,
+    'http://127.0.0.1:4318/api/analyze');
   assert.throws(() => configSchema.parse({ ...h.config, apiUrl: 'http://example.com/api/analyze' }));
+  assert.throws(() => configSchema.parse({ ...h.config, apiUrl: 'http://0.0.0.0:4318/api/analyze' }));
 });

@@ -1,7 +1,12 @@
 import { Runner } from '@chainlink/cre-sdk';
-import { configSchema, initWorkflow } from './workflow.js';
+import type { Config } from './config';
+import { initWorkflow } from './workflow';
 
 export async function main() {
-  const runner = await Runner.newRunner({ configSchema });
+  // The transformed policy schema is parsed inside the confidential handler.
+  // Keeping subscription structural avoids current CRE/Javy Standard Schema incompatibilities.
+  const runner = await Runner.newRunner<Config>();
   await runner.run(initWorkflow);
 }
+
+main();

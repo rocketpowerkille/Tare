@@ -16,26 +16,35 @@ function request(runtime: TeeRuntime<Config>, token: string, body: unknown): unk
 }
 
 export function onCronTrigger(runtime: TeeRuntime<Config>) {
+  let stage = 'config';
   try {
     const config = configSchema.parse(runtime.config);
+    stage = 'policy-secret';
     const policyText = runtime.getSecret({ id: config.policySecretId }).result().value;
     if (policyText.length > 1024) throw new Error('Private policy exceeds limit');
+    stage = 'policy';
     const policy = PrivatePolicy.parse(JSON.parse(policyText));
+    stage = 'api-secret';
     const token = runtime.getSecret({ id: config.apiSecretId }).result().value;
     if (!/^[A-Za-z0-9_-]{32,128}$/.test(token)) throw new Error('Invalid Tare API token');
+    stage = 'resolve';
     const resolution = request(runtime, token, { operation: 'resolve-v1', owner: config.owner, vault: config.vault });
     // Read only the block selector here; the projection below validates required evidence fields and identities.
+    stage = 'block-selector';
     const selector = resolution as { capture?: { block?: { number?: unknown } } };
     const number = selector?.capture?.block?.number;
     if (typeof number !== 'string' || !/^0x[0-9a-fA-F]{1,8}$/.test(number)) throw new Error('Missing Tare block');
+    stage = 'accounting';
     const verification = request(runtime, token, { operation: 'verify-accounting', vault: config.vault,
       blockNumber: BigInt(number).toString() });
+    stage = 'evidence';
     const evidence = v1AccountingEvidence(resolution, verification, { ...config, deployment: config.graphDeployment });
     const now = Math.floor(runtime.now().getTime() / 1000);
+    stage = 'publish';
     return publishDecision(runtime, evidence, policy, now);
   } catch {
     // SDK/API/validation errors must not echo enclave secrets or private policy input.
-    throw new Error('Confidential policy workflow failed; inspect execution status before retrying');
+    throw new Error(`Confidential policy workflow failed at ${stage}; inspect execution status before retrying`);
   }
 }
 

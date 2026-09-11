@@ -1,0 +1,8 @@
+# CRE project-level capability configuration.
+# The confidential policy reads Ethereum evidence through the Tare HTTPS API.
+# Sepolia is declared for the optional bounded writeReport path; simulation does
+# not broadcast unless --broadcast is supplied explicitly.
+staging-settings:
+  rpcs:
+    - chain-name: ethereum-testnet-sepolia
+      url: https://ethereum-sepolia-rpc.publicnode.com

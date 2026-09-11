@@ -2,8 +2,9 @@
 
 Local implementation: confidential CRE handler, private policy evaluation, signed
 verdicts, Sepolia report submission and an ERC-4626 exit receiver. The official SDK
-compiles the workflow to WASM. SDK harness and Foundry tests exercise the local
-paths; they are not a CRE CLI simulation, deployed TEE run or live transaction.
+compiles the workflow to WASM. SDK harness and Foundry tests exercise the isolated
+paths; the authenticated CRE CLI simulator now also exercises the live local path.
+This remains a simulator run, not a deployed TEE workflow or live transaction.
 
 ## Evidence and privacy boundary
 
@@ -66,11 +67,17 @@ Artifacts use the existing ignored `.tare/` and `dist/` directories. CRE tooling
 has an isolated package/lockfile because its protobuf and runtime requirements
 differ from the Node CLI/API. No runtime dependencies were added to the root.
 
-Acceptance on 2026-09-10: 113 root tests plus existing demos/replay; 7 CRE tests;
+Acceptance on 2026-09-11: 120 root tests plus existing demos/replay; 7 CRE tests;
 12 Solidity tests including 256 fuzz cases; official WASM compilation. The shared
 synthetic ABI vector is checked by both languages. SDK tests mock HTTP, secrets,
 signing and EVM submission; Foundry tests use a deliberately controllable vault.
-CI repeats these checks. A remote CI run has not been performed for this change.
+An authenticated CRE CLI v1.33.0 simulation called the loopback Tare API, resolved
+the live Steakhouse USDC V1 position, reconciled the deployed accounting subgraph
+against same-block RPC evidence and produced `hold` with the ordinary private
+threshold and `review` with a stricter threshold. Both runs disabled simulator
+limits because the stable no-key public RPC exceeded CRE's ten-second HTTP limit.
+No transaction was broadcast. CI repeats the automated checks; a remote CI run has
+not been performed for this change.
 
 ## Deferred setup and remaining code
 
@@ -86,6 +93,17 @@ deployment and its providers, CRE access and enclave secrets. Run and retain a
 successful CRE confidential simulation/deployment with stale/partial failure cases
 and two private thresholds producing different outcomes. Local SDK tests and WASM
 compilation do not satisfy this hosted acceptance step.
+
+For end-to-end development without exposing a machine, the CRE configuration may
+use `http://127.0.0.1:<port>/api/analyze` or the equivalent `localhost` URL while
+the simulator and Tare API run on the same computer. Plain HTTP is rejected for
+every non-loopback hostname. This local path exercises live provider acquisition
+and confidential policy execution, but it is not evidence of a deployed CRE
+workflow or production HTTPS authentication.
+
+Production-limit acceptance still needs a reliable low-latency Ethereum RPC (a
+provider account/key is expected) and a protected HTTPS Tare deployment. The
+current CRE organization can simulate but reports deployment access as disabled.
 
 Before live exits, **implement and validate a verified Sepolia evidence producer**.
 The current V1 adapter is Ethereum-only and cannot supply eligible exit evidence;
