@@ -6,6 +6,8 @@ import { configSchema, type Config } from '../src/config.js';
 import { policyFixture, privatePolicy, testnetEvidence } from '../../../tests/helpers/policy.js';
 import { BASE_SEPOLIA_CHAIN_SELECTOR, publishDecision } from '../src/publish.js';
 import { Evidence } from '../../../packages/policy/src/decision.js';
+import { replayBaseSepoliaCustody } from '../../../packages/verification/src/base-sepolia-custody.js';
+import { baseOwner, baseOuterVault, baseSepoliaCapture } from '../../../tests/helpers/base-sepolia.js';
 
 async function harness(threshold = 5000) {
   const fixture = await policyFixture();
@@ -101,4 +103,30 @@ test('API failure and invalid private configuration never sign or leak response 
     'http://127.0.0.1:4318/api/analyze');
   assert.throws(() => configSchema.parse({ ...h.config, apiUrl: 'http://example.com/api/analyze' }));
   assert.throws(() => configSchema.parse({ ...h.config, apiUrl: 'http://0.0.0.0:4318/api/analyze' }));
+});
+
+test('confidential handler converts the allowlisted live Base custody report into a bounded write', async () => {
+  const h = await harness();
+  h.config.evidenceSource = 'base-sepolia-custody';
+  h.config.owner = baseOwner;
+  h.config.vault = baseOuterVault;
+  h.config.execution.validUntil = String(h.fixture.now + 300);
+  const custody = { ...await replayBaseSepoliaCustody(baseSepoliaCapture()), sourceMode: 'live-rpc' as const };
+  const timestamp = `0x${h.fixture.now.toString(16)}`;
+  custody.capture.witnesses[0].rpc.block!.timestamp = timestamp;
+  custody.capture.witnesses[1].rpc.block!.timestamp = timestamp;
+  HttpActionsMock.testInstance().sendRequest = request => {
+    const body = JSON.parse(new TextDecoder().decode(request.body));
+    assert.deepEqual(body, { operation: 'verify-base-custody', owner: baseOwner });
+    return { statusCode: 200, body: Buffer.from(JSON.stringify(custody)).toString('base64') };
+  };
+  let writes = 0;
+  EvmMock.testInstance(BASE_SEPOLIA_CHAIN_SELECTOR).writeReport = () => {
+    writes++;
+    return { txStatus: 'TX_STATUS_SUCCESS', receiverContractExecutionStatus: 'RECEIVER_CONTRACT_EXECUTION_STATUS_SUCCESS' };
+  };
+  const result = onCronTrigger(h.runtime);
+  assert.equal(result.action, 'exit');
+  assert.equal(writes, 1);
+  assert.equal(h.signed[0]!.length, 352);
 });

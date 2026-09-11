@@ -4,6 +4,9 @@ import { resolveNestedPosition, replayNestedCapture } from '../../resolver/src/n
 import { verifyShares, replayShareVerification } from '../../verification/src/shares.js';
 import { verifyAccounting, replayAccounting } from '../../verification/src/accounting.js';
 import { verifyWethCustody, replayCustody } from '../../verification/src/custody.js';
+import { verifyBaseSepoliaCustody, replayBaseSepoliaCustody } from '../../verification/src/base-sepolia-custody.js';
+import { BaseSepoliaCustodyDeploymentSchema } from '../../verification/src/base-sepolia-custody-capture.js';
+import type { BaseSepoliaCustodyDeployment } from '../../verification/src/base-sepolia-custody-capture.js';
 import { readJsonFile } from '../../sources/src/snapshot.js';
 import { AnalyzeSchema, ReplaySchema, ExampleSchema, MAX_INPUT_BYTES, ServiceError } from './requests.js';
 import { composePosition } from './composition.js';
@@ -14,13 +17,27 @@ export interface ServiceConfig {
   graphUrl?: string;
   expectedDeployment?: string;
   graphApiKey?: string;
+  baseRpcUrl?: string;
+  baseSecondaryRpcUrl?: string;
+  baseCustodyDeployment?: BaseSepoliaCustodyDeployment;
 }
 export function configFromEnv(env: NodeJS.ProcessEnv = process.env): ServiceConfig {
-  return Object.fromEntries(Object.entries({
+  const config: ServiceConfig = Object.fromEntries(Object.entries({
     rpcUrl: env.TARE_RPC_URL, secondaryRpcUrl: env.TARE_SECONDARY_RPC_URL,
     graphUrl: env.TARE_GRAPH_URL, expectedDeployment: env.TARE_GRAPH_DEPLOYMENT,
     graphApiKey: env.GRAPH_API_KEY,
+    baseRpcUrl: env.TARE_BASE_RPC_URL, baseSecondaryRpcUrl: env.TARE_BASE_SECONDARY_RPC_URL,
   }).filter((entry): entry is [string, string] => Boolean(entry[1])));
+  if (env.TARE_BASE_CUSTODY_DEPLOYMENT) {
+    try {
+      config.baseCustodyDeployment = BaseSepoliaCustodyDeploymentSchema.parse(
+        JSON.parse(env.TARE_BASE_CUSTODY_DEPLOYMENT),
+      );
+    } catch {
+      throw new Error('TARE_BASE_CUSTODY_DEPLOYMENT must contain a valid allowlisted deployment.');
+    }
+  }
+  return config;
 }
 
 export const examples = [
@@ -40,7 +57,9 @@ export class TareService {
     return {
       name: 'tare', apiVersion: 1, chainId: 1, readOnly: true, examples,
       live: { 'resolve-v1': rpc, 'resolve-v2': rpc, 'verify-shares': graph,
-        'verify-accounting': graph, 'verify-weth': rpc && Boolean(this.config.secondaryRpcUrl) },
+        'verify-accounting': graph, 'verify-weth': rpc && Boolean(this.config.secondaryRpcUrl),
+        'verify-base-custody': Boolean(this.config.baseRpcUrl && this.config.baseSecondaryRpcUrl
+          && this.config.baseCustodyDeployment) },
       limits: { maxInputBytes: MAX_INPUT_BYTES, concurrentOperations: 2 },
       limitations: ['Recorded evidence is unsigned and is not a fresh source check.',
         'Morpho backing remains unverified; the WETH metric applies only to the wrapper.'],
@@ -74,6 +93,7 @@ export class TareService {
       case 'verify-shares': return replayShareVerification(request.capture);
       case 'verify-accounting': return replayAccounting(request.capture);
       case 'verify-weth': return replayCustody(request.capture);
+      case 'verify-base-custody': return replayBaseSepoliaCustody(request.capture);
     }
   }
 
@@ -91,6 +111,13 @@ export class TareService {
       case 'verify-shares': return verifyShares({ ...graph, owner: request.owner, vault: request.vault }, graphApiKey);
       case 'verify-accounting': return verifyAccounting({ ...graph, vault: request.vault }, graphApiKey);
       case 'verify-weth': return verifyWethCustody({ ...rpc, owner: request.owner, secondaryRpcUrl: secondaryRpcUrl! });
+      case 'verify-base-custody': return verifyBaseSepoliaCustody({
+        owner: request.owner,
+        deployment: this.config.baseCustodyDeployment!,
+        rpcUrl: this.config.baseRpcUrl!,
+        secondaryRpcUrl: this.config.baseSecondaryRpcUrl!,
+        ...(request.blockNumber === undefined ? {} : { blockNumber: request.blockNumber }),
+      });
     }
   }
 }

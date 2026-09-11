@@ -2,10 +2,12 @@
 
 Phase seven keeps private policy rules and V1 report projection in `packages/policy`.
 The isolated `workflows/cre` package owns enclave secret access, API acquisition,
-redacted signing and guarded Base Sepolia report submission. Its projection trusts the
-configured Tare service and cannot upgrade V1 lending backing to verified evidence.
+redacted signing and guarded Base Sepolia report submission. Its V1 projection trusts the
+configured Tare service and cannot upgrade Ethereum lending backing to verified evidence.
+The separate Base producer pins two differently hosted RPCs, checks allowlisted contract
+bytecode and reconciles both custody layers at one block before creating eligible evidence.
 `contracts` owns the one-use ERC-4626 exit receiver; its ABI has a shared test vector
-with the workflow. A verified Base Sepolia producer and hosted acceptance remain open.
+with the workflow. Deployment-backed Base acceptance and hosted acceptance remain open.
 See [phase seven](PHASE_7.md).
 
 Phase-five interfaces add `packages/service` for request validation, provider

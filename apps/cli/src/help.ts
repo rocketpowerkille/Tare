@@ -8,6 +8,10 @@ export const help = `Tare 0.1.0 — exposure CLI with offline replay and read-on
   tare verify custody --address <holder> [--rpc-url <url>] [--secondary-rpc-url <url>]
        [--block-number <n>] [--json] [--out <capture.json>]
   tare verify custody-replay <capture.json> [--json]
+  tare verify base-custody --address <owner> --deployment <deployment.json>
+       [--rpc-url <url>] [--secondary-rpc-url <url>] [--block-number <n>]
+       [--json] [--out <capture.json>]
+  tare verify base-custody-replay <capture.json> [--json]
 
   tare demo [control|deep|degraded|cycle|all|phase2|phase4] [--json]
   tare resolve <snapshot.json> [--wallet <name>] [--json] [--out <receipt.json>]

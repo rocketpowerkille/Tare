@@ -1,5 +1,6 @@
 {
   "schedule": "0 */5 * * * *",
+  "evidenceSource": "ethereum-mainnet-v1",
   "apiUrl": "https://tare.example.invalid/api/analyze",
   "owner": "0x1111111111111111111111111111111111111111",
   "vault": "0x2222222222222222222222222222222222222222",

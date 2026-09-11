@@ -23,9 +23,10 @@ resolution and Graph/RPC checks, with resumable checkpoints, deduplication and
 reorg retractions. Hosted acceptance remains pending; see [monitoring](docs/PHASE_6.md).
 
 **Phase seven has a local confidential policy workflow and Solidity exit receiver:**
-private thresholds drive signed verdicts, with a guarded Base Sepolia execution path
-tested using synthetic evidence. A verified Base Sepolia evidence producer and hosted
-acceptance remain open. Current V1 reports cannot authorize exits.
+private thresholds drive signed verdicts, with a guarded Base Sepolia execution path.
+The Base Sepolia producer independently pins two RPC hosts, checks allowlisted bytecode
+and reconciles direct two-layer custody; deployment-backed live acceptance and hosted
+CRE acceptance remain open. Current Ethereum V1 reports cannot authorize exits.
 See [phase seven](docs/PHASE_7.md) for verification and deferred setup.
 
 Tare is an exposure resolver for nested vault positions. Phase one is a working
@@ -143,6 +144,8 @@ operator. No transaction, connection request, or signature is made.
 | `verify accounting-replay <capture>` | Recompute underlying accounting comparisons |
 | `verify custody --address <holder>` | Cross-check WETH/native ETH custody across two RPC hosts |
 | `verify custody-replay <capture>` | Replay the scoped custody metric |
+| `verify base-custody --address <owner> --deployment <file>` | Verify the allowlisted Base Sepolia two-layer control across two RPC hosts |
+| `verify base-custody-replay <capture>` | Replay Base evidence without claiming freshness or execution eligibility |
 | `demo phase4` | Synthetic 1x/3x methodology controls and blocked cases |
 | `wallet add/list/show/remove` | Manage local watch-only profiles |
 | `wallet balance <name> --rpc-url <url>` | Read a block-pinned native balance from an EVM RPC endpoint |

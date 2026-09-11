@@ -1,7 +1,7 @@
 # Phase seven: confidential policy and bounded exit
 
 Local implementation: confidential CRE handler, private policy evaluation, signed
-verdicts, Base Sepolia report submission and an ERC-4626 exit receiver. The official SDK
+verdicts, a verified Base Sepolia evidence producer, report submission and an ERC-4626 exit receiver. The official SDK
 compiles the workflow to WASM. SDK harness and Foundry tests exercise the isolated
 paths; the authenticated CRE CLI simulator now also exercises the live local path.
 This remains a simulator run, not a deployed TEE workflow or live transaction.
@@ -21,6 +21,15 @@ the resolution block. Recorded, partial, stale or inconsistent evidence blocks
 action. A private concentration threshold changes the review/hold verdict.
 V1 lending backing is always unverified and its multiple remains unavailable:
 neither extra API fields nor `execution.enabled` can turn V1 into an exit.
+
+The distinct `verify-base-custody` operation uses server-configured Base Sepolia
+deployment identities and two RPC endpoints with different hostnames. Both witnesses
+must agree on chain ID 84532 and the same confirmed block. Runtime bytecode for the
+outer vault, inner vault and terminal asset must match the allowlisted SHA-256 digests;
+direct balances, supplies, asset links and redemption previews must reconcile across
+both providers. Recorded captures remain non-executable. CRE selects this source only
+when `evidenceSource` is `base-sepolia-custody`; callers cannot supply provider URLs or
+deployment addresses through the API request.
 
 Only a verdict and evidence commitment, or public exit terms, cross to the DON for
 signing. Raw API responses, private thresholds and tokens are not logged, returned
@@ -67,7 +76,7 @@ Artifacts use the existing ignored `.tare/` and `dist/` directories. CRE tooling
 has an isolated package/lockfile because its protobuf and runtime requirements
 differ from the Node CLI/API. No runtime dependencies were added to the root.
 
-Acceptance on 2026-09-11: 120 root tests plus existing demos/replay; 7 CRE tests;
+Acceptance on 2026-09-11: 127 root tests plus existing demos/replay; 8 CRE tests;
 12 Solidity tests including 256 fuzz cases; official WASM compilation. The shared
 synthetic ABI vector is checked by both languages. SDK tests mock HTTP, secrets,
 signing and EVM submission; Foundry tests use a deliberately controllable vault.
@@ -106,11 +115,11 @@ Local production-limit acceptance is complete with the configured low-latency
 Ethereum RPC. A protected HTTPS Tare deployment and CRE deployment approval remain
 required for hosted acceptance; the access request is pending review.
 
-Before live exits, **implement and validate a verified Base Sepolia evidence producer**.
-The current V1 adapter is Ethereum-only and cannot supply eligible exit evidence;
-the synthetic test fixture must never replace this missing producer. This is
-remaining implementation work, not an account-setting task. Then deploy the
-receiver with official forwarder/workflow identities, obtain explicit owner
+The verified Base Sepolia producer is implemented and wired through the CLI, protected
+API and confidential workflow. Its automated acceptance uses two independently served
+RPC fixtures; it has not yet been validated against deployed Base Sepolia control
+contracts. The current Ethereum V1 adapter remains non-executable. Next deploy the
+allowlisted control and receiver, record their code digests, obtain explicit owner
 authorization and verify a bounded testnet redemption and its failure cases.
 
 The production forwarder's metadata is 64 bytes: workflow ID (32), workflow name

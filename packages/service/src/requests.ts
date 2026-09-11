@@ -11,9 +11,10 @@ export const AnalyzeSchema = z.discriminatedUnion('operation', [
   z.strictObject({ operation: z.literal('verify-shares'), ...position, blockNumber: graphBlock }),
   z.strictObject({ operation: z.literal('verify-accounting'), vault: AddressSchema, blockNumber: graphBlock }),
   z.strictObject({ operation: z.literal('verify-weth'), owner: AddressSchema, blockNumber: UintSchema.optional() }),
+  z.strictObject({ operation: z.literal('verify-base-custody'), owner: AddressSchema, blockNumber: UintSchema.optional() }),
 ]);
 export const ReplaySchema = z.strictObject({
-  operation: z.enum(['resolve-v1', 'resolve-v2', 'verify-shares', 'verify-accounting', 'verify-weth']),
+  operation: z.enum(['resolve-v1', 'resolve-v2', 'verify-shares', 'verify-accounting', 'verify-weth', 'verify-base-custody']),
   capture: z.json(),
 });
 export const ExampleSchema = z.strictObject({ id: z.enum(['steakhouse-usdc', 'ov-usdc-v2', 'weth-custody']) });

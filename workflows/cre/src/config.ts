@@ -15,6 +15,7 @@ function isAnalyzeEndpoint(value: string): boolean {
 
 export const configSchema = z.object({
   schedule: z.string().min(1).max(100),
+  evidenceSource: z.enum(['ethereum-mainnet-v1', 'base-sepolia-custody']).default('ethereum-mainnet-v1'),
   apiUrl: z.string().refine(isAnalyzeEndpoint,
     'Use an HTTPS Tare analyze endpoint, or HTTP loopback for local simulation'),
   owner: Address, vault: Address, graphDeployment: z.string().min(10).max(128),

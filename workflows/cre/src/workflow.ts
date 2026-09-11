@@ -1,6 +1,7 @@
 import { cre, bytesToBase64, ok, text, type TeeRuntime } from '@chainlink/cre-sdk';
 import { PrivatePolicy } from '../../../packages/policy/src/decision.js';
 import { v1AccountingEvidence } from '../../../packages/policy/src/v1.js';
+import { baseSepoliaCustodyEvidence } from '../../../packages/policy/src/base-sepolia.js';
 import { configSchema, type Config } from './config.js';
 import { publishDecision } from './publish.js';
 export { configSchema } from './config.js';
@@ -27,18 +28,26 @@ export function onCronTrigger(runtime: TeeRuntime<Config>) {
     stage = 'api-secret';
     const token = runtime.getSecret({ id: config.apiSecretId }).result().value;
     if (!/^[A-Za-z0-9_-]{32,128}$/.test(token)) throw new Error('Invalid Tare API token');
-    stage = 'resolve';
-    const resolution = request(runtime, token, { operation: 'resolve-v1', owner: config.owner, vault: config.vault });
-    // Read only the block selector here; the projection below validates required evidence fields and identities.
-    stage = 'block-selector';
-    const selector = resolution as { capture?: { block?: { number?: unknown } } };
-    const number = selector?.capture?.block?.number;
-    if (typeof number !== 'string' || !/^0x[0-9a-fA-F]{1,8}$/.test(number)) throw new Error('Missing Tare block');
-    stage = 'accounting';
-    const verification = request(runtime, token, { operation: 'verify-accounting', vault: config.vault,
-      blockNumber: BigInt(number).toString() });
-    stage = 'evidence';
-    const evidence = v1AccountingEvidence(resolution, verification, { ...config, deployment: config.graphDeployment });
+    let evidence;
+    if (config.evidenceSource === 'base-sepolia-custody') {
+      stage = 'base-custody';
+      const custody = request(runtime, token, { operation: 'verify-base-custody', owner: config.owner });
+      stage = 'evidence';
+      evidence = baseSepoliaCustodyEvidence(custody, config);
+    } else {
+      stage = 'resolve';
+      const resolution = request(runtime, token, { operation: 'resolve-v1', owner: config.owner, vault: config.vault });
+      // Read only the block selector here; the projection below validates required evidence fields and identities.
+      stage = 'block-selector';
+      const selector = resolution as { capture?: { block?: { number?: unknown } } };
+      const number = selector?.capture?.block?.number;
+      if (typeof number !== 'string' || !/^0x[0-9a-fA-F]{1,8}$/.test(number)) throw new Error('Missing Tare block');
+      stage = 'accounting';
+      const verification = request(runtime, token, { operation: 'verify-accounting', vault: config.vault,
+        blockNumber: BigInt(number).toString() });
+      stage = 'evidence';
+      evidence = v1AccountingEvidence(resolution, verification, { ...config, deployment: config.graphDeployment });
+    }
     const now = Math.floor(runtime.now().getTime() / 1000);
     stage = 'publish';
     return publishDecision(runtime, evidence, policy, now);
