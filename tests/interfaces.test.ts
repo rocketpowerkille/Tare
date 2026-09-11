@@ -78,8 +78,18 @@ test('configuration stays private, OpenAPI describes strict requests, and explor
     assert.ok(!text.includes('SECRET'));
     assert.equal(JSON.parse(text).live['resolve-v1'], true);
     assert.equal(JSON.parse(text).live['verify-shares'], false);
-    const schema = await (await fetch(`${url}/openapi.json`)).json() as { paths: Record<string, unknown> };
+    const schema = await (await fetch(`${url}/openapi.json`)).json() as {
+      openapi: string;
+      paths: Record<string, { post?: { requestBody?: { content?: Record<string, { schema?: unknown }> } } }>;
+    };
+    assert.equal(schema.openapi, '3.0.3');
     assert.deepEqual(Object.keys(schema.paths).sort(), ['/api/analyze', '/api/compose', '/api/example', '/api/replay', '/api/status', '/healthz']);
+    for (const route of Object.values(schema.paths)) {
+      const requestSchema = route.post?.requestBody?.content?.['application/json']?.schema as { type?: string } | undefined;
+      if (requestSchema) assert.equal(requestSchema.type, 'object');
+    }
+    assert.ok(!JSON.stringify(schema).includes('"$schema"'));
+    assert.ok(!JSON.stringify(schema).includes('"const"'));
     for (const [path, type] of [['/', 'text/html'], ['/app.js', 'text/javascript'], ['/style.css', 'text/css']]) {
       const response = await fetch(`${url}${path}`);
       assert.equal(response.status, 200);

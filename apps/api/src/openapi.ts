@@ -1,33 +1,99 @@
-import { z } from 'zod/v4';
-import { AnalyzeSchema, ReplaySchema, ExampleSchema } from '../../../packages/service/src/requests.js';
-import { ComposeSchema } from '../../../packages/service/src/composition.js';
+const address = {
+  type: 'string',
+  pattern: '^0x[0-9a-fA-F]{40}$',
+  description: 'A 20-byte EVM address encoded with a 0x prefix.',
+} as const;
+const blockNumber = {
+  type: 'string',
+  pattern: '^(0|[1-9][0-9]{0,77})$',
+  description: 'Optional decimal block number. Graph-backed operations accept signed 32-bit heights only.',
+} as const;
+const operations = [
+  'resolve-v1', 'resolve-v2', 'verify-shares', 'verify-accounting',
+  'verify-weth', 'verify-base-custody',
+] as const;
+const genericObject = { type: 'object', additionalProperties: true } as const;
 
-const operations = {
-  analyze: { schema: AnalyzeSchema, summary: 'Read-only Ethereum resolution or verification using configured providers' },
-  replay: { schema: ReplaySchema, summary: 'Recalculate an unsigned capture offline; never establishes freshness' },
-  example: { schema: ExampleSchema, summary: 'Replay one retained public example offline' },
-  compose: { schema: ComposeSchema, summary: 'Recompute and join V1 resolution and Graph share captures at the same position and block; unsigned recorded evidence only' },
-};
+const analyzeSchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['operation'],
+  description: 'Acquire fresh read-only evidence. Resolution and share checks require owner and vault; accounting requires vault; custody checks require owner.',
+  properties: {
+    operation: { type: 'string', enum: operations },
+    owner: address,
+    vault: address,
+    blockNumber,
+  },
+} as const;
+const replaySchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['operation', 'capture'],
+  properties: {
+    operation: { type: 'string', enum: operations },
+    capture: { ...genericObject, description: 'A Tare evidence capture previously returned by a compatible report.' },
+  },
+} as const;
+const exampleSchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['id'],
+  properties: {
+    id: { type: 'string', enum: ['steakhouse-usdc', 'ov-usdc-v2', 'weth-custody'] },
+  },
+} as const;
+const composeSchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['resolutionCapture', 'shareCapture', 'graphResponse'],
+  description: 'Recompute and join a V1 resolution capture, share-verification capture and direct Graph response from the same position and block.',
+  properties: {
+    resolutionCapture: genericObject,
+    shareCapture: genericObject,
+    graphResponse: genericObject,
+  },
+} as const;
+
+const postOperation = (operationId: string, summary: string, schema: object) => ({
+  operationId,
+  summary,
+  requestBody: {
+    required: true,
+    content: { 'application/json': { schema } },
+  },
+  responses: {
+    '200': {
+      description: 'A Tare report. Incomplete and mismatch reports are valid responses, not proof of backing.',
+      content: { 'application/json': { schema: genericObject } },
+    },
+    '400': { description: 'Input does not match the operation requirements.' },
+    '401': { description: 'The hosted bearer token is missing or invalid.' },
+    '403': { description: 'The request uses an untrusted Host or Origin.' },
+    '413': { description: 'The request exceeds the five MiB input limit.' },
+    '415': { description: 'The request must use application/json.' },
+    '429': { description: 'The concurrency or per-client quota was reached.' },
+    '500': { description: 'The operation failed without exposing private provider diagnostics.' },
+    '503': { description: 'A provider required by the requested operation is not configured.' },
+  },
+});
+
 export const openapi = {
-  openapi: '3.1.0', info: { title: 'Tare read-only evidence API', version: '1.0.0',
-    description: 'Raw integer amounts are decimal strings. Read status, sourceMode, findings and metric scope before using a result.' },
+  openapi: '3.0.3',
+  info: {
+    title: 'Tare read-only evidence API',
+    version: '1.0.0',
+    description: 'Trace nested-vault exposure and verification gaps. Raw integers are decimal strings; inspect status, sourceMode, findings and metric scope.',
+  },
   paths: {
-    '/healthz': { get: { operationId: 'tare_health', summary: 'Public process health check',
-      security: [], responses: { '200': { description: 'The API process is accepting requests' } } } },
-    '/api/status': { get: { operationId: 'tare_status', summary: 'Configuration flags, limits and retained examples',
-      responses: { '200': { description: 'Capabilities; configured does not mean independently verified' } } } },
-    ...Object.fromEntries(Object.entries(operations).map(([name, { schema, summary }]) => [`/api/${name}`, {
-      post: { operationId: `tare_${name}`, summary,
-        requestBody: { required: true, content: { 'application/json': { schema: z.toJSONSchema(schema, { io: 'input' }) } } },
-        responses: {
-          '200': { description: 'Existing Tare report, including incomplete/mismatch results. A 200 response is not proof of backing.',
-            content: { 'application/json': { schema: { type: 'object' } } } },
-          '400': { description: 'Invalid input' }, '401': { description: 'Missing or invalid hosted API token' }, '403': { description: 'Untrusted Host or Origin' },
-          '413': { description: 'Input exceeds 5 MiB' }, '415': { description: 'Expected application/json' },
-          '429': { description: 'Concurrency or client quota reached; see Retry-After' }, '500': { description: 'Operation failed' },
-          '503': { description: 'Required provider is not configured' },
-        },
-      },
-    }])),
+    '/healthz': { get: { operationId: 'tare_health', summary: 'Check whether the API process is accepting requests.',
+      security: [], responses: { '200': { description: 'The API process is healthy.' } } } },
+    '/api/status': { get: { operationId: 'tare_status', summary: 'List configured capabilities, limits and retained evidence examples.',
+      responses: { '200': { description: 'Capability flags; configured does not mean independently verified.',
+        content: { 'application/json': { schema: genericObject } } } } } },
+    '/api/analyze': { post: postOperation('tare_analyze', 'Acquire fresh read-only Ethereum or Base Sepolia evidence.', analyzeSchema) },
+    '/api/replay': { post: postOperation('tare_replay', 'Recalculate an unsigned evidence capture without making network requests.', replaySchema) },
+    '/api/example': { post: postOperation('tare_example', 'Replay one retained public evidence example without network requests.', exampleSchema) },
+    '/api/compose': { post: postOperation('tare_compose', 'Recompute and join V1 exposure and Graph share evidence.', composeSchema) },
   },
 };
