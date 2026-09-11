@@ -11,15 +11,15 @@ dataSources:
     source:
       address: '0xbeef01735c132ada46aa9aa4c54623caa92a64cb'
       abi: VaultShares
-      # Full history is required. Narrow only to a verified deployment block.
-      startBlock: 0
+      # Full share history begins with the vault creation transaction.
+      startBlock: 18928285
     context:
       chainId:
         type: Int
         data: 1
       indexedFromBlock:
         type: BigInt
-        data: '0'
+        data: '18928285'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9

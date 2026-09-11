@@ -1,5 +1,25 @@
 # Field notes
 
+## 2026-09-11 — hosted Graph deployment preparation
+
+- Reconfirmed that hosted Graph deployment remains the first unfinished external
+  acceptance gate; no deployment or credential use was performed.
+- The share-ledger manifest previously started at Ethereum genesis. Morpho's V1
+  vault directory and Etherscan both identify Steakhouse USDC creation block
+  `18928285`, so the manifest and `indexedFromBlock` now begin there while retaining
+  complete share-transfer history.
+- A historical `eth_getCode` confirmation through the credential-free PublicNode
+  endpoint was attempted for blocks `18928284` and `18928285`; the provider rejected
+  both archive reads and requested a personal token. This is recorded as a provider
+  limitation, not treated as confirmation.
+- The local Anvil/Graph Node harness rewrites both mainnet start-block fields to its
+  fixture deployment block, preserving isolated rollback acceptance.
+- The Docker Graph/Postgres/IPFS/Anvil stack started successfully, but the pinned
+  Foundry container twice failed to resolve `binaries.soliditylang.org` while
+  fetching the Solidity compiler. The isolated stack and its volumes were removed.
+  Subgraph code generation/build passed; the full rollback harness still needs a
+  rerun after Docker DNS or the compiler cache is available.
+
 ## Phase-three closeout and phase-four indexing increment
 
 - Revalidated the phase-three baseline: 50 tests, ten synthetic demos and the

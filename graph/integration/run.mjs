@@ -67,6 +67,8 @@ await transact('0x40c10f19' + word(owner) + word(100n));
 const directory = fileURLToPath(new URL('../subgraph/', import.meta.url));
 const manifest = (await readFile(new URL('../subgraph/subgraph.yaml', import.meta.url), 'utf8'))
   .replaceAll('0xbeef01735c132ada46aa9aa4c54623caa92a64cb', vault)
+  .replace('startBlock: 18928285', `startBlock: ${Number(BigInt(deployed.blockNumber))}`)
+  .replace("data: '18928285'", `data: '${BigInt(deployed.blockNumber)}'`)
   .replace('startBlock: 25937756', `startBlock: ${Number(BigInt(deployed.blockNumber))}`);
 await writeFile(new URL('../subgraph/subgraph.local.yaml', import.meta.url), manifest);
 const cli = fileURLToPath(new URL('../subgraph/node_modules/@graphprotocol/graph-cli/bin/run.js', import.meta.url));

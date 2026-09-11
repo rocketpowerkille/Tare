@@ -24,10 +24,11 @@ TypeScript/pnpm application. Neither installation nor build deploys anything.
   transaction hash and log index; duplicate delivery does not apply the change twice.
 - Initial identity uses `asset()` and `decimals()` from the vault. A reverted read
   or negative ledger balance stops indexing rather than inventing state.
-- **Full transfer history is required.** `startBlock: 0` is deliberately conservative.
-  Before deployment it may be narrowed to an independently confirmed deployment
-  block, updating `indexedFromBlock` context to match. Never start after existing
-  balances have been minted without implementing an explicit audited bootstrap.
+- **Full transfer history is required.** The share ledger starts at the Steakhouse
+  USDC creation block, `18928285`, and `indexedFromBlock` matches it. Morpho's vault
+  directory and Etherscan independently report that creation block. Never start
+  after existing balances have been minted without implementing an explicit audited
+  bootstrap.
 - The static address and network are intentionally fixed to the public example.
   Other contracts need reviewed data sources and confirmation that their shares
   are non-rebasing and completely represented by Transfer events. A native token,
@@ -63,4 +64,6 @@ then set `TARE_GRAPH_URL` and optionally `GRAPH_API_KEY` and
 
 References: [Graph manifests](https://thegraph.com/docs/en/subgraphs/developing/creating/subgraph-manifest/),
 [AssemblyScript mappings](https://thegraph.com/docs/en/subgraphs/developing/creating/graph-ts/api/),
-[historical GraphQL queries](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/).
+[historical GraphQL queries](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/),
+[Morpho's V1 vault directory](https://docs.morpho.org/api/vaults-v1/list-v1-vaults/),
+and [the Steakhouse USDC deployment on Etherscan](https://etherscan.io/address/0xbeef01735c132ada46aa9aa4c54623caa92a64cb).
