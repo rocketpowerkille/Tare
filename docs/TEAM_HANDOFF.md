@@ -14,10 +14,11 @@ monitoring logic, Graph mappings, confidential-policy workflow and receiver are
 implemented and tested. Both the deterministic test-forwarder path and a hosted
 Chainlink production-forwarder path completed bounded Base Sepolia exits.
 
-The technical MVP is complete for the implemented Chainlink path, but the project
-is **not submission-complete**. Bazantic has not been connected on its platform,
-hosted monitoring remains pending, the historical Graph share ledger has not
-completed its backfill, and the UI still needs final product integration and polish.
+The technical MVP is complete for the implemented Chainlink path, and the
+authenticated API/explorer is permanently hosted on Render. The project is **not
+submission-complete**: Bazantic has not been connected on its platform, hosted
+monitoring remains pending, the historical Graph share ledger has not completed
+its backfill, and the UI still needs final product integration and polish.
 
 ## Partner and component status
 
@@ -25,11 +26,11 @@ completed its backfill, and the UI still needs final product integration and pol
 | --- | --- | --- |
 | Core resolver | Implemented for synthetic schemas and the documented Ethereum MetaMorpho V1 plus V2→V1→Blue scope. Integer accounting, partial evidence and replay are tested. | Broader protocol/network coverage is optional future scope, not part of the verified MVP. |
 | The Graph | Custom share/accounting mappings build and pass real local Graph Node rollback tests. The deadline-safe `tare-live-accounting` Studio deployment matched all 56 Graph observations to same-block RPC at Ethereum block `25953771`, with zero mismatches. | The original `tare-steakhouse-usdc-ethereum` full-history share ledger was last observed around 73% sync. When it completes, retain one same-block share **and** accounting acceptance report. |
-| Chainlink CRE | The TypeScript workflow compiles to WASM, reads private secrets, acquires authenticated HTTPS evidence and submits a confidential consensus report. Local simulation passed, then private-registry workflow `0024de…e3bd` completed an EVM write through the production Base Sepolia Keystone Forwarder. It is paused after acceptance. | Preserve the acceptance artifacts and demo narrative. Persistent production hosting, a security audit and mainnet use are explicitly outside the current claim. |
+| Chainlink CRE | The TypeScript workflow compiles to WASM, reads private secrets, acquires authenticated HTTPS evidence and submits a confidential consensus report. Private-registry revision `0024de…e3bd` completed an EVM write through the production Base Sepolia Keystone Forwarder. Current paused revision `00fe…0a48` points to the permanent Render API with execution disabled. | Preserve both the historical exit record and current safe hosted binding. A security audit and mainnet use are explicitly outside the current claim. |
 | Base Sepolia execution | Two-provider allowlisted-bytecode verification matched a 2.000000x control. Five deterministic failure/replay cases reverted. A separate hosted receiver redeemed exactly 100 outer shares for 100 inner shares through Chainlink transaction `0x65549c…b95f9`; allowance and permit shares became zero and nonce advanced to 2. | Both disposable control positions are consumed. Create another only if a new live demo is genuinely required. The contracts use test assets and are not production audited. |
 | Bazantic | Tare's deterministic composition API/MCP operation is implemented and rejects contradictory evidence. | Account/gateway setup, second-service binding, native Recipe authoring and a hosted run are not done. |
 | Monitoring | Local TypeScript Substreams consumer, checkpoints, deduplication, reorg rollback and evidence evaluation are implemented. | Hosted provider credentials, deployment and operational acceptance are pending. |
-| Interfaces/UI | CLI, protected HTTP API, stdio MCP server and localhost explorer are functional. | Connect the final hosted endpoints and complete the UI last, with clear live/recorded and verified/unverified labels. |
+| Interfaces/UI | CLI, protected HTTP API, stdio MCP server and explorer are functional. The API/explorer is live at `https://tare-api.onrender.com`; anonymous rejection, authenticated access and Base Sepolia acquisition passed. | Complete UI product polish last, with clear live/recorded and verified/unverified labels. Render's free instance may cold-start. |
 
 Rust is not currently required. Core services and CRE remain TypeScript, Graph
 mappings use AssemblyScript, and the receiver uses Solidity. Rust is allowed only
@@ -40,7 +41,7 @@ if a future custom Substreams extraction module is justified; see
 
 Latest local acceptance in this workspace:
 
-- `pnpm verify`: **128/128** Node tests passed, followed by all required demos and
+- `pnpm verify`: **131/131** Node tests passed, followed by all required demos and
   the retained Ethereum capture replay.
 - CRE workflow suite: **12/12** tests passed in the Bun-enabled environment; the
   official SDK compiled the workflow to `.tare/cre/tare-policy.wasm`.

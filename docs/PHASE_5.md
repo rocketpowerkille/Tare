@@ -1,10 +1,12 @@
 # Phase five — interfaces
 
-Tare-side implementation and local acceptance are complete. Full phase-five
-rollout is not complete: the user deferred deployment and Bazantic account setup.
-The platform's native Recipe authoring/registration and a real hosted run remain
-unverified. Phase four's deadline-safe hosted accounting acceptance is complete;
-its separate full-history share-ledger acceptance remains open.
+Tare-side implementation and hosted API acceptance are complete. The Docker
+service is live at `https://tare-api.onrender.com`; public health, anonymous
+rejection, authenticated status and two-provider Base Sepolia acquisition passed.
+Full phase-five rollout is not complete because Bazantic account setup, native
+Recipe authoring/registration and a real hosted run remain unverified. Phase
+four's deadline-safe hosted accounting acceptance is complete; its separate
+full-history share-ledger acceptance remains open.
 
 ## Delivered
 
@@ -30,10 +32,11 @@ its separate full-history share-ledger acceptance remains open.
   Missing sources, GraphQL partial errors and contradictions cannot pass.
 - [x] Portable multi-stage Docker image, fail-closed external bind, public health
   endpoint and Render Blueprint. The built image passed a local hosted smoke test.
+- [x] Render deployment and authenticated live acceptance. The retained consumed
+  Base Sepolia control correctly reports an incomplete zero position.
 
 ## Deferred rollout gates
 
-- [ ] Hosted deployment, TLS reverse proxy configuration and live acceptance.
 - [ ] Bazantic account, required x402/MPP gateway, second-service binding and native Recipe run.
 
 Local verification: `node --run verify` runs 131 tests plus existing demo/replay

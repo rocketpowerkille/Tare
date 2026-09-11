@@ -1,0 +1,41 @@
+{
+  "kind": "tare-cre-stable-api-binding-v1",
+  "api": {
+    "provider": "render",
+    "origin": "https://tare-api.onrender.com",
+    "healthStatus": 200,
+    "anonymousStatus": 401,
+    "authenticatedStatus": 200,
+    "baseSepoliaAcceptance": {
+      "status": "incomplete",
+      "findings": [
+        "zero-position",
+        "zero-supply",
+        "redemption-rounds-to-zero"
+      ],
+      "captureDigest": "sha256:0dee2a561c9ca94137a9dc62c1dedbab34774f45dca844bbdfa5ed40973377cb",
+      "multipleMillionths": null
+    }
+  },
+  "workflow": {
+    "registry": "private",
+    "donFamily": "zone-a",
+    "name": "tare-confidential-policy",
+    "workflowId": "00fe0024badc88b0518ca30fa44d6b0911dd338282ae5a75eadc460e4c140a48",
+    "owner": "0xf7a77f49bf7f9805baa01bee187ca1fed6d64767",
+    "status": "PAUSED",
+    "binaryHash": "ec80a3ef16ef6a1bc36ae785fb11a29a6c6fa999a9402ceb4e7f19e2975900e5",
+    "configHash": "9f3e63a4751280d2ee5fcec7c3d5e2217fa20e4336e3f8682e6264f92a109fda",
+    "workflowHash": "00fe0024badc88b0518ca30fa44d6b0911dd338282ae5a75eadc460e4c140a48",
+    "binaryUrl": "https://storage.cre.chain.link/artifacts/00fe0024badc88b0518ca30fa44d6b0911dd338282ae5a75eadc460e4c140a48/binary.wasm",
+    "configUrl": "https://storage.cre.chain.link/artifacts/00fe0024badc88b0518ca30fa44d6b0911dd338282ae5a75eadc460e4c140a48/config",
+    "evidenceSource": "base-sepolia-custody",
+    "executionEnabled": false
+  },
+  "historicalExitRecord": "deployments/cre-hosted-execution.json",
+  "limitations": [
+    "render-free-instance-can-spin-down",
+    "hosted-test-position-already-consumed",
+    "not-a-production-security-audit"
+  ]
+}
