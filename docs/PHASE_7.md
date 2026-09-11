@@ -246,5 +246,18 @@ tokens are deliberately non-production test assets. Unlike the simulator harness
 it contains no mock forwarder and cannot deliver reports itself; only the production
 KeystoneForwarder can call its receiver.
 
+The hosted control was deployed at
+`0xE4A29c01d197E190503bec2f7953F1044eE7374f` in Base Sepolia transaction
+`0x98afce52a722fa9a5ece13a6bbc521053a8936ae38f62a49051966f258eb4268`.
+Both configured RPC providers returned identical runtime bytecode for all three
+custody contracts. A live two-provider Tare verification at block `46692887`
+matched the allowlisted bytecode, ownership, vault links and complete custody
+position, reporting a 2.000000x control multiple. Its public capture digest is
+`sha256:397c4d1756fedd48ca16d8bf8af538e0687785ab6859b9c0ca4c330506b3dec2`.
+The deployment record and allowlisted Tare SHA-256 code digests are in
+`deployments/base-sepolia-hosted.json` and
+`deployments/base-sepolia-hosted-custody.json`. Approval, arming, hosted execution
+and the final state transition remain pending.
+
 References: [confidential workflow template](https://docs.chain.link/cre-templates/hello-confidential-workflows)
 and [receiver integration](https://docs.chain.link/cre/guides/workflow/using-evm-client/onchain-write/building-consumer-contracts).

@@ -1,0 +1,44 @@
+{
+  "kind": "tare-base-sepolia-hosted-control-v1",
+  "network": "base-sepolia",
+  "chainId": 84532,
+  "productionAssets": false,
+  "productionForwarder": true,
+  "positionOwner": "0xf1fea08ebba92ed342acc5639db312c3694bc391",
+  "transactionHash": "0x98afce52a722fa9a5ece13a6bbc521053a8936ae38f62a49051966f258eb4268",
+  "blockNumber": "46692684",
+  "blockHash": "0xe41b460b5e55c6bea8762a1e4505347ef43bfbb31d9c415a5d33c10f33d066b7",
+  "harness": "0xe4a29c01d197e190503bec2f7953f1044ee7374f",
+  "contracts": {
+    "terminalAsset": "0x345a2f01c226b45efac353849edcde1e82715298",
+    "innerVault": "0xbb189c52274d6c3950a44da20adf3e681ec70d20",
+    "outerVault": "0x65d8dcf4d0ae830b09a906ab57366fa226026d03",
+    "receiver": "0xec3b0dc653f9150ecde9a6a2c14e9138dfb9e577"
+  },
+  "receiverIdentity": {
+    "forwarder": "0xf8344cfd5c43616a4366c34e3eee75af79a74482",
+    "workflowId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "workflowName": "0x63306563326530663834",
+    "workflowOwner": "0xf7a77f49bf7f9805baa01bee187ca1fed6d64767"
+  },
+  "initialPositionRaw": "100000000000000000000",
+  "custodyAllowlist": "deployments/base-sepolia-hosted-custody.json",
+  "acceptance": {
+    "twoProviderVerification": {
+      "status": "matched",
+      "sourceMode": "live-rpc",
+      "captureDigest": "sha256:397c4d1756fedd48ca16d8bf8af538e0687785ab6859b9c0ca4c330506b3dec2",
+      "observedBlockNumber": "46692887",
+      "observedBlockHash": "0xad4db11a8316741737a34ddcb7e8e9355ae6a45cb3c4cb2bf85d520f96afcc52",
+      "multipleMillionths": "2000000"
+    },
+    "approvalTransaction": null,
+    "armTransaction": null,
+    "hostedExecution": null
+  },
+  "limitations": [
+    "fixed-supply-test-assets",
+    "workflow-execution-currently-disabled",
+    "receiver-not-yet-approved-or-armed"
+  ]
+}
