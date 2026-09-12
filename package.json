@@ -11,8 +11,9 @@
     "tare": "dist/apps/cli/src/main.js"
   },
   "scripts": {
-    "build": "node node_modules/typescript/bin/tsc -p tsconfig.json",
-    "check": "node node_modules/typescript/bin/tsc -p tsconfig.json --noEmit",
+    "build": "pnpm build:web && node node_modules/typescript/bin/tsc -p tsconfig.json",
+    "build:web": "node node_modules/typescript/bin/tsc -p apps/web/tsconfig.json --noEmit && node node_modules/vite/bin/vite.js build --config apps/web/vite.config.ts",
+    "check": "node node_modules/typescript/bin/tsc -p tsconfig.json --noEmit && node node_modules/typescript/bin/tsc -p apps/web/tsconfig.json --noEmit",
     "build:subgraph": "npm run build --prefix graph/subgraph",
     "build:subgraph:live": "npm run build:live --prefix graph/subgraph",
     "verify:cre": "npm run verify --prefix workflows/cre",
@@ -24,7 +25,7 @@
     "demo": "node dist/apps/cli/src/main.js demo all",
     "demo:phase2": "node dist/apps/cli/src/main.js demo phase2",
     "demo:phase3": "node dist/apps/cli/src/main.js live replay fixtures/live/steakhouse-usdc.capture.json",
-    "verify": "node node_modules/typescript/bin/tsc -p tsconfig.json && node --test dist/tests/*.test.js && node dist/apps/cli/src/main.js demo all && node dist/apps/cli/src/main.js demo phase2 && node dist/apps/cli/src/main.js live replay fixtures/live/steakhouse-usdc.capture.json"
+    "verify": "pnpm build:web && node node_modules/typescript/bin/tsc -p tsconfig.json && node --test dist/tests/*.test.js && node dist/apps/cli/src/main.js demo all && node dist/apps/cli/src/main.js demo phase2 && node dist/apps/cli/src/main.js live replay fixtures/live/steakhouse-usdc.capture.json"
   },
   "dependencies": {
     "@bufbuild/protobuf": "1.10.1",
@@ -32,11 +33,18 @@
     "@connectrpc/connect-node": "1.7.0",
     "@modelcontextprotocol/server": "2.0.0",
     "@substreams/core": "0.17.0",
+    "lucide-react": "1.45.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
     "zod": "4.5.4"
   },
   "devDependencies": {
     "@modelcontextprotocol/client": "2.0.0",
     "@types/node": "24.13.2",
-    "typescript": "5.9.3"
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "typescript": "5.9.3",
+    "vite": "8.3.0"
   }
 }

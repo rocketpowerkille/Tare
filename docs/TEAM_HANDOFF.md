@@ -9,13 +9,14 @@ truth.
 
 Tare is a working technical MVP for resolving nested vault exposure, comparing
 independent observations and conditionally executing a tightly bounded exit on
-Base Sepolia. The core engine, CLI/API/MCP interfaces, local web explorer,
+Base Sepolia. The core engine, CLI/API/MCP interfaces, modular web application,
 monitoring logic, Graph mappings, confidential-policy workflow and receiver are
 implemented and tested. Both the deterministic test-forwarder path and a hosted
 Chainlink production-forwarder path completed bounded Base Sepolia exits.
 
 The technical MVP is complete for the implemented Chainlink path, and the
-authenticated API/explorer is permanently hosted on Render. Tare is also live as
+authenticated API plus earlier explorer build are permanently hosted on Render.
+The rebuilt browser bundle is verified locally but not deployed yet. Tare is also live as
 a Bazantic gateway and MCP server, with a published evidence-evaluation Recipe
 that completed retained-evidence and fresh-live tests. A controlled
 raw-API-versus-Recipe comparison is also complete: the Recipe reached the same
@@ -23,7 +24,7 @@ correct Base Sepolia conclusion with **31.34% lower latency** and **17.54% fewer
 tokens**, while returning a more consistently structured evidence report. The
 project is **not submission-complete**: the comparison recording remains, hosted
 monitoring remains pending, the historical Graph share ledger has not completed
-its backfill, and the UI still needs final product integration and polish.
+its backfill, and the rebuilt web application still needs hosted browser acceptance.
 
 ## Partner and component status
 
@@ -35,7 +36,7 @@ its backfill, and the UI still needs final product integration and polish.
 | Base Sepolia execution | Two-provider allowlisted-bytecode verification matched a 2.000000x control. Five deterministic failure/replay cases reverted. A separate hosted receiver redeemed exactly 100 outer shares for 100 inner shares through Chainlink transaction `0x65549c…b95f9`; allowance and permit shares became zero and nonce advanced to 2. | Both disposable control positions are consumed. Create another only if a new live demo is genuinely required. The contracts use test assets and are not production audited. |
 | Bazantic | Gateway `zvnss2njirhqjllnbfsv3sneca` is live against the Render API. Its generated MCP server exposes status plus compact analyze/example tools. The published `DeFi Vault Backing Evidence Evaluator` Recipe completed retained and live Base Sepolia runs without payment. In the controlled live comparison it matched the raw baseline's correct result in `19,513 ms` and `6,685` tokens versus `28,419 ms` and `8,107` tokens, and produced a more standardized evidence report. | Record the completed comparison and gateway/Recipe flow for the submission. A second sponsor service is still required only for the separate multi-service Recipe prize. Do not fund the Base-mainnet payment account while testnet support remains unresolved. |
 | Monitoring | Local TypeScript Substreams consumer, checkpoints, deduplication, reorg rollback and evidence evaluation are implemented. | Hosted provider credentials, deployment and operational acceptance are pending. |
-| Interfaces/UI | CLI, protected HTTP API, stdio MCP server and explorer are functional. The API/explorer is live at `https://tare-api.onrender.com`; anonymous rejection, authenticated access and Base Sepolia acquisition passed. | Complete UI product polish last, with clear live/recorded and verified/unverified labels. Render's free instance may cold-start. |
+| Interfaces/UI | CLI, protected HTTP API and stdio MCP server are functional. A modular React application now provides Home, Explore, Learn and Developers routes, guided Base Sepolia analysis, recorded replay, beginner documentation and honest SDK status. Local browser routes and the full 131-test verification pass. | Deploy the rebuilt bundle to Render, then run hosted desktop and mobile browser acceptance. Render's free instance may cold-start. |
 
 Rust is not currently required. Core services and CRE remain TypeScript, Graph
 mappings use AssemblyScript, and the receiver uses Solidity. Rust is allowed only
@@ -153,13 +154,14 @@ and [phase seven](PHASE_7.md).
 4. Let the historical Graph share ledger continue independently. Once fully
    indexed, run the same-block share plus accounting comparison and retain it.
 
-### 2. Complete the UI last
+### 2. Complete hosted UI acceptance
 
-Connect the explorer to the chosen hosted API and surface provenance, block,
-deployment identity, completeness, verification status and execution eligibility.
-Recorded captures must never appear live, and an unavailable collateral multiple
-must not be replaced by an invented percentage. Add a simple guided demo path and
-run manual browser acceptance before submission.
+Deploy the rebuilt browser bundle to the existing Render service. Check Home,
+Explore, Learn and Developers at desktop and mobile widths. Run one authenticated
+Base Sepolia analysis and one recorded example. Confirm that provenance, block,
+deployment identity, completeness, verification status and execution eligibility
+remain clear. Recorded captures must never appear live, and an unavailable
+collateral multiple must not be replaced by an invented percentage.
 
 ### 3. Assemble submission evidence
 

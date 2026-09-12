@@ -9,13 +9,22 @@ import { compactEvidenceReport } from '../../../packages/receipts/src/compact.js
 import { ApiAccess } from './access.js';
 import type { HostedConfig } from './access.js';
 
-const assets = new Map([
-  ['/', { file: 'index.html', type: 'text/html; charset=utf-8' }],
-  ['/app.js', { file: 'app.js', type: 'text/javascript; charset=utf-8' }],
-  ['/report.js', { file: 'report.js', type: 'text/javascript; charset=utf-8' }],
-  ['/style.css', { file: 'style.css', type: 'text/css; charset=utf-8' }],
-]);
 const specificationPaths = new Set(['/openapi.json', '/openapi-mcp.json', '/openapi-mcp-v2.json', '/openapi-mcp-v3.json']);
+const appPaths = new Set(['/', '/explore', '/docs', '/developers']);
+const assetTypes: Record<string, string> = {
+  '.css': 'text/css; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.svg': 'image/svg+xml; charset=utf-8',
+};
+
+async function webAsset(path: string) {
+  const appRoute = appPaths.has(path);
+  const file = appRoute ? 'index.html' : path.slice(1);
+  if (!appRoute && !/^(assets\/[A-Za-z0-9._-]+\.(?:js|css)|favicon\.svg)$/.test(file)) return null;
+  const extension = file.slice(file.lastIndexOf('.'));
+  return { data: await readFile(new URL(`../../../../apps/web/build/${file}`, import.meta.url)),
+    type: appRoute ? 'text/html; charset=utf-8' : assetTypes[extension] ?? 'application/octet-stream' };
+}
 
 function json(response: ServerResponse, status: number, value: unknown) {
   response.writeHead(status, { 'content-type': 'application/json; charset=utf-8' });
@@ -57,9 +66,10 @@ export function createApiServer(service = new TareService(), hosted?: HostedConf
   server.setTimeout(310000, socket => socket.destroy());
 
   async function route(request: IncomingMessage, response: ServerResponse) {
-    const path = request.url ?? '';
+    const path = new URL(request.url ?? '/', 'http://tare.local').pathname;
     access.check(request, path.startsWith('/api/'));
-    if (path === '/healthz' || path === '/api/status' || specificationPaths.has(path) || assets.has(path)) {
+    const asset = await webAsset(path);
+    if (path === '/healthz' || path === '/api/status' || specificationPaths.has(path) || asset) {
       if (request.method !== 'GET') throw new ServiceError(405, 'method-not-allowed', 'Use GET.');
       if (path === '/healthz') return json(response, 200, { status: 'ok' });
       if (path === '/api/status') return json(response, 200, service.capabilities());
@@ -75,10 +85,9 @@ export function createApiServer(service = new TareService(), hosted?: HostedConf
           components: { securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer' } } },
         });
       }
-      const asset = assets.get(path)!;
-      const data = await readFile(new URL(`../../../../apps/web/${asset.file}`, import.meta.url));
+      if (!asset) throw new ServiceError(404, 'not-found', 'Unknown route.');
       response.writeHead(200, { 'content-type': asset.type });
-      response.end(data);
+      response.end(asset.data);
       return;
     }
     const action = path.slice('/api/'.length);

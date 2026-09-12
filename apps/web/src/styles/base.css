@@ -1,0 +1,48 @@
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--canvas); }
+button, input, select { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+a { color: inherit; }
+.skip-link { position: fixed; z-index: 100; top: 10px; left: 10px; transform: translateY(-160%); border-radius: 6px; background: white; color: var(--ink); padding: 10px 14px; font-weight: 700; text-decoration: none; box-shadow: var(--shadow); }
+.skip-link:focus { transform: translateY(0); }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: 0.55; }
+:focus-visible { outline: 3px solid rgba(39, 98, 143, 0.35); outline-offset: 3px; }
+h1, h2, h3, p { margin-top: 0; }
+h1 { max-width: 850px; margin-bottom: 22px; color: var(--ink); font-size: clamp(2.35rem, 5vw, 4.75rem); font-weight: 620; letter-spacing: -0.055em; line-height: 0.98; }
+h2 { color: var(--ink); font-size: clamp(1.65rem, 3vw, 2.55rem); font-weight: 620; letter-spacing: -0.035em; line-height: 1.1; }
+h3 { color: var(--ink); font-size: 1.05rem; line-height: 1.35; }
+p, li { color: var(--ink-soft); font-size: 1rem; line-height: 1.7; }
+code, pre { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
+code { font-size: 0.88em; }
+select, input {
+  width: 100%; min-height: 46px; border: 1px solid var(--line-strong); border-radius: 7px;
+  background: var(--surface); color: var(--ink); padding: 10px 12px; font-size: 0.95rem;
+}
+select:hover, input:hover { border-color: #9cabb7; }
+select:focus, input:focus { border-color: var(--blue); outline: 3px solid rgba(39, 98, 143, 0.13); }
+label { display: block; margin: 20px 0 8px; color: var(--ink); font-size: 0.88rem; font-weight: 650; }
+.optional { color: var(--muted); font-size: 0.78rem; font-weight: 500; }
+.page-width { width: min(calc(100% - 48px), var(--page)); margin-inline: auto; }
+.kicker, .section-label { margin-bottom: 10px; color: var(--green); font-size: 0.76rem; font-weight: 760; letter-spacing: 0.12em; line-height: 1.4; text-transform: uppercase; }
+.lead { max-width: 700px; color: #4a5866; font-size: clamp(1.05rem, 1.8vw, 1.24rem); line-height: 1.65; }
+.button { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: 8px; border: 1px solid transparent; border-radius: 7px; padding: 11px 17px; font-size: 0.91rem; font-weight: 680; text-decoration: none; transition: border-color 140ms ease, background 140ms ease, color 140ms ease, transform 140ms ease; }
+.button:hover { transform: translateY(-1px); }
+.button.primary { background: var(--navy); color: white; }
+.button.primary:hover { background: #1a2734; }
+.button.secondary { border-color: var(--line-strong); background: white; color: var(--ink); }
+.button.secondary:hover, .button.quiet:hover { border-color: #9cabb7; background: var(--surface-subtle); }
+.button.quiet { border-color: var(--line); background: transparent; color: var(--ink); }
+.full-button { width: 100%; margin-top: 22px; }
+.button-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
+.text-link, .text-button { display: inline-flex; align-items: center; gap: 7px; color: var(--green); font-weight: 690; text-decoration: none; }
+.text-button { border: 0; background: none; padding: 0; font-size: 0.94rem; }
+.text-link:hover, .text-button:hover { text-decoration: underline; text-underline-offset: 4px; }
+.status-badge { display: inline-flex; width: fit-content; align-items: center; border: 1px solid var(--line); border-radius: 999px; padding: 5px 9px; color: var(--ink-soft); background: var(--surface-subtle); font-size: 0.74rem; font-weight: 720; line-height: 1; white-space: nowrap; }
+.status-success { border-color: #adddca; background: var(--green-soft); color: #086444; }
+.status-warning { border-color: #ecd299; background: var(--amber-soft); color: var(--amber); }
+.status-danger { border-color: #ebbbbb; background: var(--red-soft); color: var(--red); }
+.status-info { border-color: #bdd5e7; background: var(--blue-soft); color: var(--blue); }
+.spin { animation: spin 900ms linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }

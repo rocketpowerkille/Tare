@@ -110,7 +110,7 @@ test('configuration stays private, OpenAPI describes strict requests, and explor
     assert.ok(!JSON.stringify(mcpSchema).includes('additionalProperties":true'));
     assert.deepEqual(await (await fetch(`${url}/openapi-mcp-v2.json`)).json(), mcpSchema);
     assert.deepEqual(await (await fetch(`${url}/openapi-mcp-v3.json`)).json(), mcpSchema);
-    for (const [path, type] of [['/', 'text/html'], ['/app.js', 'text/javascript'], ['/style.css', 'text/css']]) {
+    for (const [path, type] of [['/', 'text/html'], ['/explore', 'text/html'], ['/docs', 'text/html'], ['/developers', 'text/html'], ['/assets/app.js', 'text/javascript'], ['/assets/app.css', 'text/css'], ['/favicon.svg', 'image/svg+xml']]) {
       const response = await fetch(`${url}${path}`);
       assert.equal(response.status, 200);
       assert.ok(response.headers.get('content-type')?.startsWith(type!));

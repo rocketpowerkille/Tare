@@ -1,12 +1,14 @@
 # Phase five — interfaces
 
-Tare-side implementation and hosted API acceptance are complete. The Docker
+Tare-side implementation, Bazantic integration and hosted API acceptance are
+complete. The Docker
 service is live at `https://tare-api.onrender.com`; public health, anonymous
 rejection, authenticated status and two-provider Base Sepolia acquisition passed.
-Full phase-five rollout is not complete because Bazantic account setup, native
-Recipe authoring/registration and a real hosted run remain unverified. Phase
-four's deadline-safe hosted accounting acceptance is complete; its separate
-full-history share-ledger acceptance remains open.
+The Bazantic gateway exposes the compact Tare tools, and the published Recipe has
+completed retained and fresh Base Sepolia runs. The rebuilt browser application
+still requires deployment and hosted browser acceptance. Phase four's deadline-safe
+hosted accounting acceptance is complete; its separate full-history share-ledger
+acceptance remains open.
 
 ## Delivered
 
@@ -15,8 +17,9 @@ full-history share-ledger acceptance remains open.
 - [x] HTTP API with strict request schemas and generated OpenAPI 3.1 inputs.
 - [x] Official MCP SDK v2 stdio server: `tare_status`, `tare_analyze`,
   `tare_replay`, `tare_example`, `tare_compose`. Tools return JSON text and structured reports.
-- [x] Web explorer: recorded examples, configured live reads, capture import,
-  allocation paths, findings, scoped metrics and report/capture downloads.
+- [x] Modular React web application: product overview, guided explorer, beginner
+  documentation, developer reference, recorded examples, configured live reads,
+  capture import and report/capture downloads.
 - [x] Three retained public examples replay without provider configuration.
 - [x] Loopback binding, Host/Origin checks, 5 MiB input bound, two concurrent
   operations, source budgets, private configuration and sanitized errors.
@@ -37,10 +40,12 @@ full-history share-ledger acceptance remains open.
 
 ## Deferred rollout gates
 
-- [ ] Bazantic account, required x402/MPP gateway, second-service binding and native Recipe run.
+- [ ] Deploy the rebuilt browser bundle and complete hosted desktop/mobile acceptance.
+- [ ] Bind a second sponsor service only if pursuing the separate multi-service Recipe prize.
 
 Local verification: `node --run verify` runs 131 tests plus existing demo/replay
-checks. No new runtime dependency was needed for this completion work. Local
+checks. The browser application uses React, Lucide icons and Vite while the API
+keeps its existing runtime surface. Local
 HTTP source fixtures are not live Graph or Bazantic acceptance evidence.
 
 ## Run locally
@@ -168,9 +173,10 @@ successful tool responses with their unresolved findings intact.
 
 ## Boundaries
 
-The default API is a local development service. Optional hosted mode implements
-access controls but does not provision HTTPS, host the service or register it
-with any third party. Those configured deployment checks remain deferred.
+The API can run locally or in authenticated hosted mode. Render provides HTTPS
+and hosts the configured service; the repository does not provision certificates
+or register third-party integrations by itself. Hosted acceptance must be repeated
+after the rebuilt browser bundle is deployed.
 MCP is stdio only; remote MCP/OAuth is outside this implementation.
 There is no payment gateway, transaction signing, monitoring worker or new
 accounting algorithm in this phase. The browser performs no chain calls directly.
