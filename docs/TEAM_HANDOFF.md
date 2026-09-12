@@ -15,16 +15,17 @@ implemented and tested. Both the deterministic test-forwarder path and a hosted
 Chainlink production-forwarder path completed bounded Base Sepolia exits.
 
 The technical MVP is complete for the implemented Chainlink path, and the
-authenticated API plus earlier explorer build are permanently hosted on Render.
-The rebuilt browser bundle is verified locally but not deployed yet. Tare is also live as
+authenticated API plus rebuilt modular browser application are hosted on Render.
+Hosted Home, Explore, Learn and Developers routes now pass route and browser
+acceptance. Tare is also live as
 a Bazantic gateway and MCP server, with a published evidence-evaluation Recipe
 that completed retained-evidence and fresh-live tests. A controlled
 raw-API-versus-Recipe comparison is also complete: the Recipe reached the same
 correct Base Sepolia conclusion with **31.34% lower latency** and **17.54% fewer
 tokens**, while returning a more consistently structured evidence report. The
-project is **not submission-complete**: the comparison recording remains, hosted
-monitoring remains pending, and the rebuilt web application still needs hosted
-browser acceptance. The historical Graph share ledger cannot finish before the
+project is **not submission-complete**: submission recording remains, hosted
+monitoring remains pending, and a dedicated mobile-width visual pass remains. The
+historical Graph share ledger cannot finish before the
 deadline and is no longer a submission dependency.
 
 ## Partner and component status
@@ -32,12 +33,12 @@ deadline and is no longer a submission dependency.
 | Area | Current state | What remains |
 | --- | --- | --- |
 | Core resolver | Implemented for synthetic schemas and the documented Ethereum MetaMorpho V1 plus V2→V1→Blue scope. Integer accounting, partial evidence and replay are tested. | Broader protocol/network coverage is optional future scope, not part of the verified MVP. |
-| The Graph | Custom share/accounting mappings build and pass real local Graph Node rollback tests. The deadline-safe `tare-live-accounting` Studio deployment matched all 56 Graph observations to same-block RPC at Ethereum block `25953771`, with zero mismatches. | Use this bounded current-accounting result for submission. The full-history ledger cannot finish before the deadline and is post-submission only. Do not claim historical share reconstruction. |
+| The Graph | Custom share/accounting mappings build and pass real local Graph Node rollback tests. The deadline-safe `tare-live-accounting` Studio deployment originally matched all 56 Graph observations to same-block RPC at Ethereum block `25953771`. A fresh acceptance on 2026-09-12 found that RPC-first pinning could outrun the indexer or exceed free-RPC history. Unpinned verification now anchors on the current Graph head, confirms its hash through RPC, and again matches 56/56 with zero findings. | Redeploy Render, then run `pnpm verify:hosted:graph`. Use this bounded current-accounting result for submission. The full-history ledger cannot finish before the deadline and is post-submission only. Do not claim historical share reconstruction. |
 | Chainlink CRE | The TypeScript workflow compiles to WASM, reads private secrets, acquires authenticated HTTPS evidence and submits a confidential consensus report. Private-registry revision `0024de…e3bd` completed an EVM write through the production Base Sepolia Keystone Forwarder. Current paused revision `00fe…0a48` points to the permanent Render API with execution disabled. | Preserve both the historical exit record and current safe hosted binding. A security audit and mainnet use are explicitly outside the current claim. |
 | Base Sepolia execution | Two-provider allowlisted-bytecode verification matched a 2.000000x control. Five deterministic failure/replay cases reverted. A separate hosted receiver redeemed exactly 100 outer shares for 100 inner shares through Chainlink transaction `0x65549c…b95f9`; allowance and permit shares became zero and nonce advanced to 2. | Both disposable control positions are consumed. Create another only if a new live demo is genuinely required. The contracts use test assets and are not production audited. |
-| Bazantic | Gateway `zvnss2njirhqjllnbfsv3sneca` is live against the Render API. Its generated MCP server exposes status plus compact analyze/example tools. The published `DeFi Vault Backing Evidence Evaluator` Recipe completed retained and live Base Sepolia runs without payment. In the controlled live comparison it matched the raw baseline's correct result in `19,513 ms` and `6,685` tokens versus `28,419 ms` and `8,107` tokens, and produced a more standardized evidence report. | Record the completed comparison and gateway/Recipe flow for the submission. A second sponsor service is still required only for the separate multi-service Recipe prize. Do not fund the Base-mainnet payment account while testnet support remains unresolved. |
+| Bazantic | Gateway `zvnss2njirhqjllnbfsv3sneca` is live against the Render API. Its generated MCP server exposes status plus compact analyze/example tools. The published `DeFi Vault Backing Evidence Evaluator` Recipe completed retained and live Base Sepolia runs without payment. In the controlled live comparison it matched the raw baseline's correct result in `19,513 ms` and `6,685` tokens versus `28,419 ms` and `8,107` tokens, and produced a more standardized evidence report. The repository now publishes a narrow OpenAPI contract for The Graph Studio and an exact two-service Recipe flow. | After the Render redeploy, add the second The Graph gateway and bind both services using [the multi-service runbook](BAZANTIC_MULTI_SERVICE.md). This external account action is required for both Bazantic prizes that are not marked Continuity-only. Do not fund the Base-mainnet payment account while testnet support remains unresolved. |
 | Monitoring | Local TypeScript Substreams consumer, checkpoints, deduplication, reorg rollback and evidence evaluation are implemented. | Hosted provider credentials, deployment and operational acceptance are pending. |
-| Interfaces/UI | CLI, protected HTTP API and stdio MCP server are functional. A modular React application now provides Home, Explore, Learn and Developers routes, guided Base Sepolia analysis, recorded replay, beginner documentation and honest SDK status. Local browser routes and the full 131-test verification pass. | Deploy the rebuilt bundle to Render, then run hosted desktop and mobile browser acceptance. Render's free instance may cold-start. |
+| Interfaces/UI | CLI, protected HTTP API and stdio MCP server are functional. The modular React application is live on Render with Home, Explore, Learn and Developers routes, guided Base Sepolia analysis, recorded replay, beginner documentation and honest SDK status. Hosted routes, browser accessibility trees, authenticated status and compact-example checks pass. | Complete a dedicated mobile-width visual pass. Render's free instance may cold-start. |
 
 Rust is not currently required. Core services and CRE remain TypeScript, Graph
 mappings use AssemblyScript, and the receiver uses Solidity. Rust is allowed only
@@ -48,7 +49,7 @@ if a future custom Substreams extraction module is justified; see
 
 Latest local acceptance in this workspace:
 
-- `pnpm verify`: **131/131** Node tests passed, followed by all required demos and
+- `pnpm verify`: **132/132** Node tests passed, followed by all required demos and
   the retained Ethereum capture replay.
 - CRE workflow suite: **12/12** tests passed in the Bun-enabled environment; the
   official SDK compiled the workflow to `.tare/cre/tare-policy.wasm`.
@@ -143,23 +144,28 @@ and [phase seven](PHASE_7.md).
 
 ## Ordered next work
 
-### 1. Finish Bazantic submission evidence and hosted monitoring
+### 1. Finish partner submission evidence and hosted monitoring
 
 1. Record a concise Bazantic demo showing the live gateway/MCP surface, the raw
    baseline, the published Recipe run and the measured comparison. Include the
    Bazantic username and keep both result screens available as source evidence.
-2. If pursuing Bazantic's separate multi-service prize, bind a second existing or
-   sponsor service and make the final result depend materially on both services.
-3. Deploy the monitor with bounded provider configuration, durable state,
+2. Use [the exact prize matrix](PRIZE_TRACKS.md) before selecting tracks. Tare is
+   likely net-new, which makes the completed Continuity-only Bazantic
+   comparison ineligible even though it remains strong product evidence.
+3. For either Bazantic prize that is not marked Continuity-only, follow
+   [the multi-service runbook](BAZANTIC_MULTI_SERVICE.md), bind the direct The Graph
+   service, and make the final result depend materially on both services.
+4. Deploy the monitor with bounded provider configuration, durable state,
    TLS/auth and explicit live-source labels.
-4. Keep the historical Graph share ledger outside the deadline path. Use the
+5. Keep the historical Graph share ledger outside the deadline path. Use the
    pinned live-accounting deployment and completed 56/56 comparison, with its
    current-accounting-only limitation stated clearly.
 
 ### 2. Complete hosted UI acceptance
 
-Deploy the rebuilt browser bundle to the existing Render service. Check Home,
-Explore, Learn and Developers at desktop and mobile widths. Run one authenticated
+The rebuilt browser bundle is deployed to the existing Render service. Home,
+Explore, Learn and Developers pass hosted desktop route and accessibility checks,
+and authenticated status plus retained-example requests pass. Check mobile widths and run one authenticated
 Base Sepolia analysis and one recorded example. Confirm that provenance, block,
 deployment identity, completeness, verification status and execution eligibility
 remain clear. Recorded captures must never appear live, and an unavailable

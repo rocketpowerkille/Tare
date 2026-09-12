@@ -13,6 +13,9 @@ export const AccountingDataSchema = z.object({
     reads: z.array(z.object({ to: AddressSchema, data: HexDataSchema, result: HexDataSchema })).max(264),
   }).nullable(),
 });
+export const AccountingHeadDataSchema = z.object({
+  _meta: GraphShareDataSchema.shape._meta,
+});
 export const AccountingCaptureSchema = z.strictObject({
   captureVersion: z.literal(1), scope: z.literal('morpho-v1-accounting'), chainId: z.literal(1),
   vault: AddressSchema, capturedAt: z.iso.datetime(), expectedDeployment: DeploymentSchema.nullable(),
@@ -23,4 +26,7 @@ export type AccountingCapture = z.infer<typeof AccountingCaptureSchema>;
 export const ACCOUNTING_QUERY = `query TareAccounting($block:Block_height!,$vault:ID!){
   _meta(block:$block){block{number hash} deployment hasIndexingErrors}
   accountingState(id:$vault,block:$block){id chainId blockNumber blockHash timestamp reads(first:264){to data result}}
+}`;
+export const ACCOUNTING_HEAD_QUERY = `query TareAccountingHead{
+  _meta{block{number hash} deployment hasIndexingErrors}
 }`;

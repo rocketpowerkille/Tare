@@ -6,7 +6,10 @@ import { PinnedRpc } from '../../sources/src/evm.js';
 import { SourceFailure } from '../../sources/src/http.js';
 import { evidenceDigest, RecordedReader } from '../../sources/src/recorded.js';
 import { DeploymentSchema, GraphShareClient } from '../../sources/src/the-graph.js';
-import { ACCOUNTING_QUERY, AccountingCaptureSchema, AccountingDataSchema } from './accounting-capture.js';
+import {
+  ACCOUNTING_HEAD_QUERY, ACCOUNTING_QUERY, AccountingCaptureSchema, AccountingDataSchema,
+  AccountingHeadDataSchema,
+} from './accounting-capture.js';
 import type { AccountingCapture } from './accounting-capture.js';
 
 export async function replayAccounting(input: unknown, sourceMode: 'live-graph-rpc' | 'recorded-graph-rpc' = 'recorded-graph-rpc') {
@@ -71,7 +74,17 @@ export async function verifyAccounting(input: z.input<typeof AccountingOptionsSc
     rpc: { block: null, confirmed: false, calls: rpc.observations, failedCalls: rpc.failedCalls }, graph: null, failures: [],
   };
   try {
-    await rpc.pin(1, options.blockNumber);
+    let blockNumber = options.blockNumber;
+    let graphHead: z.infer<typeof AccountingHeadDataSchema> | null = null;
+    if (blockNumber === undefined) {
+      graphHead = await graph.query(ACCOUNTING_HEAD_QUERY, {}, AccountingHeadDataSchema);
+      if (!graphHead._meta.block.hash) throw new SourceFailure('invalid-response', 'Graph head omitted its block hash');
+      blockNumber = graphHead._meta.block.number.toString();
+    }
+    await rpc.pin(1, blockNumber);
+    if (graphHead && rpc.block.hash !== graphHead._meta.block.hash) {
+      throw new SourceFailure('reorg', 'Graph and RPC disagree on the indexed head block');
+    }
     capture.rpc.block = rpc.block;
     const block = Number(BigInt(rpc.block.number));
     z.number().int().max(2147483647).parse(block);

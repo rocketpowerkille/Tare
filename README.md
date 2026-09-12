@@ -22,9 +22,22 @@ overview, guided explorer, beginner documentation and developer reference. Hoste
 access controls and deterministic Recipe composition are tested; public recordings
 need no configuration. A tested
 Docker/Render package is deployed at `https://tare-api.onrender.com`; public,
-authenticated and two-provider Base Sepolia acceptance passed. Bazantic platform
-authoring and live acceptance are recorded in the team handoff.
+authenticated and two-provider Base Sepolia acceptance passed. Run
+`pnpm verify:hosted` with a local access token to repeat the deployed UI/API checks.
+After a deployment, `pnpm verify:hosted:graph` also runs the live Graph Studio to
+Ethereum RPC accounting cross-check. Unpinned accounting requests start from The
+Graph's latest indexed block, confirm the same block hash through RPC, then compare
+the complete bounded 56-read set. This does not depend on the unfinished historical
+share backfill.
+Bazantic platform authoring and live acceptance are recorded in the team handoff.
+The repository-side contract and Recipe text for the required second sponsor
+service are in [the Bazantic multi-service runbook](docs/BAZANTIC_MULTI_SERVICE.md).
 See [phase five](docs/PHASE_5.md) for the implementation and rollout checklist.
+
+Prize eligibility is narrower than technical integration. Tare appears net-new
+based on its first commit date and should use The Graph's From Scratch AI pool.
+Bazantic and Chainlink instead mark specific prizes as Continuity-only. See the
+[partner prize matrix](docs/PRIZE_TRACKS.md) before selecting ETHGlobal tracks.
 
 **Phase six local V1 monitoring is implemented:** Substreams events trigger existing
 resolution and Graph/RPC checks, with resumable checkpoints, deduplication and

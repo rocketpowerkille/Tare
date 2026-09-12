@@ -110,6 +110,12 @@ test('configuration stays private, OpenAPI describes strict requests, and explor
     assert.ok(!JSON.stringify(mcpSchema).includes('additionalProperties":true'));
     assert.deepEqual(await (await fetch(`${url}/openapi-mcp-v2.json`)).json(), mcpSchema);
     assert.deepEqual(await (await fetch(`${url}/openapi-mcp-v3.json`)).json(), mcpSchema);
+    const graphSchema = await (await fetch(`${url}/openapi-graph.json`)).json() as {
+      servers: { url: string }[]; paths: Record<string, { post: { operationId: string } }>;
+    };
+    assert.deepEqual(graphSchema.servers, [{ url: 'https://api.studio.thegraph.com' }]);
+    assert.equal(graphSchema.paths['/query/1760123/tare-live-accounting/0.1.0']?.post.operationId,
+      'graph_tare_accounting_head');
     for (const [path, type] of [['/', 'text/html'], ['/explore', 'text/html'], ['/docs', 'text/html'], ['/developers', 'text/html'], ['/assets/app.js', 'text/javascript'], ['/assets/app.css', 'text/css'], ['/favicon.svg', 'image/svg+xml']]) {
       const response = await fetch(`${url}${path}`);
       assert.equal(response.status, 200);

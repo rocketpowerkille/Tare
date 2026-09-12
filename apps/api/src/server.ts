@@ -5,11 +5,14 @@ import { TareService } from '../../../packages/service/src/index.js';
 import { MAX_INPUT_BYTES, ServiceError, publicError } from '../../../packages/service/src/requests.js';
 import { openapi } from './openapi.js';
 import { mcpOpenapi } from './openapi-mcp.js';
+import { graphOpenapi } from './openapi-graph.js';
 import { compactEvidenceReport } from '../../../packages/receipts/src/compact.js';
 import { ApiAccess } from './access.js';
 import type { HostedConfig } from './access.js';
 
-const specificationPaths = new Set(['/openapi.json', '/openapi-mcp.json', '/openapi-mcp-v2.json', '/openapi-mcp-v3.json']);
+const specificationPaths = new Set([
+  '/openapi.json', '/openapi-mcp.json', '/openapi-mcp-v2.json', '/openapi-mcp-v3.json', '/openapi-graph.json',
+]);
 const appPaths = new Set(['/', '/explore', '/docs', '/developers']);
 const assetTypes: Record<string, string> = {
   '.css': 'text/css; charset=utf-8',
@@ -74,6 +77,7 @@ export function createApiServer(service = new TareService(), hosted?: HostedConf
       if (path === '/healthz') return json(response, 200, { status: 'ok' });
       if (path === '/api/status') return json(response, 200, service.capabilities());
       if (specificationPaths.has(path)) {
+        if (path === '/openapi-graph.json') return json(response, 200, graphOpenapi);
         const isMcpSpecification = path !== '/openapi.json';
         const specification = isMcpSpecification ? mcpOpenapi : openapi;
         if (!access.origin) return json(response, 200, specification);

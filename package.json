@@ -17,6 +17,8 @@
     "build:subgraph": "npm run build --prefix graph/subgraph",
     "build:subgraph:live": "npm run build:live --prefix graph/subgraph",
     "verify:cre": "npm run verify --prefix workflows/cre",
+    "verify:hosted": "node scripts/verify-hosted.mjs",
+    "verify:hosted:graph": "node scripts/verify-hosted.mjs --live-graph",
     "test:graph": "node graph/integration/run.mjs",
     "test": "node --test dist/tests/*.test.js",
     "cli": "node dist/apps/cli/src/main.js",

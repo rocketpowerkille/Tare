@@ -1,12 +1,12 @@
 # Phase five — interfaces
 
 Tare-side implementation, Bazantic integration and hosted API acceptance are
-complete. The Docker
-service is live at `https://tare-api.onrender.com`; public health, anonymous
-rejection, authenticated status and two-provider Base Sepolia acquisition passed.
-The Bazantic gateway exposes the compact Tare tools, and the published Recipe has
-completed retained and fresh Base Sepolia runs. The rebuilt browser application
-still requires deployment and hosted browser acceptance. Phase four's deadline-safe
+complete. The Docker service and rebuilt modular browser application are live at
+`https://tare-api.onrender.com`; public health, anonymous rejection, authenticated
+status, compact retained replay and two-provider Base Sepolia acquisition passed.
+Home, Explore, Learn and Developers also pass hosted route and browser
+accessibility-tree acceptance. The Bazantic gateway exposes the compact Tare tools,
+and the published Recipe completed retained and fresh Base Sepolia runs. Phase four's deadline-safe
 hosted accounting acceptance is complete; its separate full-history share-ledger
 acceptance remains open.
 
@@ -40,7 +40,9 @@ acceptance remains open.
 
 ## Deferred rollout gates
 
-- [ ] Deploy the rebuilt browser bundle and complete hosted desktop/mobile acceptance.
+- [x] Deploy the rebuilt browser bundle and complete hosted desktop route and
+  accessibility-tree acceptance.
+- [ ] Complete a dedicated mobile-width visual pass.
 - [ ] Bind a second sponsor service only if pursuing the separate multi-service Recipe prize.
 
 Local verification: `node --run verify` runs 131 tests plus existing demo/replay

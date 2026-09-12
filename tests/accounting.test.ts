@@ -41,6 +41,32 @@ test('underlying verification compares the exact 56-read allocation set and repl
     assert.equal(result.metric.kind, 'unavailable');
   });
 });
+test('live accounting anchors unpinned requests to the latest indexed Graph block', async () => {
+  const capture = await accountingCapture();
+  const source = await fixture();
+  const handler = replayHandler(source);
+  let graphRequests = 0;
+  await withServer((body, response, request) => {
+    if (typeof body === 'object' && body && 'query' in body) {
+      const query = z.object({ query: z.string(), variables: z.unknown() }).parse(body);
+      graphRequests++;
+      if (query.query.includes('TareAccountingHead')) {
+        assert.deepEqual(query.variables, {});
+        json(response, { data: { _meta: capture.graph!._meta } });
+      } else {
+        assert.deepEqual(query.variables, { block: { hash: source.block!.hash }, vault: source.vault });
+        json(response, { data: capture.graph });
+      }
+    } else handler(body, response, request);
+  }, async url => {
+    const result = await verifyAccounting({
+      vault: source.vault, rpcUrl: url, graphUrl: url, expectedDeployment: capture.expectedDeployment!,
+    });
+    assert.equal(result.status, 'matched');
+    assert.equal(result.checks.length, 56);
+    assert.equal(graphRequests, 2);
+  });
+});
 test('underlying comparison detects altered quantities, missing reads and duplicate reads', async () => {
   for (const mutation of ['value', 'missing', 'duplicate'] as const) {
     const capture = await accountingCapture();
