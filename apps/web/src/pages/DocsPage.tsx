@@ -44,8 +44,9 @@ export function DocsPage() {
       </section>
 
       <section className="doc-section" id="reading-a-report">
-        <p className="section-label">Reading a report</p><h2>Five labels matter most</h2>
+        <p className="section-label">Reading a report</p><h2>Six labels matter most</h2>
         <div className="definition-list">
+          <div><strong>Your position</strong><p>The amount of the underlying asset that the wallet's vault shares converted to at the checked block. It is not a wallet cash balance or a guarantee that the full amount can be redeemed.</p></div>
           <div><strong>Live</strong><p>The report requested current data from configured providers at the time shown.</p></div>
           <div><strong>Recorded</strong><p>The report replayed a saved capture. It is useful for reproducibility but does not describe current state.</p></div>
           <div><strong>Matched</strong><p>The compared observations agreed within the narrow check shown in the report.</p></div>
@@ -60,7 +61,7 @@ export function DocsPage() {
         <ol className="numbered-steps">
           <li><span>1</span><div><strong>Paste your wallet address</strong><p>Use the public address that holds the vault shares. Never enter a seed phrase or private key.</p></div></li>
           <li><span>2</span><div><strong>Find or paste the vault</strong><p>Tare can search Morpho's index for supported MetaMorpho V1 positions. Choose a result, or paste the vault contract address yourself.</p></div></li>
-          <li><span>3</span><div><strong>Check the position</strong><p>Tare reports what it found, what the result means, what remains unknown, and what you can do next. Technical settings and the full JSON report stay optional.</p></div></li>
+          <li><span>3</span><div><strong>Check the position</strong><p>Start with Your position to see the share value and allocation path. Then read what the evidence means, what remains unknown, and what you can do next. Technical settings and the full JSON report stay optional.</p></div></li>
         </ol>
         <div className="plain-example"><strong>Just want to learn first?</strong><p>Open a saved example from the explorer. Saved examples explain the report format, but they are not a fresh check of your position.</p></div>
         <AppLink href="/explore" className="button primary">Open the explorer <ArrowRight size={17} /></AppLink>
@@ -96,6 +97,7 @@ export function DocsPage() {
           <details><summary>Why can a report be incomplete?</summary><p>A provider may be unavailable, the requested position may be empty, two observations may disagree, or the requested proof may be outside Tare's current scope. Incomplete is a useful result because it prevents unsupported claims.</p></details>
           <details><summary>Can I use Tare without technical knowledge?</summary><p>Yes. Enter your public wallet address and let Tare find supported vault candidates. Choose one and press Check this position. Start with What this means, What to do next, and What remains unknown. The technical sections are optional.</p></details>
           <details><summary>Can Tare find all of my vaults from my wallet?</summary><p>Tare can find indexed MetaMorpho V1 candidates. It is not a general wallet portfolio scanner, and an empty search does not prove that the wallet has no positions. Every selected candidate is checked with direct blockchain reads before Tare reports it.</p></details>
+          <details><summary>What amount does Tare show?</summary><p>For supported vault traces, Your position shows how much of the underlying asset the wallet's vault shares converted to at the checked block. Tare separately shows where the vault allocates assets and whether the available evidence verifies backing. A position amount does not by itself prove liquidity, safety, or redeemability.</p></details>
           <details><summary>Is there an SDK?</summary><p>There is no published Tare SDK yet. Developers can use the HTTP API, OpenAPI contract, MCP server, or command line interface.</p></details>
         </div>
       </section>

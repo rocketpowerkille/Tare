@@ -80,13 +80,13 @@ export function OperationForm({ capabilities, busy, operation, onOperationChange
   return <section className="query-panel">
     <div className="panel-heading"><div><p className="section-label">Live public data</p><h2>Check a wallet and vault</h2></div><StatusBadge tone={configured ? 'success' : 'neutral'}>{configured ? 'Ready' : 'Unavailable'}</StatusBadge></div>
     <form onSubmit={submit}>
-      <p className="form-intro">Start with your public wallet address. Tare can find supported V1 vaults, or you can paste a vault address yourself.</p>
+      <p className="form-intro">Start with your public wallet address. Tare can find indexed V1 vault candidates, or you can paste a vault address yourself.</p>
       {definition.owner && <><label htmlFor="owner">Wallet address</label><input id="owner" value={owner} onChange={event => updateOwner(event.target.value)} placeholder="0x0000..." pattern={ADDRESS.source} required autoComplete="off" spellCheck={false} /><p className="field-help">The public address that owns the vault shares.</p></>}
       {operation === 'resolve-v1' && <div className="vault-discovery">
         <button className="button secondary full-button" type="button" disabled={busy || discovering} onClick={() => void discoverVaults()}>{discovering ? <><LoaderCircle className="spin" size={16} />Finding supported vaults</> : <><ScanSearch size={16} />Find my vaults</>}</button>
         {discoveryError && <p className="discovery-error" role="alert">{discoveryError}</p>}
         {discovery && <div className="discovery-results" aria-live="polite">
-          <div className="discovery-heading"><strong>{discovery.positions.length ? `${discovery.positions.length} supported vault${discovery.positions.length === 1 ? '' : 's'} found` : 'No supported V1 vaults found'}</strong><span>Candidate results from Morpho's index</span></div>
+          <div className="discovery-heading"><strong>{discovery.positions.length ? `${discovery.positions.length} indexed vault candidate${discovery.positions.length === 1 ? '' : 's'} found` : 'No indexed V1 vault candidates found'}</strong><span>Discovery is not verification. Tare checks the selected candidate next.</span></div>
           {discovery.positions.map(position => <button className={vault === position.vault ? 'vault-option selected' : 'vault-option'} type="button" key={position.vault} onClick={() => updateVault(position.vault)}><span>{position.name || 'Unnamed vault'}</span><code>{position.vault.slice(0, 8)}...{position.vault.slice(-6)}</code></button>)}
           <p>{discovery.positions.length ? 'Choose a vault. Tare will confirm the selected position with direct blockchain reads.' : 'This does not prove the wallet has no positions. You can still paste a vault address below.'}</p>
           {!discovery.complete && <p>The index reported incomplete coverage, so some supported positions may be missing.</p>}
@@ -108,7 +108,7 @@ export function OperationForm({ capabilities, busy, operation, onOperationChange
       </details>
 
       <div className="privacy-note"><strong>Safe to check</strong><span>Tare reads public data only. It cannot move funds or ask your wallet to sign.</span></div>
-      <p className="form-note">Wallet search currently covers indexed MetaMorpho V1 positions. Other checks still need a vault entered manually.</p>
+      <p className="form-note">Wallet search currently covers indexed MetaMorpho V1 candidates. A candidate can still be unsupported or incomplete when checked. Other checks need a vault entered manually.</p>
       <button className="button primary full-button" type="submit" disabled={busy || discovering || !canSubmit}>{busy ? <><LoaderCircle className="spin" size={17} />Checking this position</> : <>Check this position <ArrowRight size={17} /></>}</button>
     </form>
   </section>;

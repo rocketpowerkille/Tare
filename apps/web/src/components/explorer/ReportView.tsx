@@ -1,6 +1,7 @@
 import { AlertCircle, CheckCircle2, ChevronDown, Clock3, Download, FileJson, Radio, ShieldAlert } from '../Icons';
 import { StatusBadge } from '../StatusBadge';
 import { isRecord, list, record, text, type JsonRecord } from '../../lib/types';
+import { PositionOverview } from './PositionOverview';
 
 function readable(value: string) {
   return value.replaceAll('-', ' ').replaceAll('_', ' ');
@@ -118,6 +119,7 @@ export function ReportView({ report }: { report: JsonRecord }) {
       <div><div className="report-meta"><StatusBadge tone={sourceMode.startsWith('live') ? 'success' : 'info'}>{sourceMode.startsWith('live') ? 'Fresh check' : 'Saved example'}</StatusBadge><span>{readable(reportType)}</span></div><h2>{result.title}</h2></div>
       <span className={`verdict-icon verdict-${result.tone}`}><VerdictIcon size={25} /></span>
     </header>
+    <PositionOverview report={report} />
     <section className={`plain-summary summary-${result.tone}`}>
       <div><p className="section-label">What this means</p><p>{result.meaning}</p></div>
       <div><p className="section-label">What to do next</p><p>{result.next}</p></div>
