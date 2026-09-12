@@ -9,6 +9,11 @@ import { DeploymentSchema } from '../../sources/src/the-graph.js';
 import { AccountingCaptureSchema } from './accounting-capture.js';
 import { replayAccounting, verifyAccounting } from './accounting.js';
 
+// The deadline-safe Studio deployment has one static data source. Other vaults
+// can still use the Token API balance check, but they are outside this
+// accounting subgraph's declared scope.
+export const GRAPH_ACCOUNTING_VAULT = '0xbeef01735c132ada46aa9aa4c54623caa92a64cb';
+
 export const GraphCompositionCaptureSchema = z.strictObject({
   captureVersion: z.literal(1),
   scope: z.literal('graph-product-composition'),
@@ -42,9 +47,12 @@ function compare(capture: GraphCompositionCapture) {
   const accounting = replayAccounting(capture.accounting, 'recorded-graph-rpc');
   return accounting.then(async accountingReport => {
     const findings: string[] = [];
+    const accountingApplicable = capture.vault === GRAPH_ACCOUNTING_VAULT;
     if (capture.tokenApiFailure) findings.push(`token-api-${capture.tokenApiFailure}`);
     if (capture.shareRpcFailure) findings.push(`share-rpc-${capture.shareRpcFailure}`);
-    if (accountingReport.status !== 'matched') findings.push(`subgraph-accounting-${accountingReport.status}`);
+    if (accountingApplicable && accountingReport.status !== 'matched') {
+      findings.push(`subgraph-accounting-${accountingReport.status}`);
+    }
     const balance = capture.tokenApi?.balance ?? null;
     if (!capture.tokenApi && !capture.tokenApiFailure) findings.push('token-api-observation-missing');
     if (capture.tokenApi && !balance) findings.push('token-balance-not-found');
@@ -71,10 +79,10 @@ function compare(capture: GraphCompositionCapture) {
     if (balance && balance.decimals !== null && rpcDecimals !== null && balance.decimals !== rpcDecimals) {
       findings.push('token-api-rpc-decimals-mismatch');
     }
-    const mismatch = accountingReport.status === 'mismatch'
+    const mismatch = (accountingApplicable && accountingReport.status === 'mismatch')
       || findings.some(item => item.endsWith('-mismatch'));
     const status = mismatch ? 'mismatch' as const : findings.length ? 'incomplete' as const : 'matched' as const;
-    return { accountingReport, findings, status, balance, rpcBalance, rpcDecimals, checkedBlock };
+    return { accountingReport, accountingApplicable, findings, status, balance, rpcBalance, rpcDecimals, checkedBlock };
   });
 }
 
@@ -96,6 +104,7 @@ export async function replayGraphComposition(input: unknown, sourceMode:
     products: [
       { product: 'The Graph Token API', role: 'Wallet vault-share balance', live: Boolean(capture.tokenApi) },
       { product: 'Subgraph Studio', role: 'Normalized vault accounting checkpoint', live: Boolean(capture.accounting.graph),
+        applicable: result.accountingApplicable,
         deployment: capture.accounting.graph?._meta.deployment ?? null },
     ],
     checks: {
@@ -104,11 +113,14 @@ export async function replayGraphComposition(input: unknown, sourceMode:
       decimals: result.rpcDecimals,
       tokenApiLastUpdateBlock: result.balance?.last_update_block_num ?? null,
       checkedBlock: result.checkedBlock,
+      accountingApplicable: result.accountingApplicable,
       accountingStatus: result.accountingReport.status,
       accountingReads: result.accountingReport.checks.length,
     },
     findings: result.findings,
-    verification: 'two-live-graph-products-with-rpc-cross-check' as const,
+    verification: result.accountingApplicable
+      ? 'two-live-graph-products-with-rpc-cross-check' as const
+      : 'token-api-with-rpc-cross-check' as const,
     metric: { kind: 'unavailable' as const, reasons: ['independent-backing-unverified', 'missing-valuation'] },
   };
 }

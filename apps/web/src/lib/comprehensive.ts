@@ -32,12 +32,24 @@ function graphModule(result: PromiseSettledResult<JsonRecord> | undefined): Evid
     status: 'unavailable', summary: result.reason instanceof Error ? result.reason.message : 'The Graph check was unavailable.',
   };
   const status = text(result.value.status);
+  const checks = record(result.value.checks);
+  const accountingApplicable = checks.accountingApplicable !== false;
+  const tokenAmount = text(checks.tokenApiAmountRaw);
+  const rpcAmount = text(checks.rpcAmountRaw);
+  const tokenMatched = Boolean(tokenAmount && rpcAmount && tokenAmount === rpcAmount);
+  const summary = status === 'matched'
+    ? accountingApplicable
+      ? 'The Graph Token API and Studio accounting agreed with direct blockchain readings.'
+      : 'The Graph Token API vault-share balance matched the direct blockchain reading. Studio accounting is not configured for this vault.'
+    : status === 'mismatch'
+      ? 'At least one applicable Graph result disagreed with the direct blockchain evidence.'
+      : tokenMatched
+        ? 'The Graph Token API balance matched RPC, but the applicable Studio accounting evidence was incomplete.'
+        : 'At least one applicable Graph result was missing, unavailable, or incomplete.';
   return {
-    id: 'the-graph', name: 'Indexed accounting cross-check', partner: 'The Graph', eligible: true,
+    id: 'the-graph', name: 'Indexed position cross-check', partner: 'The Graph', eligible: true,
     status: status === 'matched' ? 'verified' : status === 'mismatch' ? 'mismatch' : 'incomplete',
-    summary: status === 'matched'
-      ? 'Token API and Studio accounting agreed with direct blockchain readings.'
-      : 'The Graph comparison reported missing or disagreeing evidence.',
+    summary,
     report: result.value,
   };
 }
