@@ -78,15 +78,15 @@ not proof of independently verified asset backing.
 
 This flow makes the final result depend on both a direct sponsor service and Tare.
 The direct Graph Studio gateway is active at
-`https://hgtvwubvqvci5fddvkmksjtkdu.bazgateway.com`. The draft Recipe
+`https://hgtvwubvqvci5fddvkmksjtkdu.bazgateway.com`. The published Recipe
 `tare-graph-accounting-assurance` binds `graph_tare_accounting_head` from that
 gateway and `tare_analyze_compact` from the Tare gateway. The first post-deploy run
 returned a bounded timeout report at Tare's 20-second acquisition limit. A warm
 retry completed successfully on 2026-09-12: The Graph reported a healthy indexed
 head at block `25961875` with the expected deployment, and Tare matched all 56
 accounting checks with zero findings in `7.94s`. Bazantic returned the Recipe verdict
-`matched`. Preserve this acceptance result and publish the Recipe after final
-review. The paid Base Sepolia sandbox lifecycle remains separate acceptance work.
+`matched`. The Recipe was published on 2026-09-12. Preserve this acceptance result.
+The paid Base Sepolia sandbox lifecycle remains separate acceptance work.
 
 The hosted Graph product acceptance passed separately on 2026-09-12. It proves
 that the deployed Tare service can compose the Token API, Studio and RPC sources;
