@@ -171,7 +171,7 @@ test('configuration stays private, OpenAPI describes strict requests, and explor
     assert.deepEqual(graphSchema.servers, [{ url: 'https://api.studio.thegraph.com' }]);
     assert.equal(graphSchema.paths['/query/1760123/tare-live-accounting/0.1.0']?.post.operationId,
       'graph_tare_accounting_head');
-    for (const [path, type] of [['/', 'text/html'], ['/explore', 'text/html'], ['/docs', 'text/html'], ['/developers', 'text/html'], ['/assets/app.js', 'text/javascript'], ['/assets/app.css', 'text/css'], ['/favicon.svg', 'image/svg+xml']]) {
+    for (const [path, type] of [['/', 'text/html'], ['/explore', 'text/html'], ['/docs', 'text/html'], ['/developers', 'text/html'], ['/assets/app.js', 'text/javascript'], ['/assets/app.css', 'text/css'], ['/favicon.svg', 'image/svg+xml'], ['/tare-mark.png', 'image/png'], ['/tare-logo.png', 'image/png']]) {
       const response = await fetch(`${url}${path}`);
       assert.equal(response.status, 200);
       assert.ok(response.headers.get('content-type')?.startsWith(type!));

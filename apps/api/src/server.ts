@@ -17,13 +17,14 @@ const appPaths = new Set(['/', '/explore', '/docs', '/developers']);
 const assetTypes: Record<string, string> = {
   '.css': 'text/css; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
+  '.png': 'image/png',
   '.svg': 'image/svg+xml; charset=utf-8',
 };
 
 async function webAsset(path: string) {
   const appRoute = appPaths.has(path);
   const file = appRoute ? 'index.html' : path.slice(1);
-  if (!appRoute && !/^(assets\/[A-Za-z0-9._-]+\.(?:js|css)|favicon\.svg)$/.test(file)) return null;
+  if (!appRoute && !/^(assets\/[A-Za-z0-9._-]+\.(?:js|css)|favicon\.svg|tare-(?:logo|mark)\.png)$/.test(file)) return null;
   const extension = file.slice(file.lastIndexOf('.'));
   return { data: await readFile(new URL(`../../../../apps/web/build/${file}`, import.meta.url)),
     type: appRoute ? 'text/html; charset=utf-8' : assetTypes[extension] ?? 'application/octet-stream' };

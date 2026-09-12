@@ -16,8 +16,8 @@ export function AppShell({ path, children }: { path: string; children: React.Rea
       <a className="skip-link" href="#main-content">Skip to content</a>
       <header className="site-header">
         <AppLink href="/" className="brand" aria-label="Tare home">
-          <span className="brand-mark" aria-hidden="true"><i /><i /><i /></span>
-          <span>tare</span>
+          <img className="brand-mark" src="/tare-mark.png" alt="" width="30" height="30" />
+          <span>Tare</span>
         </AppLink>
         <nav className="desktop-nav" aria-label="Primary navigation">
           {items.map(item => <NavItem key={item.href} {...item} active={path === item.href} />)}
@@ -32,7 +32,7 @@ export function AppShell({ path, children }: { path: string; children: React.Rea
       </nav>}
       <main id="main-content">{children}</main>
       <footer className="site-footer">
-        <div><strong>Tare</strong><span>Evidence before assumptions.</span></div>
+        <div><img className="footer-mark" src="/tare-mark.png" alt="" width="26" height="26" /><strong>Tare</strong><span>Evidence before assumptions.</span></div>
         <div className="footer-links"><AppLink href="/docs">Learn</AppLink><AppLink href="/developers">API and MCP</AppLink><a href="/openapi.json">OpenAPI</a></div>
         <p>Read-only analysis for Ethereum and Base Sepolia. Not financial advice.</p>
       </footer>
