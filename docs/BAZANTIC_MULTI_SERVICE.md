@@ -49,6 +49,26 @@ response and final conservative result. Sandbox settlement proves the Bazantic
 payment path; the Tare evidence operation can still read Ethereum because payment
 network and evidence network are separate concerns.
 
+The Bazantic Playground is only for testing gateways owned by the current account.
+Customers use Tare's public gateway through the Bazantic CLI. Create a bounded
+Base Sepolia grant, then call the session route with an explicit POST and empty JSON
+body:
+
+```sh
+baz grant create --name tare-demo --cap 0.01 --network base-sepolia --service zvnss2njirhqjllnbfsv3sneca
+baz curl https://zvnss2njirhqjllnbfsv3sneca.bazgateway.com/api/bazantic/session \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -d '{}' \
+  --account tare-demo \
+  --max-amount 0.001 \
+  --yes \
+  --json
+```
+
+Copy `body.accessToken` from the response into Tare Explorer. The access token is
+unique to that paid request and expires after 15 minutes.
+
 ## Recipe text
 
 Use the following as the Recipe goal. If Bazantic changes generated tool names,

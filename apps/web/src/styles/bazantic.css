@@ -1,0 +1,130 @@
+.bazantic-steps {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bazantic-steps > li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 9px;
+}
+
+.bazantic-steps > li > span {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--green);
+  font-size: 0.7rem;
+  font-weight: 760;
+}
+
+.bazantic-steps strong {
+  font-size: 0.8rem;
+}
+
+.bazantic-steps p {
+  margin: 4px 0 0;
+}
+
+.copy-command {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  margin-top: 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 9px;
+  background: var(--surface);
+}
+
+.copy-command code {
+  overflow-x: auto;
+  color: var(--ink-soft);
+  font-size: 0.69rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.copy-command button {
+  display: inline-flex;
+  align-items: center;
+  align-self: start;
+  gap: 5px;
+  border: 0;
+  padding: 2px;
+  background: transparent;
+  color: var(--green);
+  font-size: 0.7rem;
+  font-weight: 720;
+}
+
+.bazantic-endpoint {
+  display: grid;
+  gap: 5px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+.bazantic-endpoint span {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 720;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.bazantic-endpoint code {
+  color: var(--ink-soft);
+  font-size: 0.7rem;
+  overflow-wrap: anywhere;
+}
+
+.bazantic-guide-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 12px;
+}
+
+.bazantic-guide-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--green);
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.bazantic-guide-links a:hover {
+  text-decoration: underline;
+}
+
+.developer-code-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.developer-note {
+  margin: 16px 0 0;
+  color: var(--ink-soft);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 720px) {
+  .copy-command {
+    grid-template-columns: 1fr;
+  }
+
+  .copy-command button {
+    justify-self: start;
+  }
+}

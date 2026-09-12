@@ -83,12 +83,12 @@ export function DocsPage() {
         <p className="section-label">Access</p><h2>Use a code or pay with test USDC</h2>
         <p>Tare is in private beta. You can enter an access code, or create a short-lived Explorer session through the Bazantic sandbox. A successful paid session appears as verified in the combined position report.</p>
         <ol className="numbered-steps">
-          <li><span>1</span><div><strong>Open Bazantic Playground</strong><p>Select the Tare gateway and choose the Start sandbox session operation.</p></div></li>
-          <li><span>2</span><div><strong>Send an empty JSON object</strong><p>Bazantic quotes and settles the request using Base Sepolia test USDC. No mainnet funds are used.</p></div></li>
-          <li><span>3</span><div><strong>Copy the access token</strong><p>Paste the returned token into Tare Explorer. It is kept only in the current browser tab and expires after a short period.</p></div></li>
+          <li><span>1</span><div><strong>Prepare a Bazantic payment source</strong><p>Install the Bazantic command line tool. Use a Base Sepolia spend grant linked to your Bazantic account, or a self-custody test wallet.</p></div></li>
+          <li><span>2</span><div><strong>Call Tare's public gateway</strong><p>Send a paid POST request to the Tare session endpoint. Bazantic quotes and settles 0.001 Base Sepolia test USDC. The provider Playground is not used because it only lists gateways owned by the current account.</p></div></li>
+          <li><span>3</span><div><strong>Copy the access token</strong><p>Paste <code>body.accessToken</code> from the response into Tare Explorer. It stays in the current browser tab and expires after 15 minutes.</p></div></li>
         </ol>
         <div className="callout safe"><LockKeyhole size={21} /><div><strong>Testnet only.</strong><p>Mainnet payment access is a future stretch goal and is not enabled in this release.</p></div></div>
-        <a className="text-link" href="https://bazantic.com/playground" target="_blank" rel="noreferrer">Open Bazantic Playground <ArrowRight size={16} /></a>
+        <AppLink className="text-link" href="/developers">See the exact gateway commands <ArrowRight size={16} /></AppLink>
       </section>
 
       <section className="doc-section" id="limits">

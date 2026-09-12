@@ -1,5 +1,6 @@
 import { Check, Copy, ExternalLink, Terminal } from '../components/Icons';
 import { useState } from 'react';
+import { bazanticGrantCommand, bazanticSessionCommand } from '../lib/bazantic';
 
 const curlExample = `curl https://tare-api.onrender.com/api/analyze \\
   -H "Authorization: Bearer $TARE_API_TOKEN" \\
@@ -18,9 +19,8 @@ const mcpExample = `{
   }
 }`;
 
-const bazanticExample = `baz curl https://zvnss2njirhqjllnbfsv3sneca.bazgateway.com/api/bazantic/session \\
-  --account <grant-name> \\
-  --json`;
+const bazanticGrantExample = bazanticGrantCommand();
+const bazanticExample = bazanticSessionCommand();
 
 const graphExample = `curl https://tare-api.onrender.com/api/analyze \\
   -H "Authorization: Bearer $TARE_API_TOKEN" \\
@@ -45,9 +45,13 @@ export function DevelopersPage() {
       <CodeBlock code={curlExample} label="cURL" />
     </section>
 
-    <section className="developer-section">
-      <div className="section-heading"><p className="kicker">Bazantic sandbox</p><h2>Create a short-lived Explorer session</h2><p>The paid gateway request settles with Base Sepolia test USDC. Read the token from <code>body.accessToken</code> in the JSON response. Mainnet access is not enabled.</p></div>
-      <CodeBlock code={bazanticExample} label="Bazantic CLI" />
+    <section className="developer-section" id="bazantic-sandbox">
+      <div className="section-heading"><p className="kicker">Bazantic sandbox</p><h2>Create a short-lived Explorer session</h2><p>Install <code>@bazantic/cli</code>, sign in, and fund your Bazantic receiving address with Base Sepolia test USDC. Create a bounded testnet grant, then call Tare's public gateway. Read the session token from <code>body.accessToken</code>. Mainnet access is not enabled.</p></div>
+      <div className="developer-code-stack">
+        <CodeBlock code={bazanticGrantExample} label="1. Create a Base Sepolia grant" />
+        <CodeBlock code={bazanticExample} label="2. Call the public Tare gateway" />
+      </div>
+      <p className="developer-note">Bazantic Playground is a provider test console and only lists gateways owned by the current account. Customers call this public gateway with the CLI or an agent payment source.</p>
     </section>
 
     <section className="developer-section">

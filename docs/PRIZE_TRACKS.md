@@ -46,12 +46,12 @@ secret is the JWT labelled **API Token** in The Graph Market, not the API-key ID
 | --- | --- | --- |
 | Help an Agent Use Your Hackathon Project | Technically complete, likely ineligible | The live gateway, MCP tools, published Recipe and controlled raw-versus-Recipe comparison satisfy the technical requirements. The prize page restricts this prize to Continuity Track participants and Tare appears net-new. |
 | Best Recipe that uses ETHGlobal sponsor APIs | Complete and published | The published `tare-graph-accounting-assurance` Recipe binds the direct Graph Studio `graph_tare_accounting_head` tool with Tare's `tare_analyze_compact` tool. On 2026-09-12 the Graph call reported a healthy expected deployment at block `25961875`, Tare matched all 56 accounting checks with zero findings, and Bazantic returned `matched`. Preserve the test result for submission evidence. |
-| Agentify a New API | Complete and published | Tare is a new API with a live six-tool sandbox gateway. The published two-service Recipe calls The Graph Studio directly and then calls Tare for the bounded accounting assurance result. The post-deploy test passed with both tools. The separate paid sandbox-session lifecycle remains blocked only by test-USDC funding visibility. |
+| Agentify a New API | Complete and published | Tare is a new API with a live six-tool sandbox gateway. The published two-service Recipe calls The Graph Studio directly and then calls Tare for the bounded accounting assurance result. The post-deploy test passed with both tools. A separate paid sandbox request completed the Base Sepolia 402 flow and issued a 15-minute Tare session. |
 
 Bazantic's listed qualifications do not require a completed paid request. The
 operator-credential tests remain valid integration evidence unless Bazantic says
-otherwise. Base-mainnet-only settlement should be disclosed because Tare is
-testnet-only.
+otherwise. The paid demo settles with Base Sepolia test USDC. Production mainnet
+payment access is not enabled.
 
 ## Sponsor questions
 
