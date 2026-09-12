@@ -23,15 +23,16 @@ raw-API-versus-Recipe comparison is also complete: the Recipe reached the same
 correct Base Sepolia conclusion with **31.34% lower latency** and **17.54% fewer
 tokens**, while returning a more consistently structured evidence report. The
 project is **not submission-complete**: the comparison recording remains, hosted
-monitoring remains pending, the historical Graph share ledger has not completed
-its backfill, and the rebuilt web application still needs hosted browser acceptance.
+monitoring remains pending, and the rebuilt web application still needs hosted
+browser acceptance. The historical Graph share ledger cannot finish before the
+deadline and is no longer a submission dependency.
 
 ## Partner and component status
 
 | Area | Current state | What remains |
 | --- | --- | --- |
 | Core resolver | Implemented for synthetic schemas and the documented Ethereum MetaMorpho V1 plus V2→V1→Blue scope. Integer accounting, partial evidence and replay are tested. | Broader protocol/network coverage is optional future scope, not part of the verified MVP. |
-| The Graph | Custom share/accounting mappings build and pass real local Graph Node rollback tests. The deadline-safe `tare-live-accounting` Studio deployment matched all 56 Graph observations to same-block RPC at Ethereum block `25953771`, with zero mismatches. | The original `tare-steakhouse-usdc-ethereum` full-history share ledger was last observed around 73% sync. When it completes, retain one same-block share **and** accounting acceptance report. |
+| The Graph | Custom share/accounting mappings build and pass real local Graph Node rollback tests. The deadline-safe `tare-live-accounting` Studio deployment matched all 56 Graph observations to same-block RPC at Ethereum block `25953771`, with zero mismatches. | Use this bounded current-accounting result for submission. The full-history ledger cannot finish before the deadline and is post-submission only. Do not claim historical share reconstruction. |
 | Chainlink CRE | The TypeScript workflow compiles to WASM, reads private secrets, acquires authenticated HTTPS evidence and submits a confidential consensus report. Private-registry revision `0024de…e3bd` completed an EVM write through the production Base Sepolia Keystone Forwarder. Current paused revision `00fe…0a48` points to the permanent Render API with execution disabled. | Preserve both the historical exit record and current safe hosted binding. A security audit and mainnet use are explicitly outside the current claim. |
 | Base Sepolia execution | Two-provider allowlisted-bytecode verification matched a 2.000000x control. Five deterministic failure/replay cases reverted. A separate hosted receiver redeemed exactly 100 outer shares for 100 inner shares through Chainlink transaction `0x65549c…b95f9`; allowance and permit shares became zero and nonce advanced to 2. | Both disposable control positions are consumed. Create another only if a new live demo is genuinely required. The contracts use test assets and are not production audited. |
 | Bazantic | Gateway `zvnss2njirhqjllnbfsv3sneca` is live against the Render API. Its generated MCP server exposes status plus compact analyze/example tools. The published `DeFi Vault Backing Evidence Evaluator` Recipe completed retained and live Base Sepolia runs without payment. In the controlled live comparison it matched the raw baseline's correct result in `19,513 ms` and `6,685` tokens versus `28,419 ms` and `8,107` tokens, and produced a more standardized evidence report. | Record the completed comparison and gateway/Recipe flow for the submission. A second sponsor service is still required only for the separate multi-service Recipe prize. Do not fund the Base-mainnet payment account while testnet support remains unresolved. |
@@ -151,8 +152,9 @@ and [phase seven](PHASE_7.md).
    sponsor service and make the final result depend materially on both services.
 3. Deploy the monitor with bounded provider configuration, durable state,
    TLS/auth and explicit live-source labels.
-4. Let the historical Graph share ledger continue independently. Once fully
-   indexed, run the same-block share plus accounting comparison and retain it.
+4. Keep the historical Graph share ledger outside the deadline path. Use the
+   pinned live-accounting deployment and completed 56/56 comparison, with its
+   current-accounting-only limitation stated clearly.
 
 ### 2. Complete hosted UI acceptance
 

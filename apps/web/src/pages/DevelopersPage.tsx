@@ -1,4 +1,4 @@
-import { Check, Copy, ExternalLink, Terminal } from 'lucide-react';
+import { Check, Copy, ExternalLink, Terminal } from '../components/Icons';
 import { useState } from 'react';
 
 const curlExample = `curl https://tare-api.onrender.com/api/analyze \\

@@ -1,4 +1,4 @@
-import { FileClock, Play } from 'lucide-react';
+import { FileClock, Play } from '../Icons';
 import { useState } from 'react';
 import type { ExampleCapability } from '../../lib/types';
 

@@ -1,4 +1,4 @@
-import { BookOpen, Code2, FileSearch, Home, Menu, X } from 'lucide-react';
+import { BookOpen, Code2, FileSearch, Home, Menu, X } from './Icons';
 import { useState } from 'react';
 import { AppLink } from './AppLink';
 

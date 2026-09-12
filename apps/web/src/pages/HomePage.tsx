@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, CircleHelp, FileCheck2, Layers3, ScanSearch, ShieldCheck } from 'lucide-react';
+import { ArrowRight, CheckCircle2, CircleHelp, FileCheck2, Layers3, ScanSearch, ShieldCheck } from '../components/Icons';
 import { AppLink } from '../components/AppLink';
 import { StatusBadge } from '../components/StatusBadge';
 

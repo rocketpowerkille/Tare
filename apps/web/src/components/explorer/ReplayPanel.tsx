@@ -1,4 +1,4 @@
-import { Upload } from 'lucide-react';
+import { Upload } from '../Icons';
 import type { OperationId } from '../../lib/types';
 
 export function ReplayPanel({ operation, busy, onReplay, onError }: { operation: OperationId; busy: boolean; onReplay: (capture: unknown) => void; onError: (message: string) => void }) {

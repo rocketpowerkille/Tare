@@ -1,4 +1,4 @@
-import { ArrowRight, LoaderCircle } from 'lucide-react';
+import { ArrowRight, LoaderCircle } from '../Icons';
 import { useMemo, useState } from 'react';
 import { operationById, operations } from '../../lib/catalog';
 import type { Capabilities, OperationId } from '../../lib/types';

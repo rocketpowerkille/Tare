@@ -33,7 +33,6 @@
     "@connectrpc/connect-node": "1.7.0",
     "@modelcontextprotocol/server": "2.0.0",
     "@substreams/core": "0.17.0",
-    "lucide-react": "1.45.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "zod": "4.5.4"

@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowRight, BookOpen, CheckCircle2, CircleHelp, Database, Eye, LockKeyhole, Network } from 'lucide-react';
+import { AlertTriangle, ArrowRight, BookOpen, CheckCircle2, CircleHelp, Database, Eye, LockKeyhole, Network } from '../components/Icons';
 import { AppLink } from '../components/AppLink';
 
 const sections = [

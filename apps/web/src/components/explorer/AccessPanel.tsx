@@ -1,4 +1,4 @@
-import { KeyRound, LockKeyhole } from 'lucide-react';
+import { KeyRound, LockKeyhole } from '../Icons';
 import { useState } from 'react';
 
 export function AccessPanel({ onConnect, error }: { onConnect: (token: string) => void; error?: string }) {

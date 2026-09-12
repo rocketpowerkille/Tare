@@ -1,4 +1,4 @@
-import { AlertCircle, ArrowRight, FileSearch, LoaderCircle, Radio } from 'lucide-react';
+import { AlertCircle, ArrowRight, FileSearch, LoaderCircle, Radio } from '../components/Icons';
 import { useEffect, useState } from 'react';
 import { AccessPanel } from '../components/explorer/AccessPanel';
 import { ExamplePanel } from '../components/explorer/ExamplePanel';

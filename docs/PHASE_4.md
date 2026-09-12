@@ -113,8 +113,11 @@ observed USD valuation.
 - [x] Timestamped valuation, real WETH 1x control, and partial/mismatch tests.
 - [x] Deadline-safe live Studio accounting: 56/56 Graph/RPC reads matched at one
   canonical Ethereum block with the deployment CID pinned.
-- [ ] Let Graph Studio version `0.1.0` finish the required range, then retain matched
-  mainnet share **and** accounting reports at one indexed block.
+- [ ] Full-history share reconstruction remains a post-submission task. It is not a
+  deadline gate because the creation-block backfill cannot finish in time. Submission
+  evidence uses the separate pinned `tare-live-accounting` deployment and its
+  completed 56/56 same-block Graph/RPC comparison. Do not present that deployment
+  as historical share reconstruction.
 - [ ] Broader standardized indexing/multiple-network coverage, if retained as a
   submission milestone. This implementation remains Ethereum-only.
 

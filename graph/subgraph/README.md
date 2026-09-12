@@ -81,11 +81,14 @@ local capture is reproducible and is not a substitute for the public endpoint.
 Graph Studio version `0.1.0` is deployed at
 `tare-steakhouse-usdc-ethereum` with manifest CID
 `QmZrGd5mh9V5x57J4ETN9sWVP2P3VMVpRgQ7p5XK9CW1hw`. It is still syncing, so this
-does not yet satisfy hosted acceptance. After it reaches the required accounting
-block, set `TARE_GRAPH_URL` and `TARE_GRAPH_DEPLOYMENT` from `.env.example` and
-run the matched Graph/RPC checks. `GRAPH_API_KEY` is optional when the endpoint
-does not require one. Keep any key local. See the [phase-four acceptance
-checklist](../../docs/PHASE_4.md).
+does not establish historical share acceptance and will not complete before the
+submission deadline. It is retained as post-submission infrastructure, not as a
+blocking dependency. The deadline submission must use the separate
+`tare-live-accounting` endpoint above, its pinned manifest CID and the completed
+56/56 same-block Graph/RPC comparison. That evidence proves bounded current
+accounting agreement, not historical share reconstruction. `GRAPH_API_KEY` is
+optional when the endpoint does not require one. Keep any key local. See the
+[phase-four acceptance checklist](../../docs/PHASE_4.md).
 
 References: [Graph manifests](https://thegraph.com/docs/en/subgraphs/developing/creating/subgraph-manifest/),
 [AssemblyScript mappings](https://thegraph.com/docs/en/subgraphs/developing/creating/graph-ts/api/),

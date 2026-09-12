@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle2, ChevronDown, Clock3, Download, FileJson, Radio, ShieldAlert } from 'lucide-react';
+import { AlertCircle, CheckCircle2, ChevronDown, Clock3, Download, FileJson, Radio, ShieldAlert } from '../Icons';
 import { StatusBadge } from '../StatusBadge';
 import { isRecord, list, record, text, type JsonRecord } from '../../lib/types';
 

@@ -9,9 +9,12 @@ and [phase three](docs/PHASE_3.md) for acceptance evidence and limitations.
 underlying accounting indexing, real Graph Node rollback tests, live V2→V1→Blue
 resolution, timestamped prices and a real WETH custody 1x control. The deadline-safe
 `tare-live-accounting` Graph Studio deployment passed a 56/56 same-block Graph/RPC
-comparison. The separate full-history share ledger is still syncing, so historical
-share acceptance remains open.
-See [phase four](docs/PHASE_4.md) for the exact remaining gates.
+comparison. The separate full-history share ledger is still syncing and cannot
+finish before the deadline, so historical share reconstruction is explicitly
+outside the submission path. The
+submission uses the pinned live-accounting deployment and its completed 56/56
+same-block RPC comparison instead.
+See [phase four](docs/PHASE_4.md) for the exact acceptance boundary.
 
 **Phase five Tare-side implementation is complete:** API, MCP and the modular web
 application share the existing resolver. The web application includes a product

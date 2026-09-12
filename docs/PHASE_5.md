@@ -44,8 +44,8 @@ acceptance remains open.
 - [ ] Bind a second sponsor service only if pursuing the separate multi-service Recipe prize.
 
 Local verification: `node --run verify` runs 131 tests plus existing demo/replay
-checks. The browser application uses React, Lucide icons and Vite while the API
-keeps its existing runtime surface. Local
+checks. The browser application uses React, local SVG icon components and Vite
+while the API keeps its existing runtime surface. Local
 HTTP source fixtures are not live Graph or Bazantic acceptance evidence.
 
 ## Run locally
