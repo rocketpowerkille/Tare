@@ -11,6 +11,7 @@ const blockNumber = {
 const operations = [
   'resolve-v1', 'resolve-v2', 'resolve-erc4626', 'verify-shares', 'verify-accounting',
   'verify-graph-composition', 'verify-weth', 'verify-base-custody',
+  'value-position',
 ] as const;
 const genericObject = { type: 'object', additionalProperties: true } as const;
 const emptyObject = { type: 'object', additionalProperties: false, properties: {} } as const;
@@ -26,6 +27,9 @@ const analyzeSchema = {
     vault: address,
     blockNumber,
     chainId: { type: 'integer', enum: [1, 8453, 42161, 84532], default: 1 },
+    asset: address,
+    amountRaw: { type: 'string', pattern: '^(0|[1-9][0-9]{0,77})$' },
+    assetDecimals: { type: 'integer', minimum: 0, maximum: 36 },
   },
 } as const;
 const discoverSchema = {

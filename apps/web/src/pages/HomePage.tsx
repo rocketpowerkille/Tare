@@ -34,7 +34,7 @@ export function HomePage() {
       <div className="section-heading"><p className="kicker">What it does</p><h2>From position to evidence report</h2><p>One clear flow for people reviewing a vault, and structured output for software that needs the same answer.</p></div>
       <div className="three-column process-grid">
         <article><span className="step-number">01</span><ScanSearch size={22} /><h3>Trace</h3><p>Follow the position through supported vault layers and market allocations.</p></article>
-        <article><span className="step-number">02</span><ShieldCheck size={22} /><h3>Check</h3><p>Compare direct reads, indexed data, deployment identity, and custody where supported.</p></article>
+        <article><span className="step-number">02</span><ShieldCheck size={22} /><h3>Check</h3><p>Run direct reads plus eligible Graph, Chainlink, and Bazantic evidence checks in one report.</p></article>
         <article><span className="step-number">03</span><FileCheck2 size={22} /><h3>Explain</h3><p>Return a report with source, block, coverage, findings, and clear limitations.</p></article>
       </div>
     </section>

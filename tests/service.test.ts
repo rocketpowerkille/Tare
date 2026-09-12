@@ -37,6 +37,36 @@ test('configured service pins nested resolution and matches offline accounting w
   });
 });
 
+test('configured service values a supported position with the pinned Chainlink observation', async () => {
+  const capture = NestedCaptureSchema.parse(await readJsonFile('fixtures/live/ov-usdc-v2.capture.json'));
+  const expected = await replayNestedCapture(capture);
+  const amountRaw = expected.analysis!.quoteRaw;
+  await withServer((body, response) => {
+    const call = z.object({ id: z.number(), method: z.string(), params: z.array(z.unknown()) }).parse(body);
+    let result: unknown;
+    if (call.method === 'eth_chainId') result = '0x1';
+    else if (call.method === 'eth_getBlockByNumber') result = capture.rpc.block;
+    else {
+      assert.equal(call.method, 'eth_call');
+      const tx = z.object({ to: z.string(), data: z.string() }).parse(call.params[0]);
+      const found = capture.rpc.calls.find(item => item.to === tx.to && item.data === tx.data);
+      assert.ok(found);
+      result = found.result;
+    }
+    json(response, { jsonrpc: '2.0', id: call.id, result });
+  }, async rpcUrl => {
+    const report = await new TareService({ rpcUrl }).run('analyze', {
+      operation: 'value-position', chainId: 1,
+      asset: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+      amountRaw, assetDecimals: 6, blockNumber: BigInt(capture.rpc.block!.number).toString(),
+    }) as { status: string; value: { currency: string; decimals: number; valueRaw: string }; price: { feed: string } };
+    assert.equal(report.status, 'complete');
+    assert.equal(report.value.currency, 'USD');
+    assert.equal(report.value.decimals, 8);
+    assert.equal(report.value.valueRaw, expected.valuation.kind === 'observed' ? expected.valuation.rootClaim.valueRaw : '');
+  });
+});
+
 test('configured verification routes retain provider failures and Graph replay remains offline', async () => {
   const address = `0x${'1'.repeat(40)}`;
   await withServer((_body, response) => { response.writeHead(503); response.end('SECRET provider diagnostic'); }, async rpcUrl => {

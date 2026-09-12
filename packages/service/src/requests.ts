@@ -15,6 +15,10 @@ export const AnalyzeSchema = z.discriminatedUnion('operation', [
   z.strictObject({ operation: z.literal('verify-graph-composition'), owner: AddressSchema, vault: AddressSchema }),
   z.strictObject({ operation: z.literal('verify-weth'), owner: AddressSchema, blockNumber: UintSchema.optional() }),
   z.strictObject({ operation: z.literal('verify-base-custody'), owner: AddressSchema, blockNumber: UintSchema.optional() }),
+  z.strictObject({
+    operation: z.literal('value-position'), chainId: z.literal(1), asset: AddressSchema,
+    amountRaw: UintSchema, assetDecimals: z.number().int().min(0).max(36), blockNumber: UintSchema.optional(),
+  }),
 ]);
 export const DiscoverSchema = z.strictObject({
   owner: AddressSchema,

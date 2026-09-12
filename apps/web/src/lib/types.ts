@@ -54,6 +54,14 @@ export interface AccessOptions {
   };
 }
 
+export interface PositionAnalyzeInput {
+  operation: 'resolve-v1' | 'resolve-v2' | 'resolve-erc4626';
+  owner: string;
+  vault: string;
+  blockNumber?: string;
+  chainId?: number;
+}
+
 export type OperationId =
   | 'resolve-v1'
   | 'resolve-v2'

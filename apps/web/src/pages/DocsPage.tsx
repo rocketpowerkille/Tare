@@ -62,7 +62,7 @@ export function DocsPage() {
         <ol className="numbered-steps">
           <li><span>1</span><div><strong>Paste your wallet address</strong><p>Use the public address that holds the vault shares. Never enter a seed phrase or private key.</p></div></li>
           <li><span>2</span><div><strong>Find or paste the vault</strong><p>Tare searches Morpho V1 and V2 positions on Ethereum, Base, and Arbitrum. It also searches the deployment's public ERC-4626 registry, including Base Sepolia entries. Choose a supported result, or paste any ERC-4626 vault contract yourself.</p></div></li>
-          <li><span>3</span><div><strong>Check the position</strong><p>Start with Your position to see the share value and allocation path. Then read what the evidence means, what remains unknown, and what you can do next. Technical settings and the full JSON report stay optional.</p></div></li>
+          <li><span>3</span><div><strong>Check the position</strong><p>Tare runs the direct position trace and every eligible partner check. The combined report shows The Graph accounting comparison, Chainlink valuation, and Bazantic session verification when each applies. Start with the service cards and Your position. Technical settings and full JSON evidence stay optional.</p></div></li>
         </ol>
         <div className="plain-example"><strong>Just want to learn first?</strong><p>Open a saved example from the explorer. Saved examples explain the report format, but they are not a fresh check of your position.</p></div>
         <AppLink href="/explore" className="button primary">Open the explorer <ArrowRight size={17} /></AppLink>
@@ -70,7 +70,7 @@ export function DocsPage() {
 
       <section className="doc-section" id="graph-verification">
         <p className="section-label">Graph verification</p><h2>One check, two Graph products, one blockchain reference</h2>
-        <p>The Graph composition check is designed for an Ethereum MetaMorpho V1 position. It does not ask you to understand data providers. You provide the wallet and supported vault, then Tare performs three bounded comparisons.</p>
+        <p>The Graph composition check runs automatically when the main Explorer check receives a supported Ethereum MetaMorpho V1 position. It can also run by itself from Advanced options. Tare performs three bounded comparisons.</p>
         <ol className="numbered-steps">
           <li><span>1</span><div><strong>Token API reads the position</strong><p>The Graph Token API reports the wallet's current balance of vault-share tokens.</p></div></li>
           <li><span>2</span><div><strong>The subgraph reads the vault</strong><p>Tare's Subgraph Studio deployment supplies the normalized accounting checkpoint for the same supported vault.</p></div></li>
@@ -81,7 +81,7 @@ export function DocsPage() {
 
       <section className="doc-section" id="access">
         <p className="section-label">Access</p><h2>Use a code or pay with test USDC</h2>
-        <p>Tare is in private beta. You can enter an access code, or create a short-lived Explorer session through the Bazantic sandbox.</p>
+        <p>Tare is in private beta. You can enter an access code, or create a short-lived Explorer session through the Bazantic sandbox. A successful paid session appears as verified in the combined position report.</p>
         <ol className="numbered-steps">
           <li><span>1</span><div><strong>Open Bazantic Playground</strong><p>Select the Tare gateway and choose the Start sandbox session operation.</p></div></li>
           <li><span>2</span><div><strong>Send an empty JSON object</strong><p>Bazantic quotes and settles the request using Base Sepolia test USDC. No mainnet funds are used.</p></div></li>

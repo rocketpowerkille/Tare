@@ -1,0 +1,155 @@
+.comprehensive-view {
+  padding: 28px;
+}
+
+.comprehensive-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.comprehensive-header h2 {
+  max-width: 680px;
+  margin: 14px 0 8px;
+  font-size: clamp(1.55rem, 3vw, 2.2rem);
+}
+
+.comprehensive-header > div > p:last-child {
+  max-width: 680px;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.module-section {
+  border-block: 1px solid var(--line);
+  margin-top: 28px;
+  padding: 26px 0;
+}
+
+.module-section h3,
+.primary-report-heading h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.module-card {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  background: var(--surface-subtle);
+}
+
+.module-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.module-card-head span:first-child {
+  color: var(--green);
+  font-size: 0.68rem;
+  font-weight: 730;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.module-card h4 {
+  margin: 4px 0 0;
+  font-size: 0.94rem;
+}
+
+.module-card p {
+  margin: 12px 0 0;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.module-value {
+  display: block;
+  margin-top: 13px;
+  color: var(--ink);
+  font-size: 0.82rem;
+}
+
+.partner-details {
+  border-bottom: 1px solid var(--line);
+}
+
+.partner-details summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0;
+  color: var(--ink);
+  font-size: 0.88rem;
+  font-weight: 650;
+  cursor: pointer;
+  list-style: none;
+}
+
+.partner-details summary span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.partner-details[open] summary > svg {
+  transform: rotate(180deg);
+}
+
+.partner-details section {
+  margin-bottom: 18px;
+}
+
+.partner-details h4 {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+}
+
+.partner-details pre {
+  max-height: 320px;
+  overflow: auto;
+  border-radius: 7px;
+  margin: 0;
+  padding: 16px;
+  background: var(--navy);
+  color: #dbe7e1;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.comprehensive-actions {
+  padding: 20px 0;
+}
+
+.primary-report {
+  border-top: 1px solid var(--line);
+  padding-top: 26px;
+}
+
+.primary-report-heading {
+  margin-bottom: 4px;
+}
+
+.primary-report > .report-view {
+  padding: 22px 0 0;
+}
+
+@media (max-width: 620px) {
+  .comprehensive-view { padding: 22px; }
+  .comprehensive-header { flex-direction: column-reverse; }
+  .module-grid { grid-template-columns: 1fr; }
+}

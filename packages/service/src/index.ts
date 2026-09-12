@@ -15,6 +15,7 @@ import { z } from 'zod/v4';
 import { AddressSchema, SupportedEvmChainSchema } from '../../domain/src/index.js';
 import { AnalyzeSchema, DiscoverSchema, ReplaySchema, ExampleSchema, MAX_INPUT_BYTES, ServiceError } from './requests.js';
 import { composePosition } from './composition.js';
+import { valuePositionWithChainlink } from '../../verification/src/valuation.js';
 
 export interface ServiceConfig {
   rpcUrl?: string;
@@ -86,6 +87,7 @@ export class TareService {
         'resolve-erc4626': rpc || Boolean(this.config.baseMainnetRpcUrl || this.config.arbitrumRpcUrl || this.config.baseRpcUrl), 'verify-shares': graph,
         'verify-accounting': graph, 'verify-graph-composition': graph && Boolean(this.config.graphMarketToken),
         'verify-weth': rpc && Boolean(this.config.secondaryRpcUrl),
+        'value-position': rpc,
         'verify-base-custody': Boolean(this.config.baseRpcUrl && this.config.baseSecondaryRpcUrl
           && this.config.baseCustodyDeployment) },
       limits: { maxInputBytes: MAX_INPUT_BYTES, concurrentOperations: 2 },
@@ -211,6 +213,11 @@ export class TareService {
         deployment: this.config.baseCustodyDeployment!,
         rpcUrl: this.config.baseRpcUrl!,
         secondaryRpcUrl: this.config.baseSecondaryRpcUrl!,
+        ...(request.blockNumber === undefined ? {} : { blockNumber: request.blockNumber }),
+      });
+      case 'value-position': return valuePositionWithChainlink({
+        rpcUrl: rpcUrl!, chainId: request.chainId, asset: request.asset, amountRaw: request.amountRaw,
+        assetDecimals: request.assetDecimals,
         ...(request.blockNumber === undefined ? {} : { blockNumber: request.blockNumber }),
       });
     }

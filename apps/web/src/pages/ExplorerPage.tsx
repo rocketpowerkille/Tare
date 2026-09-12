@@ -5,8 +5,10 @@ import { ExamplePanel } from '../components/explorer/ExamplePanel';
 import { OperationForm, type AnalyzeInput } from '../components/explorer/OperationForm';
 import { ReplayPanel } from '../components/explorer/ReplayPanel';
 import { ReportView } from '../components/explorer/ReportView';
+import { ComprehensiveReportView } from '../components/explorer/ComprehensiveReportView';
 import { api, ApiError } from '../lib/api';
-import type { AccessOptions, Capabilities, DiscoveryResult, JsonRecord, OperationId } from '../lib/types';
+import { runComprehensiveCheck } from '../lib/comprehensive';
+import type { AccessOptions, Capabilities, DiscoveryResult, JsonRecord, OperationId, PositionAnalyzeInput } from '../lib/types';
 
 export function ExplorerPage() {
   const [token, setToken] = useState('');
@@ -56,7 +58,11 @@ export function ExplorerPage() {
   }
 
   function analyze(input: AnalyzeInput) {
-    void run('Reading public evidence. Some live checks may take a few minutes.', () => api.analyze(token, input));
+    const positionCheck = ['resolve-v1', 'resolve-v2', 'resolve-erc4626'].includes(input.operation)
+      && input.owner !== undefined && input.vault !== undefined;
+    void run('Running the position trace and every eligible partner check.', () => positionCheck && capabilities
+      ? runComprehensiveCheck(token, capabilities, input as PositionAnalyzeInput)
+      : api.analyze(token, input));
   }
 
   function clearQueryResult() {
@@ -94,7 +100,7 @@ export function ExplorerPage() {
         </div>
         <section className="result-panel" aria-label="Evidence result">
           <div className="activity-line" role="status" aria-live="polite">{busy ? <LoaderCircle className="spin" size={16} /> : <Radio size={16} />}<span>{activity}</span></div>
-          {report ? <ReportView report={report} /> : <div className="result-empty"><div className="empty-symbol"><FileSearch size={31} /></div><h2>Your answer will appear here.</h2><p>Tare will explain what it found, what remains unknown, and what you should review next.</p><button className="text-button" type="button" onClick={() => document.getElementById('example')?.focus()}>Try a saved example <ArrowRight size={16} /></button></div>}
+          {report ? (report.reportType === 'comprehensive-position-check' ? <ComprehensiveReportView report={report} /> : <ReportView report={report} />) : <div className="result-empty"><div className="empty-symbol"><FileSearch size={31} /></div><h2>Your answer will appear here.</h2><p>Tare will explain what it found, what remains unknown, and what you should review next.</p><button className="text-button" type="button" onClick={() => document.getElementById('example')?.focus()}>Try a saved example <ArrowRight size={16} /></button></div>}
         </section>
       </div>
     </>}
