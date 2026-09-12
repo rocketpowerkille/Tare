@@ -36,7 +36,7 @@ deadline and is no longer a submission dependency.
 | The Graph | Custom share/accounting mappings build and pass real local Graph Node rollback tests. The deadline-safe `tare-live-accounting` Studio deployment originally matched all 56 Graph observations to same-block RPC at Ethereum block `25953771`. A fresh acceptance on 2026-09-12 found that RPC-first pinning could outrun the indexer or exceed free-RPC history. Unpinned verification now anchors on the current Graph head, confirms its hash through RPC, and again matches 56/56 with zero findings. | Redeploy Render, then run `pnpm verify:hosted:graph`. Use this bounded current-accounting result for submission. The full-history ledger cannot finish before the deadline and is post-submission only. Do not claim historical share reconstruction. |
 | Chainlink CRE | The TypeScript workflow compiles to WASM, reads private secrets, acquires authenticated HTTPS evidence and submits a confidential consensus report. Private-registry revision `0024de…e3bd` completed an EVM write through the production Base Sepolia Keystone Forwarder. Current paused revision `00fe…0a48` points to the permanent Render API with execution disabled. | Preserve both the historical exit record and current safe hosted binding. A security audit and mainnet use are explicitly outside the current claim. |
 | Base Sepolia execution | Two-provider allowlisted-bytecode verification matched a 2.000000x control. Five deterministic failure/replay cases reverted. A separate hosted receiver redeemed exactly 100 outer shares for 100 inner shares through Chainlink transaction `0x65549c…b95f9`; allowance and permit shares became zero and nonce advanced to 2. | Both disposable control positions are consumed. Create another only if a new live demo is genuinely required. The contracts use test assets and are not production audited. |
-| Bazantic | Gateway `zvnss2njirhqjllnbfsv3sneca` is live against the Render API. Its generated MCP server exposes status plus compact analyze/example tools. The published `DeFi Vault Backing Evidence Evaluator` Recipe completed retained and live Base Sepolia runs without payment. In the controlled live comparison it matched the raw baseline's correct result in `19,513 ms` and `6,685` tokens versus `28,419 ms` and `8,107` tokens, and produced a more standardized evidence report. The repository now publishes a narrow OpenAPI contract for The Graph Studio and an exact two-service Recipe flow. | After the Render redeploy, add the second The Graph gateway and bind both services using [the multi-service runbook](BAZANTIC_MULTI_SERVICE.md). This external account action is required for both Bazantic prizes that are not marked Continuity-only. Do not fund the Base-mainnet payment account while testnet support remains unresolved. |
+| Bazantic | Gateway `zvnss2njirhqjllnbfsv3sneca` is live against the Render API. The compact contract now exposes wallet discovery, status, analysis and retained-example tools. The published `DeFi Vault Backing Evidence Evaluator` Recipe completed retained and live Base Sepolia runs without payment. In the controlled live comparison it matched the raw baseline's correct result in `19,513 ms` and `6,685` tokens versus `28,419 ms` and `8,107` tokens, and produced a more standardized evidence report. Bazantic has now enabled Base Sepolia sandbox settlement. The repository also publishes a narrow OpenAPI contract for The Graph Studio and an exact two-service Recipe flow. | Redeploy Render, refresh the Tare gateway, enable sandbox mode and complete a paid Base Sepolia acceptance. Then add the second The Graph gateway and bind both services using [the multi-service runbook](BAZANTIC_MULTI_SERVICE.md). These external account actions are required to finish the eligible Bazantic paths. |
 | Monitoring | Local TypeScript Substreams consumer, checkpoints, deduplication, reorg rollback and evidence evaluation are implemented. | Hosted provider credentials, deployment and operational acceptance are pending. |
 | Interfaces/UI | CLI, protected HTTP API and stdio MCP server are functional. The modular React application is live on Render with Home, Explore, Learn and Developers routes, guided Base Sepolia analysis, recorded replay, beginner documentation and honest SDK status. Hosted routes, browser accessibility trees, authenticated status and compact-example checks pass. | Complete a dedicated mobile-width visual pass. Render's free instance may cold-start. |
 
@@ -49,7 +49,7 @@ if a future custom Substreams extraction module is justified; see
 
 Latest local acceptance in this workspace:
 
-- `pnpm verify`: **132/132** Node tests passed, followed by all required demos and
+- `pnpm verify`: **133/133** Node tests passed, followed by all required demos and
   the retained Ethereum capture replay.
 - CRE workflow suite: **12/12** tests passed in the Bun-enabled environment; the
   official SDK compiled the workflow to `.tare/cre/tare-policy.wasm`.
@@ -60,11 +60,14 @@ Latest local acceptance in this workspace:
   and rejected caller/payload/replay cases are recorded in the deployment manifests.
 - Hosted CRE: trigger, authenticated HTTP, consensus report and Base Sepolia
   `WriteReport` capabilities succeeded. The following post-exit run made no EVM write.
-- Bazantic: the hosted gateway generated a live four-tool MCP surface. The
+- Bazantic: the hosted gateway generated the original four-tool MCP surface. The
   published Recipe called `/api/status` and `/api/agent-example` successfully;
   its retained report kept the recorded-source and unverified-backing limitations
   and returned `needs_review`. The agent projection stays below 4 KiB for all
   three retained examples while the original full API receipts remain unchanged.
+  The current contract adds `tare_discover_vaults`; refresh the gateway after the
+  Render deployment to generate the fifth tool. Base Sepolia sandbox settlement
+  is now available for a paid-path acceptance.
 - Bazantic controlled comparison: raw baseline and published Recipe used the same
   live Base Sepolia custody question, owner, model and enabled Tare tools. Both
   correctly found no currently executable, independently verified position. The

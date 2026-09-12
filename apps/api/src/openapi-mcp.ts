@@ -12,13 +12,38 @@ export const mcpOpenapi = {
   info: {
     title: 'Tare agent tools',
     version: '1.0.0',
-    description: 'Read-only tools for inspecting Tare capabilities, acquiring evidence and replaying retained examples.',
+    description: 'Read-only tools for finding supported vaults, acquiring evidence and replaying retained examples.',
   },
   paths: {
     '/api/status': {
       get: {
         operationId: 'tare_status',
         summary: 'Inspect available Tare evidence capabilities.',
+        responses: { '200': success },
+      },
+    },
+    '/api/discover': {
+      post: {
+        operationId: 'tare_discover_vaults',
+        summary: 'Find indexed MetaMorpho V1 vault candidates for a public wallet address.',
+        description: 'Candidate discovery uses Morpho indexed current state. Confirm a selected vault with tare_analyze_compact.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                additionalProperties: false,
+                required: ['owner'],
+                properties: {
+                  owner: address,
+                  vault: { ...address, description: 'Optional MetaMorpho V1 vault filter.' },
+                  maxPositions: { type: 'integer', minimum: 1, maximum: 100, default: 25 },
+                },
+              },
+            },
+          },
+        },
         responses: { '200': success },
       },
     },

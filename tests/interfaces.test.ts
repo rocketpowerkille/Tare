@@ -135,7 +135,12 @@ test('configuration stays private, OpenAPI describes strict requests, and explor
       paths: Record<string, unknown>;
     };
     assert.equal(mcpSchema.openapi, '3.0.0');
-    assert.deepEqual(Object.keys(mcpSchema.paths).sort(), ['/api/agent-analyze', '/api/agent-example', '/api/status']);
+    assert.deepEqual(Object.keys(mcpSchema.paths).sort(), ['/api/agent-analyze', '/api/agent-example', '/api/discover', '/api/status']);
+    const discoveryTool = mcpSchema.paths['/api/discover'] as {
+      post: { operationId: string; requestBody: { content: Record<string, { schema: { required: string[] } }> } };
+    };
+    assert.equal(discoveryTool.post.operationId, 'tare_discover_vaults');
+    assert.deepEqual(discoveryTool.post.requestBody.content['application/json']?.schema.required, ['owner']);
     assert.ok(!JSON.stringify(mcpSchema).includes('additionalProperties":true'));
     assert.deepEqual(await (await fetch(`${url}/openapi-mcp-v2.json`)).json(), mcpSchema);
     assert.deepEqual(await (await fetch(`${url}/openapi-mcp-v3.json`)).json(), mcpSchema);

@@ -23,6 +23,30 @@ Tare.
 5. Add that gateway and the existing Tare gateway to a new Recipe.
 6. Enable only the Graph status tool and Tare's compact live-analysis tool.
 
+## Base Sepolia sandbox acceptance
+
+Bazantic enabled Base Sepolia sandbox settlement for the hackathon. After the
+latest Render deployment, refresh or resave the existing Tare gateway so its MCP
+server exposes `tare_discover_vaults` alongside status, compact analysis and the
+compact retained example.
+
+1. Open the Tare gateway and choose `Actions`, then `Turn sandbox mode on`.
+2. Save the gateway and wait for its MCP server to finish provisioning.
+3. Confirm the payment quote names Base Sepolia and test USDC before approving it.
+4. Call `tare_status` first to prove the paid request lifecycle with the smallest
+   response.
+5. Call `tare_discover_vaults` with owner
+   `0x9fc3dc011b461664c835f2527fffb1169b3c213e`. The indexed result should include
+   Steakhouse USDC at `0xbeef01735c132ada46aa9aa4c54623caa92a64cb`.
+6. Call `tare_analyze_compact` with that owner, vault and operation `resolve-v1`.
+   The result must identify fresh Ethereum evidence and retain the independent
+   backing and valuation limitations.
+
+Save evidence of the Base Sepolia quote, completed payment lifecycle, HTTP 200
+response and final conservative result. Sandbox settlement proves the Bazantic
+payment path; the Tare evidence operation can still read Ethereum because payment
+network and evidence network are separate concerns.
+
 ## Recipe text
 
 Use the following as the Recipe goal. If Bazantic changes generated tool names,

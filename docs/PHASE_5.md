@@ -5,8 +5,9 @@ complete. The Docker service and rebuilt modular browser application are live at
 `https://tare-api.onrender.com`; public health, anonymous rejection, authenticated
 status, compact retained replay and two-provider Base Sepolia acquisition passed.
 Home, Explore, Learn and Developers also pass hosted route and browser
-accessibility-tree acceptance. The Bazantic gateway exposes the compact Tare tools,
-and the published Recipe completed retained and fresh Base Sepolia runs. Phase four's deadline-safe
+accessibility-tree acceptance. The Bazantic contract exposes five compact Tare
+tools, including wallet discovery. The published Recipe completed retained and
+fresh Base Sepolia runs. Phase four's deadline-safe
 hosted accounting acceptance is complete; its separate full-history share-ledger
 acceptance remains open.
 
