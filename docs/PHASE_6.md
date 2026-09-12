@@ -20,6 +20,8 @@ pnpm verify:hosted:graph-products
 The hosted command uses the known public Steakhouse USDC position. A successful
 acceptance must report two live Graph products, equal Token API and RPC share
 balances, a matched Studio accounting result, 56 accounting reads and no findings.
+Tare defaults to the current Token API provider contract at
+`https://api.pinax.network`; `TARE_GRAPH_TOKEN_API_URL` remains an explicit override.
 
 ## Run
 

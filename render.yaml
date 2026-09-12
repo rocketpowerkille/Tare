@@ -36,6 +36,8 @@ services:
         value: QmWSiZRvaFzYkohhsM2D9yHD4Nc7ZnZFRWz8pUcwfQi3j2
       - key: GRAPH_MARKET_API_TOKEN
         sync: false
+      - key: TARE_GRAPH_TOKEN_API_URL
+        value: https://api.pinax.network
       - key: TARE_BASE_RPC_URL
         value: https://sepolia.base.org
       - key: TARE_BASE_SECONDARY_RPC_URL

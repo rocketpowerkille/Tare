@@ -203,7 +203,7 @@ export class TareService {
       case 'verify-accounting': return verifyAccounting({ ...graph, vault: request.vault }, graphApiKey);
       case 'verify-graph-composition': return verifyGraphComposition({
         ...graph, owner: request.owner, vault: request.vault,
-        tokenApiUrl: tokenApiUrl ?? 'https://token-api.thegraph.com',
+        tokenApiUrl: tokenApiUrl ?? 'https://api.pinax.network',
       }, graphMarketToken!, graphApiKey);
       case 'verify-weth': return verifyWethCustody({ ...rpc, owner: request.owner, secondaryRpcUrl: secondaryRpcUrl! });
       case 'verify-base-custody': return verifyBaseSepoliaCustody({

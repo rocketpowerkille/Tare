@@ -17,7 +17,7 @@ export async function runGraphCompositionCommand(positionals: string[], values: 
       vault: required(stringOption(values, 'vault'), '--vault'),
       rpcUrl: required(stringOption(values, 'rpc-url') ?? process.env.TARE_RPC_URL, '--rpc-url or TARE_RPC_URL'),
       graphUrl: required(stringOption(values, 'graph-url') ?? process.env.TARE_GRAPH_URL, '--graph-url or TARE_GRAPH_URL'),
-      tokenApiUrl: stringOption(values, 'token-api-url') ?? process.env.TARE_GRAPH_TOKEN_API_URL ?? 'https://token-api.thegraph.com',
+      tokenApiUrl: stringOption(values, 'token-api-url') ?? process.env.TARE_GRAPH_TOKEN_API_URL ?? 'https://api.pinax.network',
       ...((stringOption(values, 'graph-deployment') ?? process.env.TARE_GRAPH_DEPLOYMENT)
         ? { expectedDeployment: stringOption(values, 'graph-deployment') ?? process.env.TARE_GRAPH_DEPLOYMENT! } : {}),
       timeoutMs: integerOption(values, 'timeout-ms', 10000),

@@ -33,7 +33,7 @@ export const GraphCompositionOptionsSchema = z.strictObject({
   vault: AddressSchema,
   rpcUrl: z.string().min(1),
   graphUrl: z.string().min(1),
-  tokenApiUrl: z.string().min(1).default('https://token-api.thegraph.com'),
+  tokenApiUrl: z.string().min(1).default('https://api.pinax.network'),
   expectedDeployment: DeploymentSchema.optional(),
   timeoutMs: z.number().int().min(100).max(60000).default(10000),
 });
