@@ -6,6 +6,7 @@ const sections = [
   ['how-it-works', 'How it works'],
   ['reading-a-report', 'Read a report'],
   ['using-the-explorer', 'Use the explorer'],
+  ['access', 'Access'],
   ['limits', 'Limits and safety'],
   ['faq', 'Common questions'],
 ];
@@ -65,6 +66,18 @@ export function DocsPage() {
         <AppLink href="/explore" className="button primary">Open the explorer <ArrowRight size={17} /></AppLink>
       </section>
 
+      <section className="doc-section" id="access">
+        <p className="section-label">Access</p><h2>Use a code or pay with test USDC</h2>
+        <p>Tare is in private beta. You can enter an access code, or create a short-lived Explorer session through the Bazantic sandbox.</p>
+        <ol className="numbered-steps">
+          <li><span>1</span><div><strong>Open Bazantic Playground</strong><p>Select the Tare gateway and choose the Start sandbox session operation.</p></div></li>
+          <li><span>2</span><div><strong>Send an empty JSON object</strong><p>Bazantic quotes and settles the request using Base Sepolia test USDC. No mainnet funds are used.</p></div></li>
+          <li><span>3</span><div><strong>Copy the access token</strong><p>Paste the returned token into Tare Explorer. It is kept only in the current browser tab and expires after a short period.</p></div></li>
+        </ol>
+        <div className="callout safe"><LockKeyhole size={21} /><div><strong>Testnet only.</strong><p>Mainnet payment access is a future stretch goal and is not enabled in this release.</p></div></div>
+        <a className="text-link" href="https://bazantic.com/playground" target="_blank" rel="noreferrer">Open Bazantic Playground <ArrowRight size={16} /></a>
+      </section>
+
       <section className="doc-section" id="limits">
         <p className="section-label">Limits and safety</p><h2>What Tare does not claim</h2>
         <ul className="check-list muted-list">
@@ -81,7 +94,7 @@ export function DocsPage() {
         <div className="faq-list">
           <details><summary>Does Tare move money?</summary><p>No. The public explorer and API are read only. A separate bounded testnet execution component exists for controlled Chainlink workflow testing, but it is not exposed through this explorer.</p></details>
           <details><summary>Why can a report be incomplete?</summary><p>A provider may be unavailable, the requested position may be empty, two observations may disagree, or the requested proof may be outside Tare's current scope. Incomplete is a useful result because it prevents unsupported claims.</p></details>
-          <details><summary>Can I use Tare without technical knowledge?</summary><p>Yes. For the standard Ethereum position check, enter your public wallet and vault addresses and press Check this position. Start with What this means, What to do next, and What remains unknown. The technical sections are optional.</p></details>
+          <details><summary>Can I use Tare without technical knowledge?</summary><p>Yes. Enter your public wallet address and let Tare find supported vault candidates. Choose one and press Check this position. Start with What this means, What to do next, and What remains unknown. The technical sections are optional.</p></details>
           <details><summary>Can Tare find all of my vaults from my wallet?</summary><p>Tare can find indexed MetaMorpho V1 candidates. It is not a general wallet portfolio scanner, and an empty search does not prove that the wallet has no positions. Every selected candidate is checked with direct blockchain reads before Tare reports it.</p></details>
           <details><summary>Is there an SDK?</summary><p>There is no published Tare SDK yet. Developers can use the HTTP API, OpenAPI contract, MCP server, or command line interface.</p></details>
         </div>

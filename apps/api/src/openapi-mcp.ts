@@ -22,6 +22,22 @@ export const mcpOpenapi = {
         responses: { '200': success },
       },
     },
+    '/api/bazantic/session': {
+      post: {
+        operationId: 'tare_start_bazantic_sandbox_session',
+        summary: 'Start a short-lived Tare Explorer session after a Bazantic Base Sepolia sandbox payment.',
+        description: 'This access path is testnet only. Mainnet payment access is not enabled.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { type: 'object', additionalProperties: false, properties: {} },
+            },
+          },
+        },
+        responses: { '200': success },
+      },
+    },
     '/api/discover': {
       post: {
         operationId: 'tare_discover_vaults',

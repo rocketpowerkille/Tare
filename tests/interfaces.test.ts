@@ -123,7 +123,7 @@ test('configuration stays private, OpenAPI describes strict requests, and explor
       paths: Record<string, { post?: { requestBody?: { content?: Record<string, { schema?: unknown }> } } }>;
     };
     assert.equal(schema.openapi, '3.0.3');
-    assert.deepEqual(Object.keys(schema.paths).sort(), ['/api/agent-analyze', '/api/agent-example', '/api/analyze', '/api/compose', '/api/discover', '/api/example', '/api/replay', '/api/status', '/healthz']);
+    assert.deepEqual(Object.keys(schema.paths).sort(), ['/api/access-options', '/api/agent-analyze', '/api/agent-example', '/api/analyze', '/api/bazantic/session', '/api/compose', '/api/discover', '/api/example', '/api/replay', '/api/status', '/healthz']);
     for (const route of Object.values(schema.paths)) {
       const requestSchema = route.post?.requestBody?.content?.['application/json']?.schema as { type?: string } | undefined;
       if (requestSchema) assert.equal(requestSchema.type, 'object');
@@ -135,7 +135,7 @@ test('configuration stays private, OpenAPI describes strict requests, and explor
       paths: Record<string, unknown>;
     };
     assert.equal(mcpSchema.openapi, '3.0.0');
-    assert.deepEqual(Object.keys(mcpSchema.paths).sort(), ['/api/agent-analyze', '/api/agent-example', '/api/discover', '/api/status']);
+    assert.deepEqual(Object.keys(mcpSchema.paths).sort(), ['/api/agent-analyze', '/api/agent-example', '/api/bazantic/session', '/api/discover', '/api/status']);
     const discoveryTool = mcpSchema.paths['/api/discover'] as {
       post: { operationId: string; requestBody: { content: Record<string, { schema: { required: string[] } }> } };
     };

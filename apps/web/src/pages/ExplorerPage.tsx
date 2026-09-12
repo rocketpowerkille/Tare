@@ -6,10 +6,11 @@ import { OperationForm, type AnalyzeInput } from '../components/explorer/Operati
 import { ReplayPanel } from '../components/explorer/ReplayPanel';
 import { ReportView } from '../components/explorer/ReportView';
 import { api, ApiError } from '../lib/api';
-import type { Capabilities, DiscoveryResult, JsonRecord, OperationId } from '../lib/types';
+import type { AccessOptions, Capabilities, DiscoveryResult, JsonRecord, OperationId } from '../lib/types';
 
 export function ExplorerPage() {
   const [token, setToken] = useState('');
+  const [accessOptions, setAccessOptions] = useState<AccessOptions>();
   const [capabilities, setCapabilities] = useState<Capabilities>();
   const [authRequired, setAuthRequired] = useState(false);
   const [connecting, setConnecting] = useState(true);
@@ -33,7 +34,10 @@ export function ExplorerPage() {
     } finally { setConnecting(false); }
   }
 
-  useEffect(() => { void connect(''); }, []);
+  useEffect(() => {
+    void api.accessOptions().then(setAccessOptions).catch(() => undefined);
+    void connect('');
+  }, []);
 
   async function run(label: string, task: () => Promise<JsonRecord>) {
     if (busy) return;
@@ -78,7 +82,7 @@ export function ExplorerPage() {
       <div className="service-state"><span className={capabilities ? 'network-dot' : 'network-dot offline'} /><div><strong>{capabilities ? 'Service ready' : 'Connection needed'}</strong><span>{capabilities ? `${Object.values(capabilities.live).filter(Boolean).length} live checks configured` : 'Connect to continue'}</span></div></div>
     </header>
 
-    {authRequired && <AccessPanel onConnect={value => void connect(value)} error={error || undefined} />}
+    {authRequired && <AccessPanel options={accessOptions} onConnect={value => void connect(value)} error={error || undefined} />}
     {error && !authRequired && <div className="error-banner" role="alert"><AlertCircle size={20} /><div><strong>We could not complete that request.</strong><p>{error}</p></div></div>}
 
     {capabilities && <>

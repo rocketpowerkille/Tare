@@ -7,6 +7,17 @@ import { ServiceError } from '../packages/service/src/requests.js';
 import { withApi } from './helpers/api.js';
 
 const hosted = { origin: 'https://tare.test', keys: { alpha: 'a'.repeat(40), beta: 'b'.repeat(40) }, requestsPerMinute: 2 };
+const sandboxHosted = {
+  origin: 'https://tare.test',
+  keys: { bazantic: 'g'.repeat(40), member: 'm'.repeat(40) },
+  requestsPerMinute: 10,
+  bazanticSandbox: {
+    clientId: 'bazantic',
+    sessionSecret: 's'.repeat(40),
+    gatewayUrl: 'https://tare-sandbox.bazgateway.com',
+    sessionMinutes: 1,
+  },
+};
 
 function send(url: string, path: string, headers: Record<string, string> = {}, body?: string) {
   return new Promise<{ status: number; headers: IncomingMessage['headers']; body: string }>((resolve, reject) => {
@@ -69,6 +80,46 @@ test('hosted origin checks ignore spoofed proxy headers and protect every API op
   }, undefined, hosted);
 });
 
+test('Bazantic sandbox payment route issues a short-lived testnet-only Explorer session', async () => {
+  await withApi(async url => {
+    const options = await send(url, '/api/access-options');
+    assert.equal(options.status, 200);
+    assert.deepEqual(JSON.parse(options.body), {
+      privateBeta: true,
+      bazanticSandbox: {
+        enabled: true,
+        network: 'base-sepolia',
+        gatewayUrl: sandboxHosted.bazanticSandbox.gatewayUrl,
+        sessionPath: '/api/bazantic/session',
+        sessionSeconds: 60,
+      },
+    });
+    assert.ok(!options.body.includes(sandboxHosted.bazanticSandbox.sessionSecret));
+    assert.ok(!options.body.includes(sandboxHosted.keys.bazantic));
+
+    const jsonHeaders = { 'content-type': 'application/json' };
+    assert.equal((await send(url, '/api/bazantic/session', jsonHeaders, '{}')).status, 401);
+    assert.equal((await send(url, '/api/bazantic/session', {
+      ...jsonHeaders, authorization: `Bearer ${sandboxHosted.keys.member}`,
+    }, '{}')).status, 403);
+    assert.equal((await send(url, '/api/bazantic/session', {
+      ...jsonHeaders, authorization: `Bearer ${sandboxHosted.keys.bazantic}`,
+    }, '{"network":"mainnet"}')).status, 400);
+
+    const issued = await send(url, '/api/bazantic/session', {
+      ...jsonHeaders, authorization: `Bearer ${sandboxHosted.keys.bazantic}`,
+    }, '{}');
+    assert.equal(issued.status, 200);
+    const session = JSON.parse(issued.body) as { accessToken: string; network: string; expiresInSeconds: number };
+    assert.match(session.accessToken, /^tare_sandbox_v1\./);
+    assert.equal(session.network, 'base-sepolia');
+    assert.equal(session.expiresInSeconds, 60);
+    assert.equal((await send(url, '/api/status', { authorization: `Bearer ${session.accessToken}` })).status, 200);
+    const tampered = `${session.accessToken.slice(0, -1)}${session.accessToken.endsWith('a') ? 'b' : 'a'}`;
+    assert.equal((await send(url, '/api/status', { authorization: `Bearer ${tampered}` })).status, 401);
+  }, undefined, sandboxHosted);
+});
+
 test('client quotas reset without accumulating arbitrary identities; access config fails closed', () => {
   let now = 0;
   const access = new ApiAccess(hosted, () => now);
@@ -89,4 +140,37 @@ test('client quotas reset without accumulating arbitrary identities; access conf
     RENDER: 'true', RENDER_EXTERNAL_URL: 'https://tare-api.onrender.com',
     TARE_API_KEYS: JSON.stringify(hosted.keys),
   })?.origin, 'https://tare-api.onrender.com');
+});
+
+test('Bazantic sandbox sessions expire and partial environment configuration fails closed', () => {
+  let now = 1_000_000;
+  const access = new ApiAccess(sandboxHosted, () => now);
+  const gatewayRequest = { headers: { host: 'tare.test', authorization: `Bearer ${sandboxHosted.keys.bazantic}` }, socket: {} } as IncomingMessage;
+  const identity = access.check(gatewayRequest, true);
+  const issued = access.issueBazanticSession(identity);
+  const sessionRequest = { headers: { host: 'tare.test', authorization: `Bearer ${issued.accessToken}` }, socket: {} } as IncomingMessage;
+  assert.equal(access.check(sessionRequest, true)?.kind, 'bazantic-sandbox-session');
+  now += 60_000;
+  assert.throws(() => access.check(sessionRequest, true), (error: unknown) => error instanceof ServiceError && error.code === 'unauthorized');
+
+  const parsed = accessFromEnv({
+    TARE_PUBLIC_ORIGIN: sandboxHosted.origin,
+    TARE_API_KEYS: JSON.stringify(sandboxHosted.keys),
+    TARE_BAZANTIC_CLIENT_ID: sandboxHosted.bazanticSandbox.clientId,
+    TARE_BAZANTIC_SESSION_SECRET: sandboxHosted.bazanticSandbox.sessionSecret,
+    TARE_BAZANTIC_GATEWAY_URL: sandboxHosted.bazanticSandbox.gatewayUrl,
+    TARE_BAZANTIC_SESSION_MINUTES: '1',
+  });
+  assert.equal(parsed?.bazanticSandbox?.gatewayUrl, sandboxHosted.bazanticSandbox.gatewayUrl);
+  assert.equal(accessFromEnv({
+    TARE_PUBLIC_ORIGIN: sandboxHosted.origin,
+    TARE_API_KEYS: JSON.stringify(sandboxHosted.keys),
+    TARE_BAZANTIC_GATEWAY_URL: sandboxHosted.bazanticSandbox.gatewayUrl,
+    TARE_BAZANTIC_SESSION_MINUTES: '15',
+  })?.bazanticSandbox, undefined);
+  assert.throws(() => accessFromEnv({
+    TARE_PUBLIC_ORIGIN: sandboxHosted.origin,
+    TARE_API_KEYS: JSON.stringify(sandboxHosted.keys),
+    TARE_BAZANTIC_CLIENT_ID: sandboxHosted.bazanticSandbox.clientId,
+  }));
 });

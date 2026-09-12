@@ -34,6 +34,17 @@ export interface DiscoveryResult {
   positions: DiscoveredPosition[];
 }
 
+export interface AccessOptions {
+  privateBeta: boolean;
+  bazanticSandbox: null | {
+    enabled: true;
+    network: 'base-sepolia';
+    gatewayUrl: string;
+    sessionPath: string;
+    sessionSeconds: number;
+  };
+}
+
 export type OperationId =
   | 'resolve-v1'
   | 'resolve-v2'

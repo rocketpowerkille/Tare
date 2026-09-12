@@ -13,6 +13,7 @@ const operations = [
   'verify-weth', 'verify-base-custody',
 ] as const;
 const genericObject = { type: 'object', additionalProperties: true } as const;
+const emptyObject = { type: 'object', additionalProperties: false, properties: {} } as const;
 
 const analyzeSchema = {
   type: 'object',
@@ -98,9 +99,21 @@ export const openapi = {
   paths: {
     '/healthz': { get: { operationId: 'tare_health', summary: 'Check whether the API process is accepting requests.',
       security: [], responses: { '200': { description: 'The API process is healthy.' } } } },
+    '/api/access-options': { get: {
+      operationId: 'tare_access_options',
+      summary: 'List the access methods available for this Tare deployment.',
+      security: [],
+      responses: { '200': { description: 'Public access configuration with no credentials or secrets.',
+        content: { 'application/json': { schema: genericObject } } } },
+    } },
     '/api/status': { get: { operationId: 'tare_status', summary: 'List configured capabilities, limits and retained evidence examples.',
       responses: { '200': { description: 'Capability flags; configured does not mean independently verified.',
         content: { 'application/json': { schema: genericObject } } } } } },
+    '/api/bazantic/session': { post: postOperation(
+      'tare_start_bazantic_sandbox_session',
+      'Start a short-lived Tare session after a Bazantic Base Sepolia sandbox payment.',
+      emptyObject,
+    ) },
     '/api/discover': { post: postOperation('tare_discover', 'Find indexed MetaMorpho V1 vault candidates for a wallet.', discoverSchema) },
     '/api/analyze': { post: postOperation('tare_analyze', 'Acquire fresh read-only Ethereum or Base Sepolia evidence.', analyzeSchema) },
     '/api/agent-analyze': { post: postOperation('tare_analyze_compact', 'Acquire a compact agent report from fresh read-only evidence.', analyzeSchema) },

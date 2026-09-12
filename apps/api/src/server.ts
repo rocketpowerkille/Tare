@@ -70,12 +70,14 @@ export function createApiServer(service = new TareService(), hosted?: HostedConf
 
   async function route(request: IncomingMessage, response: ServerResponse) {
     const path = new URL(request.url ?? '/', 'http://tare.local').pathname;
-    access.check(request, path.startsWith('/api/'));
+    const publicAccessOptions = path === '/api/access-options';
+    const identity = access.check(request, path.startsWith('/api/') && !publicAccessOptions);
     const asset = await webAsset(path);
-    if (path === '/healthz' || path === '/api/status' || specificationPaths.has(path) || asset) {
+    if (path === '/healthz' || path === '/api/status' || publicAccessOptions || specificationPaths.has(path) || asset) {
       if (request.method !== 'GET') throw new ServiceError(405, 'method-not-allowed', 'Use GET.');
       if (path === '/healthz') return json(response, 200, { status: 'ok' });
       if (path === '/api/status') return json(response, 200, service.capabilities());
+      if (publicAccessOptions) return json(response, 200, access.accessOptions());
       if (specificationPaths.has(path)) {
         if (path === '/openapi-graph.json') return json(response, 200, graphOpenapi);
         const isMcpSpecification = path !== '/openapi.json';
@@ -93,6 +95,14 @@ export function createApiServer(service = new TareService(), hosted?: HostedConf
       response.writeHead(200, { 'content-type': asset.type });
       response.end(asset.data);
       return;
+    }
+    if (path === '/api/bazantic/session') {
+      if (request.method !== 'POST') throw new ServiceError(405, 'method-not-allowed', 'Use POST.');
+      const input = await readBody(request);
+      if (typeof input !== 'object' || input === null || Array.isArray(input) || Object.keys(input).length !== 0) {
+        throw new ServiceError(400, 'invalid-input', 'Use an empty JSON object.');
+      }
+      return json(response, 200, access.issueBazanticSession(identity));
     }
     const action = path.slice('/api/'.length);
     const compactAction = action === 'agent-analyze' ? 'analyze' : action === 'agent-example' ? 'example' : null;
