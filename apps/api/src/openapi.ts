@@ -26,6 +26,16 @@ const analyzeSchema = {
     blockNumber,
   },
 } as const;
+const discoverSchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['owner'],
+  description: 'Find indexed MetaMorpho V1 vault candidates for a public wallet address. Results are discovery hints and are confirmed by a separate live analysis.',
+  properties: {
+    owner: address,
+    maxPositions: { type: 'integer', minimum: 1, maximum: 100, default: 25 },
+  },
+} as const;
 const replaySchema = {
   type: 'object',
   additionalProperties: false,
@@ -91,6 +101,7 @@ export const openapi = {
     '/api/status': { get: { operationId: 'tare_status', summary: 'List configured capabilities, limits and retained evidence examples.',
       responses: { '200': { description: 'Capability flags; configured does not mean independently verified.',
         content: { 'application/json': { schema: genericObject } } } } } },
+    '/api/discover': { post: postOperation('tare_discover', 'Find indexed MetaMorpho V1 vault candidates for a wallet.', discoverSchema) },
     '/api/analyze': { post: postOperation('tare_analyze', 'Acquire fresh read-only Ethereum or Base Sepolia evidence.', analyzeSchema) },
     '/api/agent-analyze': { post: postOperation('tare_analyze_compact', 'Acquire a compact agent report from fresh read-only evidence.', analyzeSchema) },
     '/api/replay': { post: postOperation('tare_replay', 'Recalculate an unsigned evidence capture without making network requests.', replaySchema) },

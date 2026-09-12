@@ -8,7 +8,8 @@ import { verifyBaseSepoliaCustody, replayBaseSepoliaCustody } from '../../verifi
 import { BaseSepoliaCustodyDeploymentSchema } from '../../verification/src/base-sepolia-custody-capture.js';
 import type { BaseSepoliaCustodyDeployment } from '../../verification/src/base-sepolia-custody-capture.js';
 import { readJsonFile } from '../../sources/src/snapshot.js';
-import { AnalyzeSchema, ReplaySchema, ExampleSchema, MAX_INPUT_BYTES, ServiceError } from './requests.js';
+import { MorphoDiscovery } from '../../sources/src/morpho.js';
+import { AnalyzeSchema, DiscoverSchema, ReplaySchema, ExampleSchema, MAX_INPUT_BYTES, ServiceError } from './requests.js';
 import { composePosition } from './composition.js';
 
 export interface ServiceConfig {
@@ -17,6 +18,7 @@ export interface ServiceConfig {
   graphUrl?: string;
   expectedDeployment?: string;
   graphApiKey?: string;
+  morphoUrl?: string;
   baseRpcUrl?: string;
   baseSecondaryRpcUrl?: string;
   baseCustodyDeployment?: BaseSepoliaCustodyDeployment;
@@ -26,6 +28,7 @@ export function configFromEnv(env: NodeJS.ProcessEnv = process.env): ServiceConf
     rpcUrl: env.TARE_RPC_URL, secondaryRpcUrl: env.TARE_SECONDARY_RPC_URL,
     graphUrl: env.TARE_GRAPH_URL, expectedDeployment: env.TARE_GRAPH_DEPLOYMENT,
     graphApiKey: env.GRAPH_API_KEY,
+    morphoUrl: env.TARE_MORPHO_URL,
     baseRpcUrl: env.TARE_BASE_RPC_URL, baseSecondaryRpcUrl: env.TARE_BASE_SECONDARY_RPC_URL,
   }).filter((entry): entry is [string, string] => Boolean(entry[1])));
   if (env.TARE_BASE_CUSTODY_DEPLOYMENT) {
@@ -67,7 +70,7 @@ export class TareService {
   }
 
   // Shared across transports: requests cannot choose provider URLs, paths or credentials.
-  async run(action: 'analyze' | 'replay' | 'example' | 'compose', input: unknown): Promise<unknown> {
+  async run(action: 'analyze' | 'discover' | 'replay' | 'example' | 'compose', input: unknown): Promise<unknown> {
     const serialized = JSON.stringify(input);
     if (!serialized || Buffer.byteLength(serialized) > MAX_INPUT_BYTES) {
       throw new ServiceError(413, 'input-too-large', 'Input exceeds the 5 MiB limit.');
@@ -76,6 +79,7 @@ export class TareService {
     this.active++;
     try {
       if (action === 'analyze') return await this.analyze(input);
+      if (action === 'discover') return await this.discover(input);
       if (action === 'replay') return await this.replay(input);
       if (action === 'compose') return await composePosition(input);
       const { id } = ExampleSchema.parse(input);
@@ -83,6 +87,20 @@ export class TareService {
       const path = fileURLToPath(new URL(`../../../../fixtures/live/${id}.capture.json`, import.meta.url));
       return await this.replay({ operation: example.operation, capture: await readJsonFile(path) });
     } finally { this.active--; }
+  }
+
+  private async discover(input: unknown) {
+    const request = DiscoverSchema.parse(input);
+    const discovery = await new MorphoDiscovery(this.config.morphoUrl).positions({
+      chainId: 1,
+      owner: request.owner,
+      maxPositions: request.maxPositions,
+    });
+    return {
+      ...discovery,
+      positions: discovery.positions.filter(position =>
+        position.reportedSharesRaw === null || BigInt(position.reportedSharesRaw) > 0n),
+    };
   }
 
   private async replay(input: unknown) {

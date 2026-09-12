@@ -8,6 +8,7 @@ import { StdioClientTransport } from '@modelcontextprotocol/client/stdio';
 import { TareService, configFromEnv, examples } from '../packages/service/src/index.js';
 import { MAX_INPUT_BYTES, ServiceError, publicError } from '../packages/service/src/requests.js';
 import { withApi, post } from './helpers/api.js';
+import { withServer, json } from './helpers/http.js';
 import { compositionFixture } from './helpers/composition.js';
 import { replayLiveCapture } from '../packages/resolver/src/live.js';
 import { replayNestedCapture } from '../packages/resolver/src/nested.js';
@@ -45,6 +46,34 @@ test('API examples and uploaded captures preserve the exact resolver reports and
     assert.equal(report.status, 'partial');
     assert.equal(report.metric.kind, 'unavailable');
     assert.equal(report.analysis, null);
+  });
+});
+
+test('API discovers active indexed MetaMorpho V1 vault candidates by wallet', async () => {
+  const owner = `0x${'1'.repeat(40)}`;
+  const activeVault = `0x${'2'.repeat(40)}`;
+  const emptyVault = `0x${'3'.repeat(40)}`;
+  await withServer((body, response) => {
+    const request = body as { variables: { chain: number; owner: string } };
+    assert.equal(request.variables.chain, 1);
+    assert.equal(request.variables.owner, owner);
+    json(response, { data: { vaultPositions: {
+      items: [
+        { user: { address: owner }, vault: { address: activeVault, name: 'Active vault', chain: { id: 1 } }, state: { shares: '42' } },
+        { user: { address: owner }, vault: { address: emptyVault, name: 'Empty vault', chain: { id: 1 } }, state: { shares: '0' } },
+      ],
+      pageInfo: { count: 2, countTotal: 2, skip: 0, limit: 25 },
+    } } });
+  }, async morphoUrl => {
+    await withApi(async url => {
+      const response = await post(url, 'discover', { owner, maxPositions: 25 });
+      assert.equal(response.status, 200);
+      const result = await response.json() as { scope: string; complete: boolean; positions: Array<{ vault: string; reportedSharesRaw: string }> };
+      assert.equal(result.scope, 'indexed-morpho-v1-only');
+      assert.equal(result.complete, true);
+      assert.deepEqual(result.positions, [{ owner, vault: activeVault, name: 'Active vault', reportedSharesRaw: '42' }]);
+      assert.equal((await post(url, 'discover', { owner: 'not-an-address' })).status, 400);
+    }, new TareService({ morphoUrl }));
   });
 });
 
@@ -94,7 +123,7 @@ test('configuration stays private, OpenAPI describes strict requests, and explor
       paths: Record<string, { post?: { requestBody?: { content?: Record<string, { schema?: unknown }> } } }>;
     };
     assert.equal(schema.openapi, '3.0.3');
-    assert.deepEqual(Object.keys(schema.paths).sort(), ['/api/agent-analyze', '/api/agent-example', '/api/analyze', '/api/compose', '/api/example', '/api/replay', '/api/status', '/healthz']);
+    assert.deepEqual(Object.keys(schema.paths).sort(), ['/api/agent-analyze', '/api/agent-example', '/api/analyze', '/api/compose', '/api/discover', '/api/example', '/api/replay', '/api/status', '/healthz']);
     for (const route of Object.values(schema.paths)) {
       const requestSchema = route.post?.requestBody?.content?.['application/json']?.schema as { type?: string } | undefined;
       if (requestSchema) assert.equal(requestSchema.type, 'object');

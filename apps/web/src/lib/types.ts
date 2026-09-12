@@ -17,6 +17,23 @@ export interface Capabilities {
   limitations: string[];
 }
 
+export interface DiscoveredPosition {
+  owner: string;
+  vault: string;
+  name: string;
+  reportedSharesRaw: string | null;
+}
+
+export interface DiscoveryResult {
+  source: 'morpho-graphql';
+  scope: 'indexed-morpho-v1-only';
+  observedAt: string;
+  blockAligned: false;
+  complete: boolean;
+  issues: Array<'limit' | 'index-changed' | 'missing-state'>;
+  positions: DiscoveredPosition[];
+}
+
 export type OperationId =
   | 'resolve-v1'
   | 'resolve-v2'

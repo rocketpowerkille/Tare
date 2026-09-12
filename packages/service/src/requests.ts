@@ -13,6 +13,10 @@ export const AnalyzeSchema = z.discriminatedUnion('operation', [
   z.strictObject({ operation: z.literal('verify-weth'), owner: AddressSchema, blockNumber: UintSchema.optional() }),
   z.strictObject({ operation: z.literal('verify-base-custody'), owner: AddressSchema, blockNumber: UintSchema.optional() }),
 ]);
+export const DiscoverSchema = z.strictObject({
+  owner: AddressSchema,
+  maxPositions: z.number().int().min(1).max(100).default(25),
+});
 export const ReplaySchema = z.strictObject({
   operation: z.enum(['resolve-v1', 'resolve-v2', 'verify-shares', 'verify-accounting', 'verify-weth', 'verify-base-custody']),
   capture: z.json(),

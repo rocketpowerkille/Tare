@@ -1,4 +1,4 @@
-import type { Capabilities, JsonRecord, OperationId } from './types';
+import type { Capabilities, DiscoveryResult, JsonRecord, OperationId } from './types';
 
 export class ApiError extends Error {
   constructor(readonly status: number, message: string) {
@@ -24,6 +24,7 @@ async function request<T>(path: string, token: string, input?: unknown): Promise
 
 export const api = {
   capabilities: (token: string) => request<Capabilities>('/api/status', token),
+  discover: (token: string, owner: string) => request<DiscoveryResult>('/api/discover', token, { owner, maxPositions: 25 }),
   analyze: (token: string, input: { operation: OperationId; owner?: string; vault?: string; blockNumber?: string }) =>
     request<JsonRecord>('/api/analyze', token, input),
   example: (token: string, id: string) => request<JsonRecord>('/api/example', token, { id }),

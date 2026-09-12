@@ -55,11 +55,13 @@ export function DocsPage() {
       </section>
 
       <section className="doc-section" id="using-the-explorer">
-        <p className="section-label">Using the explorer</p><h2>Two ways to begin</h2>
+        <p className="section-label">Using the explorer</p><h2>Check a position in three steps</h2>
         <ol className="numbered-steps">
-          <li><span>1</span><div><strong>Replay a public example</strong><p>Best for learning. It uses a retained capture and makes no network request.</p></div></li>
-          <li><span>2</span><div><strong>Run a live check</strong><p>Choose a check, enter the public address fields it needs, and review the result. Hosted live checks require a Tare access token.</p></div></li>
+          <li><span>1</span><div><strong>Paste your wallet address</strong><p>Use the public address that holds the vault shares. Never enter a seed phrase or private key.</p></div></li>
+          <li><span>2</span><div><strong>Find or paste the vault</strong><p>Tare can search Morpho's index for supported MetaMorpho V1 positions. Choose a result, or paste the vault contract address yourself.</p></div></li>
+          <li><span>3</span><div><strong>Check the position</strong><p>Tare reports what it found, what the result means, what remains unknown, and what you can do next. Technical settings and the full JSON report stay optional.</p></div></li>
         </ol>
+        <div className="plain-example"><strong>Just want to learn first?</strong><p>Open a saved example from the explorer. Saved examples explain the report format, but they are not a fresh check of your position.</p></div>
         <AppLink href="/explore" className="button primary">Open the explorer <ArrowRight size={17} /></AppLink>
       </section>
 
@@ -79,7 +81,8 @@ export function DocsPage() {
         <div className="faq-list">
           <details><summary>Does Tare move money?</summary><p>No. The public explorer and API are read only. A separate bounded testnet execution component exists for controlled Chainlink workflow testing, but it is not exposed through this explorer.</p></details>
           <details><summary>Why can a report be incomplete?</summary><p>A provider may be unavailable, the requested position may be empty, two observations may disagree, or the requested proof may be outside Tare's current scope. Incomplete is a useful result because it prevents unsupported claims.</p></details>
-          <details><summary>Can I use Tare without technical knowledge?</summary><p>Yes. Start with a recorded example, then read the source, result, findings, and limitations sections in order.</p></details>
+          <details><summary>Can I use Tare without technical knowledge?</summary><p>Yes. For the standard Ethereum position check, enter your public wallet and vault addresses and press Check this position. Start with What this means, What to do next, and What remains unknown. The technical sections are optional.</p></details>
+          <details><summary>Can Tare find all of my vaults from my wallet?</summary><p>Tare can find indexed MetaMorpho V1 candidates. It is not a general wallet portfolio scanner, and an empty search does not prove that the wallet has no positions. Every selected candidate is checked with direct blockchain reads before Tare reports it.</p></details>
           <details><summary>Is there an SDK?</summary><p>There is no published Tare SDK yet. Developers can use the HTTP API, OpenAPI contract, MCP server, or command line interface.</p></details>
         </div>
       </section>

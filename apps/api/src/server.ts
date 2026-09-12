@@ -96,11 +96,11 @@ export function createApiServer(service = new TareService(), hosted?: HostedConf
     }
     const action = path.slice('/api/'.length);
     const compactAction = action === 'agent-analyze' ? 'analyze' : action === 'agent-example' ? 'example' : null;
-    if (!path.startsWith('/api/') || (action !== 'analyze' && action !== 'replay' && action !== 'example' && action !== 'compose' && !compactAction)) {
+    if (!path.startsWith('/api/') || (action !== 'analyze' && action !== 'discover' && action !== 'replay' && action !== 'example' && action !== 'compose' && !compactAction)) {
       throw new ServiceError(404, 'not-found', 'Unknown route.');
     }
     if (request.method !== 'POST') throw new ServiceError(405, 'method-not-allowed', 'Use POST.');
-    const result = await service.run(compactAction ?? action as 'analyze' | 'replay' | 'example' | 'compose', await readBody(request));
+    const result = await service.run(compactAction ?? action as 'analyze' | 'discover' | 'replay' | 'example' | 'compose', await readBody(request));
     json(response, 200, compactAction ? compactEvidenceReport(result) : result);
   }
   return server;

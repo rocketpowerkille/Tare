@@ -37,6 +37,7 @@ export function DevelopersPage() {
       <div className="endpoint-table">
         <div className="endpoint-row endpoint-head"><span>Method</span><span>Path</span><span>Purpose</span></div>
         <div className="endpoint-row"><code>GET</code><code>/api/status</code><span>List capabilities, examples, and limits.</span></div>
+        <div className="endpoint-row"><code>POST</code><code>/api/discover</code><span>Find indexed MetaMorpho V1 vault candidates for a wallet.</span></div>
         <div className="endpoint-row"><code>POST</code><code>/api/analyze</code><span>Acquire fresh read-only evidence.</span></div>
         <div className="endpoint-row"><code>POST</code><code>/api/replay</code><span>Recalculate a compatible saved capture.</span></div>
         <div className="endpoint-row"><code>POST</code><code>/api/example</code><span>Replay a retained public example.</span></div>
