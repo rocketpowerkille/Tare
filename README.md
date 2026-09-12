@@ -45,8 +45,9 @@ reorg retractions. Hosted acceptance remains pending; see [monitoring](docs/PHAS
 The deadline-safe Graph composition operation additionally joins The Graph Token
 API wallet balance with the live Studio accounting subgraph, then checks both
 against RPC at the subgraph block. This path does not depend on the unfinished
-historical share-ledger backfill. Hosted acceptance needs `GRAPH_MARKET_API_TOKEN`
-and is repeated with `pnpm verify:hosted:graph-products`.
+historical share-ledger backfill. Hosted acceptance passed on 2026-09-12 with the
+known Steakhouse USDC position: the Token API balance matched RPC and all 56 Studio
+accounting reads matched RPC. Repeat it with `pnpm verify:hosted:graph-products`.
 
 **Phase seven has a confidential policy workflow and Solidity exit receiver:** private
 thresholds drive signed verdicts, with a guarded Base Sepolia execution path.

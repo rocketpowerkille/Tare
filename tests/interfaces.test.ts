@@ -14,6 +14,26 @@ import { replayLiveCapture } from '../packages/resolver/src/live.js';
 import { replayNestedCapture } from '../packages/resolver/src/nested.js';
 import { replayCustody } from '../packages/verification/src/custody.js';
 import { readJsonFile } from '../packages/sources/src/snapshot.js';
+import { compactEvidenceReport } from '../packages/receipts/src/compact.js';
+
+test('compact agent reports summarize large verification check sets', () => {
+  const checks = Array.from({ length: 56 }, (_, index) => ({
+    to: `0x${index.toString(16).padStart(40, '0')}`,
+    data: `0x${index.toString(16).padStart(64, '0')}`,
+    rpc: index.toString(),
+    graph: index.toString(),
+    status: 'matched',
+  }));
+  const compact = compactEvidenceReport({ status: 'matched', checks, findings: [], capture: { large: true } });
+  assert.deepEqual(compact.checkSummary, {
+    count: 56,
+    statusCounts: { matched: 56 },
+    failures: [],
+  });
+  assert.ok(!('checks' in compact));
+  assert.ok(!('capture' in compact));
+  assert.ok(Buffer.byteLength(JSON.stringify(compact)) < 4 * 1024);
+});
 
 test('API examples and uploaded captures preserve the exact resolver reports and scoped metrics', async () => {
   const replays = [replayLiveCapture, replayNestedCapture, replayCustody];

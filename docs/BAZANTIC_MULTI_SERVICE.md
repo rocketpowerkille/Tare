@@ -5,7 +5,7 @@ that are not marked Continuity-only. It uses two direct services:
 
 1. Tare, through the existing live gateway.
 2. The Graph Studio, through a second gateway generated from
-   `https://tare-api.onrender.com/openapi-graph.json` after the next Render deploy.
+   `https://tare-api.onrender.com/openapi-graph.json`.
 
 The second specification names The Graph Studio as its upstream server. It exposes
 one bounded operation, `graph_tare_accounting_head`, which returns the live indexed
@@ -25,20 +25,21 @@ Tare.
 
 ## Base Sepolia sandbox acceptance
 
-Bazantic enabled Base Sepolia sandbox settlement for the hackathon. After the
-latest Render deployment, refresh or resave the existing Tare gateway so its MCP
-server exposes `tare_discover_vaults` alongside status, compact analysis and the
-compact retained example.
+Bazantic enabled Base Sepolia sandbox settlement for the hackathon. The existing
+Tare gateway is in sandbox mode and its MCP server exposes six tools, including
+wallet discovery, compact analysis and short-lived session issuance.
 
-1. Open the Tare gateway and choose `Actions`, then `Turn sandbox mode on`.
-2. Save the gateway and wait for its MCP server to finish provisioning.
-3. Confirm the payment quote names Base Sepolia and test USDC before approving it.
-4. Call `tare_status` first to prove the paid request lifecycle with the smallest
+Bazantic's sidebar balance currently shows live funds only. For sandbox testing,
+fund the Bazantic receiving wallet with Base Sepolia USDC from Circle's testnet
+faucet, then confirm the testnet balance under **Settings > Balances > Advanced**.
+
+1. Confirm the payment quote names Base Sepolia and test USDC before approving it.
+2. Call `tare_status` first to prove the paid request lifecycle with the smallest
    response.
-5. Call `tare_discover_vaults` with owner
+3. Call `tare_discover_vaults` with owner
    `0x9fc3dc011b461664c835f2527fffb1169b3c213e`. The indexed result should include
    Steakhouse USDC at `0xbeef01735c132ada46aa9aa4c54623caa92a64cb`.
-6. Call `tare_analyze_compact` with that owner, vault and operation `resolve-v1`.
+4. Call `tare_analyze_compact` with that owner, vault and operation `resolve-v1`.
    The result must identify fresh Ethereum evidence and retain the independent
    backing and valuation limitations.
 
@@ -76,5 +77,16 @@ not proof of independently verified asset backing.
 ## Qualification boundary
 
 This flow makes the final result depend on both a direct sponsor service and Tare.
-The external Bazantic binding and one successful Recipe test are still required.
-Do not claim either eligible Bazantic prize until that test completes.
+The direct Graph Studio gateway is active at
+`https://hgtvwubvqvci5fddvkmksjtkdu.bazgateway.com`. The draft Recipe
+`tare-graph-accounting-assurance` binds `graph_tare_accounting_head` from that
+gateway and `tare_analyze_compact` from the Tare gateway. A live test proved the
+Graph call and the Tare call can both complete, but the deployed compact accounting
+response exceeded Bazantic's 32 KiB Recipe result limit. The repository now
+summarizes the 56 raw accounting checks as a bounded `checkSummary`. Redeploy the
+latest commit, rerun the Recipe, and publish only after the two-service result is
+successful. Do not claim either eligible Bazantic prize until that test completes.
+
+The hosted Graph product acceptance passed separately on 2026-09-12. It proves
+that the deployed Tare service can compose the Token API, Studio and RPC sources;
+it does not substitute for the required Bazantic two-service Recipe test.

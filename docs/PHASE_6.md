@@ -23,6 +23,11 @@ balances, a matched Studio accounting result, 56 accounting reads and no finding
 Tare defaults to the current Token API provider contract at
 `https://api.pinax.network`; `TARE_GRAPH_TOKEN_API_URL` remains an explicit override.
 
+Hosted acceptance passed on 2026-09-12. The deployed API composed the live Token
+API and Studio subgraph, matched the Token API share balance to RPC, and matched all
+56 current-accounting reads to RPC with no findings. This is current-state evidence,
+not a historical share-ledger claim.
+
 ## Run
 
 Build with `pnpm build`. Download the published package from

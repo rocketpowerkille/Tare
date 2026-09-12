@@ -53,16 +53,39 @@ function summarizeBacking(value: unknown) {
   };
 }
 
+function summarizeChecks(value: unknown) {
+  const checks = Array.isArray(value) ? value.map(record) : [];
+  const statusCounts = Object.fromEntries(
+    [...new Set(checks.map(check => check.status).filter((status): status is string => typeof status === 'string'))]
+      .map(status => [status, checks.filter(check => check.status === status).length]),
+  );
+  return {
+    count: checks.length,
+    statusCounts,
+    failures: checks.filter(check => check.status !== 'matched').slice(0, 8).map(check => ({
+      status: check.status,
+      field: check.field,
+      to: check.to,
+      data: check.data,
+      rpc: check.rpc,
+      graph: check.graph,
+    })),
+  };
+}
+
 export function compactEvidenceReport(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return { status: 'invalid-report', captureOmitted: true };
   }
-  const { capture: _capture, markets, analysis, backing, ...report } = value as Record<string, unknown>;
+  const { capture: _capture, markets, analysis, backing, checks, ...report } = value as Record<string, unknown>;
   return {
     ...report,
     ...(markets === undefined ? {} : { markets: summarizeMarkets(markets) }),
     ...(analysis === undefined ? {} : { analysis: summarizeAnalysis(analysis) }),
     ...(backing === undefined ? {} : { backing: summarizeBacking(backing) }),
+    ...(checks === undefined ? {} : Array.isArray(checks)
+      ? { checkSummary: summarizeChecks(checks) }
+      : { checks }),
     captureOmitted: true,
     captureNote: 'Raw evidence and verbose traversal details are available from the full API; this agent view preserves verdicts, exposure summaries, metrics, findings, limitations and the evidence digest.',
   };

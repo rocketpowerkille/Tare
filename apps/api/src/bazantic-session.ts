@@ -27,6 +27,11 @@ type SessionPayload = z.output<typeof SessionPayloadSchema>;
 
 const encode = (value: string | Buffer) => Buffer.from(value).toString('base64url');
 
+function decodeCanonical(value: string) {
+  const decoded = Buffer.from(value, 'base64url');
+  return decoded.toString('base64url') === value ? decoded : undefined;
+}
+
 export class BazanticSandboxSessions {
   readonly clientId: string;
   readonly gatewayUrl: string;
@@ -62,11 +67,14 @@ export class BazanticSandboxSessions {
   verify(token: string, nowMs: number): SessionPayload | undefined {
     const match = /^tare_sandbox_v1\.([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)$/.exec(token);
     if (!match) return undefined;
-    const expected = Buffer.from(this.sign(match[1]!), 'base64url');
-    const supplied = Buffer.from(match[2]!, 'base64url');
+    const encodedPayload = match[1]!;
+    const payloadBytes = decodeCanonical(encodedPayload);
+    const supplied = decodeCanonical(match[2]!);
+    if (!payloadBytes || !supplied) return undefined;
+    const expected = Buffer.from(this.sign(encodedPayload), 'base64url');
     if (expected.length !== supplied.length || !timingSafeEqual(expected, supplied)) return undefined;
     try {
-      const payload = SessionPayloadSchema.parse(JSON.parse(Buffer.from(match[1]!, 'base64url').toString('utf8')));
+      const payload = SessionPayloadSchema.parse(JSON.parse(payloadBytes.toString('utf8')));
       const now = Math.floor(nowMs / 1000);
       if (payload.issuedAt > now + 30 || payload.expiresAt <= now) return undefined;
       return payload;
