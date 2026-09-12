@@ -7,7 +7,7 @@ import { DiscoverySchema, VaultMetadataSchema } from '../../sources/src/morpho.j
 export const UintSchema = RawSchema.refine(value => BigInt(value) < 2n ** 256n, 'Value exceeds uint256');
 export const CaptureSchema = z.strictObject({
   captureVersion: z.literal(1), origin: z.literal('rpc-observed'), adapter: z.literal('metamorpho-v1-blue-v1'),
-  chainId: z.literal(1), owner: AddressSchema, vault: AddressSchema, capturedAt: z.iso.datetime(),
+  chainId: z.union([z.literal(1), z.literal(8453), z.literal(42161)]), owner: AddressSchema, vault: AddressSchema, capturedAt: z.iso.datetime(),
   block: RpcBlockSchema.nullable(), blockConfirmed: z.boolean(),
   metadata: VaultMetadataSchema.nullable(), discovery: DiscoverySchema.nullable(),
   observations: z.array(CallObservationSchema).max(1000), health: z.array(HealthSchema).max(2),

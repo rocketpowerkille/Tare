@@ -42,7 +42,7 @@ export async function runLiveCommand(positionals: string[], values: Values): Pro
   if (values.home && !walletName) throw new Error('--home requires --wallet');
   const wallet = walletName ? await getWallet(resolve(string(values, 'home') ?? process.env.TARE_HOME ?? '.tare'), walletName) : null;
   const chainId = integer(values, 'chain-id', wallet?.chainId ?? 1);
-  if (chainId !== 1 || (wallet && wallet.chainId !== chainId)) throw new Error('This live adapter supports Ethereum mainnet (chain 1) only');
+  if (![1, 8453, 42161].includes(chainId) || (wallet && wallet.chainId !== chainId)) throw new Error('Live Morpho resolution supports Ethereum, Base, and Arbitrum');
   const graphqlUrl = string(values, 'graphql-url');
   const timeoutMs = integer(values, 'timeout-ms', 10000);
   if (timeoutMs < 100 || timeoutMs > 60000) throw new Error('--timeout-ms must be between 100 and 60000');
@@ -52,15 +52,16 @@ export async function runLiveCommand(positionals: string[], values: Values): Pro
   if (action === 'discover') {
     const result = await client.positions({ chainId, ...(owner ? { owner } : {}), ...(vault ? { vault } : {}), maxPositions: integer(values, 'max-positions', 100) });
     console.log(values.json ? JSON.stringify({ ...result, health: client.health }, null, 2) : [
-      `Discovery: ${result.positions.length} indexed Morpho V1 positions; ${result.complete ? 'complete within index scope' : 'incomplete'}`,
-      ...result.positions.map(position => `${position.owner} -> ${position.vault}; indexed shares=${position.reportedSharesRaw ?? 'unavailable'}`),
+      `Discovery: ${result.positions.length} indexed Morpho V1 and V2 positions; ${result.complete ? 'complete within index scope' : 'incomplete'}`,
+      ...result.positions.map(position => `${position.owner} -> ${position.vault}; chain=${position.chainId}; ${position.version}; asset=${position.asset.symbol}; indexed shares=${position.reportedSharesRaw ?? 'unavailable'}`),
       ...result.issues.map(issue => `Finding: ${issue}`),
       'Index discovery is not block-aligned and does not prove absence of other positions.',
     ].join('\n'));
     return result.complete ? 0 : 2;
   }
   if (!vault) throw new Error('live resolve requires --vault');
-  const rpcUrl = string(values, 'rpc-url') ?? process.env.TARE_RPC_URL;
+  const rpcUrl = string(values, 'rpc-url') ?? (chainId === 1 ? process.env.TARE_RPC_URL
+    : chainId === 8453 ? process.env.TARE_BASE_MAINNET_RPC_URL : process.env.TARE_ARBITRUM_RPC_URL);
   if (!rpcUrl) throw new Error('Live resolution requires --rpc-url or TARE_RPC_URL');
   if (action === 'example' && owner) throw new Error('live example selects a public depositor; use live resolve for your wallet');
   if (action === 'resolve' && !owner) throw new Error('live resolve requires --address or --wallet');

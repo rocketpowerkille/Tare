@@ -4,6 +4,13 @@ import { SourceFailure } from '../../sources/src/http.js';
 import type { MarketObservation } from '../../domain/src/live.js';
 
 export const MORPHO_BLUE_ETHEREUM = '0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb';
+export const MORPHO_BLUE_BASE = MORPHO_BLUE_ETHEREUM;
+export const MORPHO_BLUE_ARBITRUM = '0x6c247b1f6182318877311737bac0844baa518f5e';
+export const MORPHO_BLUE_BY_CHAIN: Readonly<Record<number, string>> = {
+  1: MORPHO_BLUE_ETHEREUM,
+  8453: MORPHO_BLUE_BASE,
+  42161: MORPHO_BLUE_ARBITRUM,
+};
 export const ETHEREUM_USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
 export const PUBLIC_EXAMPLE_VAULT = '0xbeef01735c132ada46aa9aa4c54623caa92a64cb';
 export const SELECTOR = {
@@ -48,12 +55,12 @@ export function vaultFeeShares(totalAssets: bigint, lastAssets: bigint, fee: big
 export async function readUint(reader: ContractReader, to: string, selector: string, args = ''): Promise<bigint> {
   return decodeWords(await reader.call(to, selector + args), 1)[0]!;
 }
-export async function readMarket(reader: ContractReader, vault: string, marketId: string, asset: string): Promise<MarketObservation> {
+export async function readMarket(reader: ContractReader, vault: string, marketId: string, asset: string, morpho = MORPHO_BLUE_ETHEREUM): Promise<MarketObservation> {
   const id = marketId.slice(2);
   const [paramsData, stateData, positionData] = await settleReads([
-    reader.call(MORPHO_BLUE_ETHEREUM, SELECTOR.params + id),
-    reader.call(MORPHO_BLUE_ETHEREUM, SELECTOR.market + id),
-    reader.call(MORPHO_BLUE_ETHEREUM, SELECTOR.position + id + word(vault)),
+    reader.call(morpho, SELECTOR.params + id),
+    reader.call(morpho, SELECTOR.market + id),
+    reader.call(morpho, SELECTOR.position + id + word(vault)),
   ]);
   const params = decodeWords(paramsData!, 5);
   const [loan, collateral, oracle, irm, lltv] = params as [bigint, bigint, bigint, bigint, bigint];

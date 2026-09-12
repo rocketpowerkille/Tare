@@ -9,7 +9,7 @@ const blockNumber = {
   description: 'Optional decimal block number. Graph-backed operations accept signed 32-bit heights only.',
 } as const;
 const operations = [
-  'resolve-v1', 'resolve-v2', 'verify-shares', 'verify-accounting',
+  'resolve-v1', 'resolve-v2', 'resolve-erc4626', 'verify-shares', 'verify-accounting',
   'verify-weth', 'verify-base-custody',
 ] as const;
 const genericObject = { type: 'object', additionalProperties: true } as const;
@@ -25,13 +25,14 @@ const analyzeSchema = {
     owner: address,
     vault: address,
     blockNumber,
+    chainId: { type: 'integer', enum: [1, 8453, 42161, 84532], default: 1 },
   },
 } as const;
 const discoverSchema = {
   type: 'object',
   additionalProperties: false,
   required: ['owner'],
-  description: 'Find indexed MetaMorpho V1 vault candidates for a public wallet address. Results are discovery hints and are confirmed by a separate live analysis.',
+  description: 'Find indexed Morpho V1 and V2 positions across Ethereum, Base and Arbitrum, plus positions in configured ERC-4626 registries. Results are discovery hints and are confirmed by a separate live analysis.',
   properties: {
     owner: address,
     maxPositions: { type: 'integer', minimum: 1, maximum: 100, default: 25 },
@@ -114,8 +115,8 @@ export const openapi = {
       'Start a short-lived Tare session after a Bazantic Base Sepolia sandbox payment.',
       emptyObject,
     ) },
-    '/api/discover': { post: postOperation('tare_discover', 'Find indexed MetaMorpho V1 vault candidates for a wallet.', discoverSchema) },
-    '/api/analyze': { post: postOperation('tare_analyze', 'Acquire fresh read-only Ethereum or Base Sepolia evidence.', analyzeSchema) },
+    '/api/discover': { post: postOperation('tare_discover', 'Find multi-chain Morpho and registered ERC-4626 positions for a wallet.', discoverSchema) },
+    '/api/analyze': { post: postOperation('tare_analyze', 'Acquire fresh read-only Ethereum, Base, Arbitrum or Base Sepolia evidence.', analyzeSchema) },
     '/api/agent-analyze': { post: postOperation('tare_analyze_compact', 'Acquire a compact agent report from fresh read-only evidence.', analyzeSchema) },
     '/api/replay': { post: postOperation('tare_replay', 'Recalculate an unsigned evidence capture without making network requests.', replaySchema) },
     '/api/example': { post: postOperation('tare_example', 'Replay one retained public evidence example without network requests.', exampleSchema) },

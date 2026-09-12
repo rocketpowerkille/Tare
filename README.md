@@ -1,7 +1,7 @@
 # Tare
 
 **Phases two and three are implemented within their documented scope:** evidence
-snapshots and offline adapters, plus live Ethereum USDC MetaMorpho V1 discovery,
+snapshots and offline adapters, plus multi-chain Morpho V1 and V2 discovery,
 allocation accounting and reproducible RPC receipts. See [phase two](docs/PHASE_2.md)
 and [phase three](docs/PHASE_3.md) for acceptance evidence and limitations.
 
@@ -158,8 +158,8 @@ operator. No transaction, connection request, or signature is made.
 | `snapshot normalize <recording> --out <file>` | Normalize an offline recording into a version-two snapshot |
 | `replay <recording> --json` | Normalize and resolve a synthetic adapter recording |
 | `demo phase2` | Run six version-two accounting and failure cases |
-| `live discover --address <address>` | Discover indexed Ethereum MetaMorpho V1 positions |
-| `live resolve --address <address> --vault <vault> --rpc-url <url>` | Resolve a supported USDC vault position at one block |
+| `live discover --address <address>` | Discover indexed Morpho V1 and V2 positions on Ethereum, Base, or Arbitrum |
+| `live resolve --address <address> --vault <vault> --chain-id <id> --rpc-url <url>` | Resolve a supported Morpho V1 vault asset position at one block |
 | `live example --rpc-url <url>` | Discover and resolve a public Steakhouse USDC depositor |
 | `live replay <capture>` | Recompute a retained RPC capture without network calls |
 | `verify shares --address <address> --vault <vault> --rpc-url <url> --graph-url <url>` | Compare Tare's indexed share ledger with RPC at one block |

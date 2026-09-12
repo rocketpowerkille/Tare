@@ -50,8 +50,9 @@ export function HomePage() {
       <div className="section-heading"><p className="kicker">Current scope</p><h2>Purposefully bounded</h2></div>
       <div className="scope-table" role="table" aria-label="Supported networks and checks">
         <div className="scope-row scope-head" role="row"><span>Network</span><span>Available checks</span><span>Evidence mode</span></div>
-        <div className="scope-row" role="row"><strong>Ethereum</strong><span>V1 and V2 exposure, shares, accounting, WETH custody</span><StatusBadge tone="info">Live and recorded</StatusBadge></div>
-        <div className="scope-row" role="row"><strong>Base Sepolia</strong><span>Allowlisted two-layer ERC-4626 custody control</span><StatusBadge tone="success">Live testnet</StatusBadge></div>
+        <div className="scope-row" role="row"><strong>Ethereum</strong><span>Morpho V1 discovery and exposure for USDC, WETH, and other vault assets; bounded V2 support</span><StatusBadge tone="success">Live</StatusBadge></div>
+        <div className="scope-row" role="row"><strong>Base and Arbitrum</strong><span>Morpho V1 discovery and exposure plus general ERC-4626 checks</span><StatusBadge tone="success">Live</StatusBadge></div>
+        <div className="scope-row" role="row"><strong>Base Sepolia</strong><span>Registered ERC-4626 discovery and allowlisted two-layer custody control</span><StatusBadge tone="success">Live testnet</StatusBadge></div>
       </div>
     </section>
 

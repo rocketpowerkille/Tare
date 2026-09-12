@@ -7,6 +7,7 @@ import { CaptureSchema, LiveReceiptSchema } from '../packages/domain/src/live.js
 import { replayLiveCapture, resolveLivePosition } from '../packages/resolver/src/live.js';
 import { expectedMarket, SELECTOR, vaultFeeShares } from '../packages/adapters/src/morpho-blue.js';
 import { decodeAddress, decodeWords, word } from '../packages/sources/src/evm.js';
+import { AddressSchema } from '../packages/domain/src/index.js';
 
 test('real captured position replays with exact contract totals, fee conversion and rounding', async () => {
   const result = await replayLiveCapture(await fixture());
@@ -20,6 +21,22 @@ test('real captured position replays with exact contract totals, fee conversion 
   assert.equal(result.markets.reduce((sum, m) => sum + BigInt(m.attributedAssetsRaw!), 0n) + 5n, BigInt(result.vault.convertToAssetsRaw));
   assert.equal(result.verification, 'not-independently-verified');
   assert.equal(result.metric.kind, 'unavailable');
+});
+test('MetaMorpho V1 analysis supports WETH and preserves its 18 decimals', async () => {
+  const capture = await fixture();
+  const weth = AddressSchema.parse('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2');
+  capture.metadata!.asset = { address: weth, symbol: 'WETH', decimals: 18 };
+  capture.observations.find(item => item.to === capture.vault && item.data === SELECTOR.asset)!.result = `0x${word(weth)}`;
+  const decimals = capture.observations.find(item => item.data === SELECTOR.decimals)!;
+  decimals.to = weth; decimals.result = `0x${word(18n)}`;
+  capture.observations.find(item => item.to === capture.vault && item.data === SELECTOR.offset)!.result = `0x${word(0n)}`;
+  for (const item of capture.observations.filter(item => item.data.startsWith(SELECTOR.params))) {
+    item.result = `0x${word(weth)}${item.result.slice(66)}`;
+  }
+  const result = await replayLiveCapture(capture);
+  assert.ok(result.vault);
+  assert.equal(result.vault?.asset, weth);
+  assert.equal(result.vault?.decimals, 18);
 });
 test('published virtual-share and interest accounting matches independent small examples', () => {
   assert.deepEqual(expectedMarket([1000n, 1000000n, 100n, 100000n, 10n, 100000000000000000n], 100000000000000000n, 11n), { assets: 1010n, shares: 1001980n, borrow: 110n });

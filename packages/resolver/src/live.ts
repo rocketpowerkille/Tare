@@ -7,11 +7,11 @@ import type { ContractReader, RpcBlock } from '../../sources/src/evm.js';
 import { MorphoDiscovery } from '../../sources/src/morpho.js';
 import type { Discovery } from '../../sources/src/morpho.js';
 import { SourceFailure } from '../../sources/src/http.js';
-import { ETHEREUM_USDC, MORPHO_BLUE_ETHEREUM, readMarket, readUint, SELECTOR, vaultFeeShares } from '../../adapters/src/morpho-blue.js';
+import { MORPHO_BLUE_BY_CHAIN, readMarket, readUint, SELECTOR, vaultFeeShares } from '../../adapters/src/morpho-blue.js';
 
 const LimitsSchema = z.strictObject({ maxMarkets: z.number().int().min(1).max(64).default(32) });
 export const LiveOptionsSchema = z.strictObject({
-  owner: AddressSchema, vault: AddressSchema, chainId: z.literal(1), rpcUrl: z.string().min(1),
+  owner: AddressSchema, vault: AddressSchema, chainId: z.union([z.literal(1), z.literal(8453), z.literal(42161)]), rpcUrl: z.string().min(1),
   graphqlUrl: z.string().optional(), blockNumber: UintSchema.optional(),
   timeoutMs: z.number().int().min(100).max(60000).default(10000),
   maxMarkets: z.number().int().min(1).max(64).default(32), maxCalls: z.number().int().min(1).max(1000).default(250),
@@ -24,25 +24,26 @@ function failure(error: unknown, stage: string, marketId?: string): LiveReceipt[
   if (error instanceof z.ZodError) return { stage, code: 'invalid-response', ...(marketId ? { marketId } : {}) };
   throw error;
 }
-export async function analyzeMetaMorpho(reader: ContractReader, owner: string, vaultAddress: string, maxMarkets: number, expectedAsset: string = ETHEREUM_USDC): Promise<Analysis> {
+export async function analyzeMetaMorpho(reader: ContractReader, owner: string, vaultAddress: string, maxMarkets: number, expectedAsset: string, expectedMorpho: string): Promise<Analysis> {
   const result: Analysis = { vault: null, markets: [], findings: [], unattributedAssetsRaw: null };
   try {
     const [morpho, assetData] = await settleReads([reader.call(vaultAddress, SELECTOR.morpho), reader.call(vaultAddress, SELECTOR.asset)]);
     const asset = decodeAddress(assetData!);
-    if (decodeAddress(morpho!) !== MORPHO_BLUE_ETHEREUM || asset !== ETHEREUM_USDC || asset !== expectedAsset) throw new SourceFailure('invalid-response', 'Unsupported vault, Morpho deployment or loan asset');
+    if (decodeAddress(morpho!) !== expectedMorpho || asset !== expectedAsset) throw new SourceFailure('invalid-response', 'Vault does not match the expected Morpho deployment or loan asset');
     const [supply, assets, shares, fee, lastAssets, offset, queueLength, decimals] = await settleReads([
       readUint(reader, vaultAddress, SELECTOR.supply), readUint(reader, vaultAddress, SELECTOR.assets),
       readUint(reader, vaultAddress, SELECTOR.balance, word(owner)), readUint(reader, vaultAddress, SELECTOR.fee),
       readUint(reader, vaultAddress, SELECTOR.lastAssets), readUint(reader, vaultAddress, SELECTOR.offset),
       readUint(reader, vaultAddress, SELECTOR.queueLength), readUint(reader, asset, SELECTOR.decimals),
     ]) as [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint];
-    if (shares > supply || decimals !== 6n || offset !== 12n || queueLength > 1000n) throw new SourceFailure('invalid-response', 'Vault ownership, decimals or allocation queue is unsupported');
+    const expectedOffset = BigInt(Math.max(0, 18 - Number(decimals)));
+    if (shares > supply || decimals > 36n || offset !== expectedOffset || queueLength > 1000n) throw new SourceFailure('invalid-response', 'Vault ownership, decimals offset or allocation queue is unsupported');
     const quote = await readUint(reader, vaultAddress, SELECTOR.convert, word(shares));
     const fees = vaultFeeShares(assets, lastAssets, fee, supply, offset);
     const virtualShares = 10n ** offset;
     const expectedQuote = shares * (assets + 1n) / (supply + fees + virtualShares);
     if (quote !== expectedQuote) result.findings.push({ stage: 'vault-conversion', code: 'accounting-mismatch' });
-    result.vault = VaultObservationSchema.parse({ address: vaultAddress, asset, decimals: 6, sharesRaw: shares.toString(),
+    result.vault = VaultObservationSchema.parse({ address: vaultAddress, asset, decimals: Number(decimals), sharesRaw: shares.toString(),
       totalSupplyRaw: supply.toString(), totalAssetsRaw: assets.toString(), convertToAssetsRaw: quote.toString(),
       feeRaw: fee.toString(), feeSharesRaw: fees.toString(), virtualSharesRaw: virtualShares.toString(), queueLength: Number(queueLength) });
     if (queueLength > BigInt(maxMarkets)) result.findings.push({ stage: 'allocation-queue', code: 'market-limit' });
@@ -54,7 +55,7 @@ export async function analyzeMetaMorpho(reader: ContractReader, owner: string, v
         decodeWords(queueValue, 1); marketId = queueValue.toLowerCase();
         if (seen.has(marketId)) { result.findings.push({ stage: 'allocation-queue', code: 'duplicate-market', marketId }); continue; }
         seen.add(marketId);
-        result.markets.push(await readMarket(reader, vaultAddress, marketId, asset));
+        result.markets.push(await readMarket(reader, vaultAddress, marketId, asset, expectedMorpho));
       } catch (error) { result.findings.push(failure(error, `market-${index}`, marketId)); }
     }
     const observedAssets = result.markets.reduce((sum, market) => sum + BigInt(market.vaultAssetsRaw), 0n);
@@ -98,17 +99,18 @@ export async function resolveLivePosition(input: LiveOptions, discovery: Discove
   const graphql = new MorphoDiscovery(options.graphqlUrl, options.timeoutMs);
   const rpc = new PinnedRpc(options.rpcUrl, options.timeoutMs, options.maxCalls, options.deadlineMs);
   const capture: LiveCapture = { captureVersion: 1, origin: 'rpc-observed', adapter: 'metamorpho-v1-blue-v1',
-    chainId: 1, owner: options.owner, vault: options.vault, capturedAt: new Date().toISOString(),
+    chainId: options.chainId, owner: options.owner, vault: options.vault, capturedAt: new Date().toISOString(),
     block: null, blockConfirmed: false, metadata: null, discovery, observations: [], failedCalls: [], health: [], acquisitionFailures: [] };
   let analysis: Analysis = { vault: null, markets: [], findings: [], unattributedAssetsRaw: null };
   try {
-    capture.metadata = await graphql.vault(options.vault, 1);
-    if (capture.metadata.asset.address !== ETHEREUM_USDC || capture.metadata.asset.decimals !== 6) throw new SourceFailure('invalid-response', 'Only Ethereum USDC MetaMorpho V1 vaults are supported');
+    capture.metadata = await graphql.vault(options.vault, options.chainId);
   } catch (error) { capture.acquisitionFailures.push(failure(error, 'discovery')); }
   if (capture.metadata && capture.acquisitionFailures.length === 0) {
     try {
-      await rpc.pin(1, options.blockNumber); capture.block = rpc.block;
-      analysis = await analyzeMetaMorpho(rpc, options.owner, options.vault, options.maxMarkets, capture.metadata.asset.address);
+      const expectedMorpho = MORPHO_BLUE_BY_CHAIN[options.chainId];
+      if (!expectedMorpho) throw new SourceFailure('invalid-response', 'This chain has no configured Morpho deployment');
+      await rpc.pin(options.chainId, options.blockNumber); capture.block = rpc.block;
+      analysis = await analyzeMetaMorpho(rpc, options.owner, options.vault, options.maxMarkets, capture.metadata.asset.address, expectedMorpho);
       await rpc.confirm(); capture.blockConfirmed = true;
     } catch (error) { capture.acquisitionFailures.push(failure(error, 'rpc')); }
   }
@@ -135,7 +137,7 @@ class ReplayReader implements ContractReader {
 export async function replayLiveCapture(input: unknown, limits: { maxMarkets?: number } = {}): Promise<LiveReceipt> {
   const capture = CaptureSchema.parse(input); const { maxMarkets } = LimitsSchema.parse(limits);
   const analysis = capture.block && capture.metadata
-    ? await analyzeMetaMorpho(new ReplayReader(capture), capture.owner, capture.vault, maxMarkets, capture.metadata.asset.address)
+    ? await analyzeMetaMorpho(new ReplayReader(capture), capture.owner, capture.vault, maxMarkets, capture.metadata.asset.address, MORPHO_BLUE_BY_CHAIN[capture.chainId]!)
     : { vault: null, markets: [], findings: [{ stage: 'capture', code: 'missing-root-evidence' }], unattributedAssetsRaw: null };
   return receipt(capture, analysis, 'recorded-rpc');
 }

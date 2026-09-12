@@ -2,7 +2,7 @@ import { z } from 'zod/v4';
 import { AddressSchema } from '../../domain/src/index.js';
 import type { MarketObservation } from '../../domain/src/live.js';
 import { UintSchema } from '../../domain/src/live.js';
-import { readUint, SELECTOR } from '../../adapters/src/morpho-blue.js';
+import { ETHEREUM_USDC, MORPHO_BLUE_ETHEREUM, readUint, SELECTOR } from '../../adapters/src/morpho-blue.js';
 import { readV2Root, reconcileV2, V2 } from '../../adapters/src/morpho-v2.js';
 import { decodeAddress, PinnedRpc, word } from '../../sources/src/evm.js';
 import type { ContractReader } from '../../sources/src/evm.js';
@@ -59,7 +59,7 @@ async function analyzeNested(reader: ContractReader, owner: string, vault: strin
       branch.vault = child;
       const allocation = await readUint(reader, adapter, V2.allocation);
       if (allocation === 0n) throw new SourceFailure('invalid-response', 'Positive adapter assets without allocation');
-      const analysis = await analyzeMetaMorpho(reader, adapter, child, 64);
+      const analysis = await analyzeMetaMorpho(reader, adapter, child, 64, ETHEREUM_USDC, MORPHO_BLUE_ETHEREUM);
       if (analysis.findings.length || !analysis.vault || BigInt(analysis.vault.convertToAssetsRaw) !== assets) {
         throw new SourceFailure('invalid-response', 'Nested V1 accounting did not reconcile');
       }

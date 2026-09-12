@@ -1,13 +1,15 @@
 import { z } from 'zod/v4';
-import { AddressSchema } from '../../domain/src/index.js';
+import { AddressSchema, SupportedEvmChainSchema } from '../../domain/src/index.js';
 import { UintSchema } from '../../domain/src/live.js';
+import { MorphoChainSchema } from '../../sources/src/morpho.js';
 
 const position = { owner: AddressSchema, vault: AddressSchema, blockNumber: UintSchema.optional() };
 const graphBlock = z.string().regex(/^(0|[1-9][0-9]{0,9})$/)
   .refine(value => BigInt(value) <= 2147483647n).optional();
 export const AnalyzeSchema = z.discriminatedUnion('operation', [
-  z.strictObject({ operation: z.literal('resolve-v1'), ...position }),
+  z.strictObject({ operation: z.literal('resolve-v1'), ...position, chainId: MorphoChainSchema.default(1) }),
   z.strictObject({ operation: z.literal('resolve-v2'), ...position }),
+  z.strictObject({ operation: z.literal('resolve-erc4626'), ...position, chainId: SupportedEvmChainSchema.default(1) }),
   z.strictObject({ operation: z.literal('verify-shares'), ...position, blockNumber: graphBlock }),
   z.strictObject({ operation: z.literal('verify-accounting'), vault: AddressSchema, blockNumber: graphBlock }),
   z.strictObject({ operation: z.literal('verify-weth'), owner: AddressSchema, blockNumber: UintSchema.optional() }),
@@ -18,7 +20,7 @@ export const DiscoverSchema = z.strictObject({
   maxPositions: z.number().int().min(1).max(100).default(25),
 });
 export const ReplaySchema = z.strictObject({
-  operation: z.enum(['resolve-v1', 'resolve-v2', 'verify-shares', 'verify-accounting', 'verify-weth', 'verify-base-custody']),
+  operation: z.enum(['resolve-v1', 'resolve-v2', 'resolve-erc4626', 'verify-shares', 'verify-accounting', 'verify-weth', 'verify-base-custody']),
   capture: z.json(),
 });
 export const ExampleSchema = z.strictObject({ id: z.enum(['steakhouse-usdc', 'ov-usdc-v2', 'weth-custody']) });

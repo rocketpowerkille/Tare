@@ -14,23 +14,20 @@ test('GraphQL errors reject even apparently useful partial data and never echo p
     await assert.rejects(new MorphoDiscovery(url).vault(`0x${'11'.repeat(20)}`, 1), error => error instanceof SourceFailure && error.code === 'graphql-error' && !error.message.includes('SECRET'));
   });
 });
-test('GraphQL pagination distinguishes scoped absence from truncation and schema drift', async () => {
+test('GraphQL discovery returns current V1 and V2 positions with asset metadata', async () => {
   const owner = `0x${'11'.repeat(20)}`;
-  await withServer((body, response) => {
-    const { variables } = z.object({ variables: z.object({ skip: z.number(), first: z.number() }) }).parse(body);
-    const { skip, first } = variables;
-    const items = Array.from({ length: Math.min(first, 51 - skip) }, (_, i) => ({ user: { address: owner }, vault: { address: `0x${(skip + i + 1).toString(16).padStart(40, '0')}`, name: 'vault', chain: { id: 1 } }, state: { shares: '1' } }));
-    json(response, { data: { vaultPositions: { items, pageInfo: { count: items.length, countTotal: 51, skip, limit: first } } } });
-  }, async url => {
-    const client = new MorphoDiscovery(url);
-    const truncated = await client.positions({ chainId: 1, owner, maxPositions: 1 });
-    assert.equal(truncated.complete, false); assert.deepEqual(truncated.issues, ['limit']);
-    const all = await client.positions({ chainId: 1, owner, maxPositions: 100 });
-    assert.equal(all.complete, true); assert.equal(all.positions.length, 51);
-  });
-  await withServer((_body, response) => json(response, { data: { vaultPositions: { items: [], pageInfo: { count: 0, countTotal: 0, skip: 0, limit: 50 } } } }), async url => {
+  const asset = { address: `0x${'aa'.repeat(20)}`, symbol: 'WETH', decimals: 18 };
+  await withServer((_body, response) => json(response, { data: { userByAddress: {
+    vaultPositions: [{ vault: { address: `0x${'22'.repeat(20)}`, name: 'V1', asset, chain: { id: 1 } }, state: { shares: '2', assets: '3' } }],
+    vaultV2Positions: [{ vault: { address: `0x${'33'.repeat(20)}`, name: 'V2', asset, chain: { id: 1 } }, shares: '4', assets: '5' }],
+  } } }), async url => {
     const result = await new MorphoDiscovery(url).positions({ chainId: 1, owner });
-    assert.equal(result.complete, true); assert.deepEqual(result.positions, []); assert.equal(result.scope, 'indexed-morpho-v1-only');
+    assert.equal(result.complete, true);
+    assert.deepEqual(result.positions.map(position => [position.version, position.asset.symbol]), [['v2', 'WETH'], ['v1', 'WETH']]);
+  });
+  await withServer((_body, response) => json(response, { data: { userByAddress: { vaultPositions: [], vaultV2Positions: [] } } }), async url => {
+    const result = await new MorphoDiscovery(url).positions({ chainId: 1, owner });
+    assert.equal(result.complete, true); assert.deepEqual(result.positions, []); assert.equal(result.scope, 'indexed-morpho-v1-and-v2');
   });
 });
 test('HTTP reader bounds streamed bodies, handles malformed JSON and times out', async () => {

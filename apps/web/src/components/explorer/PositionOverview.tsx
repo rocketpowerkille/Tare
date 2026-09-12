@@ -68,10 +68,28 @@ function nestedOverview(report: JsonRecord, capture: JsonRecord): PositionOvervi
   };
 }
 
+function erc4626Overview(report: JsonRecord, capture: JsonRecord): PositionOverviewData | undefined {
+  const position = record(report.position);
+  const amountRaw = text(position.assetsRaw);
+  const decimals = typeof position.decimals === 'number' ? position.decimals : undefined;
+  if (!amountRaw || decimals === undefined) return undefined;
+  const vaultName = text(position.vaultName) ?? 'ERC-4626 vault';
+  return {
+    amount: formatUnits(amountRaw, decimals),
+    symbol: text(position.assetSymbol) ?? 'underlying units',
+    vaultName,
+    checkedBlock: blockNumber(capture),
+    path: ['Wallet', vaultName, 'Underlying asset quote'],
+    explanation: 'Tare read the wallet share balance and asked the vault contract to convert those shares into its underlying asset at one block. Protocol-specific downstream holdings are outside this generic check.',
+  };
+}
+
 function overview(report: JsonRecord) {
   const capture = record(report.capture);
   return text(report.protocol) === 'metamorpho-v1-blue-v1'
     ? v1Overview(report, capture)
+    : text(report.protocol) === 'erc4626'
+      ? erc4626Overview(report, capture)
     : text(report.reportType) === 'nested-exposure'
       ? nestedOverview(report, capture)
       : undefined;

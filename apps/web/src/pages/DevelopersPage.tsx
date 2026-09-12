@@ -48,7 +48,7 @@ export function DevelopersPage() {
         <div className="endpoint-row"><code>GET</code><code>/api/access-options</code><span>List public access methods without exposing secrets.</span></div>
         <div className="endpoint-row"><code>GET</code><code>/api/status</code><span>List capabilities, examples, and limits.</span></div>
         <div className="endpoint-row"><code>POST</code><code>/api/bazantic/session</code><span>Issue a short-lived session after a Bazantic sandbox payment.</span></div>
-        <div className="endpoint-row"><code>POST</code><code>/api/discover</code><span>Find indexed MetaMorpho V1 vault candidates for a wallet.</span></div>
+        <div className="endpoint-row"><code>POST</code><code>/api/discover</code><span>Find Morpho V1 and V2 positions across three mainnets plus configured ERC-4626 registry entries.</span></div>
         <div className="endpoint-row"><code>POST</code><code>/api/analyze</code><span>Acquire fresh read-only evidence.</span></div>
         <div className="endpoint-row"><code>POST</code><code>/api/replay</code><span>Recalculate a compatible saved capture.</span></div>
         <div className="endpoint-row"><code>POST</code><code>/api/example</code><span>Replay a retained public example.</span></div>

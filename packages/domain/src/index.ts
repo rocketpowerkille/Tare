@@ -2,6 +2,7 @@ import { z } from 'zod/v4';
 
 export const AddressSchema = z.string().regex(/^0x[0-9a-fA-F]{40}$/, 'Expected a 20-byte EVM address').transform(value => value.toLowerCase()).brand<'Address'>();
 export const ChainIdSchema = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
+export const SupportedEvmChainSchema = z.union([z.literal(1), z.literal(8453), z.literal(42161), z.literal(84532)]);
 export const RawSchema = z.string().regex(/^(0|[1-9][0-9]{0,77})$/, 'Expected an unsigned integer string (at most 78 digits)');
 const PositiveRawSchema = RawSchema.refine(value => BigInt(value) > 0n, 'Must be positive');
 const IdSchema = z.string().regex(/^[a-zA-Z0-9:_-]{1,100}$/);

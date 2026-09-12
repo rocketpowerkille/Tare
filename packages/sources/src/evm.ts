@@ -146,3 +146,17 @@ export function decodeAddress(data: string): string {
   if (value >= 2n ** 160n) throw new SourceFailure('invalid-response', 'Non-canonical ABI address');
   return AddressSchema.parse(`0x${value.toString(16).padStart(40, '0')}`);
 }
+
+export function decodeString(data: string): string {
+  const parsed = HexDataSchema.parse(data);
+  if (parsed.length === 66) {
+    const bytes = parsed.slice(2).match(/.{2}/g) ?? [];
+    return String.fromCharCode(...bytes.map(value => Number.parseInt(value, 16))).replace(/\0+$/, '');
+  }
+  const [offset, length] = decodeWords(`0x${parsed.slice(2, 130)}`, 2);
+  if (offset !== 32n || length === undefined || length > 200n) throw new SourceFailure('invalid-response', 'Unexpected ABI string response');
+  const start = 2 + 128;
+  const hex = parsed.slice(start, start + Number(length) * 2);
+  if (hex.length !== Number(length) * 2) throw new SourceFailure('invalid-response', 'Truncated ABI string response');
+  return new TextDecoder().decode(Uint8Array.from(hex.match(/.{2}/g) ?? [], value => Number.parseInt(value, 16)));
+}

@@ -49,29 +49,29 @@ test('API examples and uploaded captures preserve the exact resolver reports and
   });
 });
 
-test('API discovers active indexed MetaMorpho V1 vault candidates by wallet', async () => {
+test('API discovers active indexed Morpho positions by wallet and reports support', async () => {
   const owner = `0x${'1'.repeat(40)}`;
   const activeVault = `0x${'2'.repeat(40)}`;
   const emptyVault = `0x${'3'.repeat(40)}`;
   await withServer((body, response) => {
     const request = body as { variables: { chain: number; owner: string } };
-    assert.equal(request.variables.chain, 1);
     assert.equal(request.variables.owner, owner);
-    json(response, { data: { vaultPositions: {
-      items: [
-        { user: { address: owner }, vault: { address: activeVault, name: 'Active vault', chain: { id: 1 } }, state: { shares: '42' } },
-        { user: { address: owner }, vault: { address: emptyVault, name: 'Empty vault', chain: { id: 1 } }, state: { shares: '0' } },
-      ],
-      pageInfo: { count: 2, countTotal: 2, skip: 0, limit: 25 },
-    } } });
+    const positions = request.variables.chain === 1 ? [
+      { vault: { address: activeVault, name: 'Active vault', asset: { address: `0x${'a'.repeat(40)}`, symbol: 'USDC', decimals: 6 }, chain: { id: 1 } }, state: { shares: '42', assets: '43' } },
+      { vault: { address: emptyVault, name: 'Empty vault', asset: { address: `0x${'a'.repeat(40)}`, symbol: 'USDC', decimals: 6 }, chain: { id: 1 } }, state: { shares: '0', assets: '0' } },
+    ] : [];
+    json(response, { data: { userByAddress: { vaultPositions: positions, vaultV2Positions: [] } } });
   }, async morphoUrl => {
     await withApi(async url => {
       const response = await post(url, 'discover', { owner, maxPositions: 25 });
       assert.equal(response.status, 200);
-      const result = await response.json() as { scope: string; complete: boolean; positions: Array<{ vault: string; reportedSharesRaw: string }> };
-      assert.equal(result.scope, 'indexed-morpho-v1-only');
+      const result = await response.json() as { scope: string; complete: boolean; positions: Array<{ vault: string; reportedSharesRaw: string; support: { status: string } }> };
+      assert.equal(result.scope, 'indexed-morpho-v1-and-v2');
       assert.equal(result.complete, true);
-      assert.deepEqual(result.positions, [{ owner, vault: activeVault, name: 'Active vault', reportedSharesRaw: '42' }]);
+      assert.equal(result.positions.length, 1);
+      assert.equal(result.positions[0]?.vault, activeVault);
+      assert.equal(result.positions[0]?.reportedSharesRaw, '42');
+      assert.equal(result.positions[0]?.support.status, 'unsupported');
       assert.equal((await post(url, 'discover', { owner: 'not-an-address' })).status, 400);
     }, new TareService({ morphoUrl }));
   });
@@ -82,11 +82,12 @@ test('API rejects cross-origin requests, URLs, paths, invalid bodies and unsuppo
     const address = `0x${'1'.repeat(40)}`;
     const input = { operation: 'resolve-v1', owner: address, vault: address };
     assert.equal((await post(url, 'analyze', input)).status, 503);
-    for (const extra of [{ rpcUrl: 'http://private.invalid/SECRET' }, { chainId: 8453 }, { privateKey: 'SECRET' }]) {
+    for (const extra of [{ rpcUrl: 'http://private.invalid/SECRET' }, { privateKey: 'SECRET' }]) {
       const response = await post(url, 'analyze', { ...input, ...extra });
       assert.equal(response.status, 400);
       assert.ok(!(await response.text()).includes('SECRET'));
     }
+    assert.equal((await post(url, 'analyze', { ...input, chainId: 8453 })).status, 503);
     assert.equal((await post(url, 'example', { id: '../../.env' })).status, 400);
     assert.equal((await post(url, 'replay', { operation: 'resolve-v1', capture: {} })).status, 400);
     assert.equal((await post(url, 'example', { id: 'steakhouse-usdc' }, { origin: 'https://evil.invalid' })).status, 403);

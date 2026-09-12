@@ -92,7 +92,7 @@ export function ReportView({ report }: { report: JsonRecord }) {
   const reportType = text(report.reportType) ?? text(report.protocol) ?? 'Position evidence';
   const capturedAt = text(capture.capturedAt);
   const chainId = capture.chainId ?? report.chainId;
-  const network = chainId === 84532 ? 'Base Sepolia' : chainId === 1 ? 'Ethereum' : 'Network unavailable';
+  const network = chainId === 84532 ? 'Base Sepolia' : chainId === 8453 ? 'Base' : chainId === 42161 ? 'Arbitrum' : chainId === 1 ? 'Ethereum' : 'Network unavailable';
   const result = verdict(status, sourceMode);
   const VerdictIcon = result.icon;
   const findings = [...list(report.findings), ...list(report.limitations)];

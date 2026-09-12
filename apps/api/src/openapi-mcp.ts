@@ -41,8 +41,8 @@ export const mcpOpenapi = {
     '/api/discover': {
       post: {
         operationId: 'tare_discover_vaults',
-        summary: 'Find indexed MetaMorpho V1 vault candidates for a public wallet address.',
-        description: 'Candidate discovery uses Morpho indexed current state. Confirm a selected vault with tare_analyze_compact.',
+        summary: 'Find multi-chain Morpho and registered ERC-4626 positions for a public wallet address.',
+        description: 'Morpho discovery covers V1 and V2 on Ethereum, Base and Arbitrum. Configured registries add other ERC-4626 protocols and Base Sepolia. Confirm a supported result with tare_analyze_compact.',
         requestBody: {
           required: true,
           content: {
@@ -66,7 +66,7 @@ export const mcpOpenapi = {
     '/api/agent-analyze': {
       post: {
         operationId: 'tare_analyze_compact',
-        summary: 'Acquire a compact, read-only Ethereum or Base Sepolia evidence report for an agent.',
+        summary: 'Acquire a compact, read-only multi-chain evidence report for an agent.',
         requestBody: {
           required: true,
           content: {
@@ -78,11 +78,12 @@ export const mcpOpenapi = {
                 properties: {
                   operation: {
                     type: 'string',
-                    enum: ['resolve-v1', 'resolve-v2', 'verify-shares', 'verify-accounting', 'verify-weth', 'verify-base-custody'],
+                    enum: ['resolve-v1', 'resolve-v2', 'resolve-erc4626', 'verify-shares', 'verify-accounting', 'verify-weth', 'verify-base-custody'],
                   },
                   owner: address,
                   vault: address,
                   blockNumber: { type: 'string', description: 'Optional decimal block number.' },
+                  chainId: { type: 'integer', enum: [1, 8453, 42161, 84532], default: 1 },
                 },
               },
             },

@@ -15,6 +15,7 @@ export interface Capabilities {
   live: Record<OperationId, boolean>;
   limits: { maxInputBytes: number; concurrentOperations: number };
   limitations: string[];
+  networks: Array<{ chainId: number; name: string; resolveV1: boolean; erc4626: boolean }>;
 }
 
 export interface DiscoveredPosition {
@@ -22,15 +23,23 @@ export interface DiscoveredPosition {
   vault: string;
   name: string;
   reportedSharesRaw: string | null;
+  reportedAssetsRaw: string | null;
+  protocol: string;
+  version: 'v1' | 'v2' | 'erc4626';
+  chainId: 1 | 8453 | 42161 | 84532;
+  network: string;
+  asset: { address: string; symbol: string; decimals: number };
+  support: { status: 'supported'; operation: 'resolve-v1' | 'resolve-v2' | 'resolve-erc4626'; checkType: string }
+    | { status: 'unsupported'; reason: string };
 }
 
 export interface DiscoveryResult {
-  source: 'morpho-graphql';
-  scope: 'indexed-morpho-v1-only';
+  source: 'morpho-graphql' | 'morpho-graphql+erc4626-registry';
+  scope: 'indexed-morpho-v1-and-v2' | 'indexed-morpho-and-configured-erc4626';
   observedAt: string;
   blockAligned: false;
   complete: boolean;
-  issues: Array<'limit' | 'index-changed' | 'missing-state'>;
+  issues: Array<'limit' | 'chain-unavailable' | 'missing-state' | 'registry-read-failed'>;
   positions: DiscoveredPosition[];
 }
 
@@ -48,6 +57,7 @@ export interface AccessOptions {
 export type OperationId =
   | 'resolve-v1'
   | 'resolve-v2'
+  | 'resolve-erc4626'
   | 'verify-shares'
   | 'verify-accounting'
   | 'verify-weth'
@@ -58,7 +68,7 @@ export interface OperationDefinition {
   label: string;
   shortLabel: string;
   description: string;
-  network: 'Ethereum' | 'Base Sepolia';
+  network: 'Ethereum' | 'Base Sepolia' | 'Multi-chain';
   owner: boolean;
   vault: boolean;
 }
