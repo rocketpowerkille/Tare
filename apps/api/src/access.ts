@@ -71,16 +71,24 @@ export class ApiAccess {
     const localHosts = [`127.0.0.1:${request.socket.localPort}`, `localhost:${request.socket.localPort}`];
     const hosts = this.origin ? [new URL(this.origin).host] : localHosts;
     const origins = this.origin ? [this.origin] : localHosts.map(host => `http://${host}`);
-    if (!hosts.includes(request.headers.host ?? '')
-      || (request.headers.origin && !origins.includes(request.headers.origin))
-      || request.headers['sec-fetch-site'] === 'cross-site') {
-      throw new ServiceError(403, 'untrusted-origin', 'Request Host or Origin is not allowed.');
-    }
-    if (!this.origin || !protectedRoute) return undefined;
     const match = /^Bearer ([A-Za-z0-9._-]{32,512})$/i.exec(request.headers.authorization ?? '');
     const token = match?.[1] ?? '';
     const hash = digest(token);
     const client = this.clients.find(candidate => timingSafeEqual(candidate.hash, hash));
+    const bazanticGatewayRequest = Boolean(protectedRoute && this.bazantic
+      && client?.id === this.bazantic.clientId);
+    const gatewayOrigin = this.bazantic?.gatewayUrl;
+    const bazanticHosts = gatewayOrigin ? [new URL(gatewayOrigin).host] : [];
+    const bazanticOrigins = gatewayOrigin ? [gatewayOrigin, 'https://bazantic.com'] : [];
+    const trustedHost = hosts.includes(request.headers.host ?? '')
+      || Boolean(bazanticGatewayRequest && bazanticHosts.includes(request.headers.host ?? ''));
+    const trustedOrigin = !request.headers.origin || origins.includes(request.headers.origin)
+      || Boolean(bazanticGatewayRequest && bazanticOrigins.includes(request.headers.origin));
+    const trustedFetchContext = request.headers['sec-fetch-site'] !== 'cross-site' || bazanticGatewayRequest;
+    if (!trustedHost || !trustedOrigin || !trustedFetchContext) {
+      throw new ServiceError(403, 'untrusted-origin', 'Request Host or Origin is not allowed.');
+    }
+    if (!this.origin || !protectedRoute) return undefined;
     if (match && client) {
       this.useQuota(client.id);
       return { kind: 'api-key', clientId: client.id };

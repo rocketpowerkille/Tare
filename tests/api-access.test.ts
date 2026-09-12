@@ -108,6 +108,7 @@ test('Bazantic sandbox payment route issues a short-lived testnet-only Explorer 
 
     const issued = await send(url, '/api/bazantic/session', {
       ...jsonHeaders, authorization: `Bearer ${sandboxHosted.keys.bazantic}`,
+      origin: 'https://bazantic.com', 'sec-fetch-site': 'cross-site',
     }, '{}');
     assert.equal(issued.status, 200);
     const session = JSON.parse(issued.body) as { accessToken: string; network: string; expiresInSeconds: number };
@@ -115,6 +116,19 @@ test('Bazantic sandbox payment route issues a short-lived testnet-only Explorer 
     assert.equal(session.network, 'base-sepolia');
     assert.equal(session.expiresInSeconds, 60);
     assert.equal((await send(url, '/api/status', { authorization: `Bearer ${session.accessToken}` })).status, 200);
+    assert.equal((await send(url, '/api/status', {
+      host: new URL(sandboxHosted.bazanticSandbox.gatewayUrl).host,
+      authorization: `Bearer ${sandboxHosted.keys.bazantic}`,
+      origin: sandboxHosted.bazanticSandbox.gatewayUrl,
+    })).status, 200);
+    assert.equal((await send(url, '/api/status', {
+      authorization: `Bearer ${sandboxHosted.keys.member}`,
+      origin: 'https://bazantic.com', 'sec-fetch-site': 'cross-site',
+    })).status, 403);
+    assert.equal((await send(url, '/api/status', {
+      authorization: `Bearer ${sandboxHosted.keys.bazantic}`,
+      origin: 'https://attacker.test', 'sec-fetch-site': 'cross-site',
+    })).status, 403);
     const tampered = `${session.accessToken.slice(0, -1)}${session.accessToken.endsWith('a') ? 'b' : 'a'}`;
     assert.equal((await send(url, '/api/status', { authorization: `Bearer ${tampered}` })).status, 401);
   }, undefined, sandboxHosted);

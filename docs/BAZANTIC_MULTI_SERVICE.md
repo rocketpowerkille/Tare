@@ -31,7 +31,8 @@ wallet discovery, compact analysis and short-lived session issuance.
 
 Bazantic's sidebar balance currently shows live funds only. For sandbox testing,
 fund the Bazantic receiving wallet with Base Sepolia USDC from Circle's testnet
-faucet, then confirm the testnet balance under **Settings > Balances > Advanced**.
+faucet. The dashboard does not currently display this testnet balance, so confirm
+the network, token contract and recipient in the faucet transaction before retrying.
 
 1. Confirm the payment quote names Base Sepolia and test USDC before approving it.
 2. Call `tare_status` first to prove the paid request lifecycle with the smallest
