@@ -56,6 +56,15 @@ export const operations: OperationDefinition[] = [
     vault: true,
   },
   {
+    id: 'verify-graph-composition',
+    label: 'Verify with two Graph products',
+    shortLabel: 'Graph composition',
+    description: 'Compare the wallet vault-share balance from The Graph Token API with RPC, while the Studio subgraph and RPC compare vault accounting at the same checked block.',
+    network: 'Ethereum',
+    owner: true,
+    vault: true,
+  },
+  {
     id: 'verify-weth',
     label: 'Check WETH wrapper custody',
     shortLabel: 'WETH custody',

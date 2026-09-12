@@ -5,6 +5,12 @@ export const help = `Tare 0.1.0 — exposure CLI with offline replay and read-on
   tare verify accounting --vault <V1-vault> [--rpc-url <url>] [--graph-url <url>]
        [--graph-deployment <CID>] [--block-number <n>] [--json] [--out <capture.json>]
   tare verify accounting-replay <capture.json> [--json]
+  tare verify graph-products --address <owner> --vault <V1-vault>
+       [--rpc-url <url>] [--graph-url <url>] [--graph-deployment <CID>]
+       [--token-api-url <url>] [--json] [--out <capture.json>]
+       Requires GRAPH_MARKET_API_TOKEN. Composes live Token API and Studio data,
+       then checks both against RPC at the Studio accounting block.
+  tare verify graph-replay <capture.json> [--json]
   tare verify custody --address <holder> [--rpc-url <url>] [--secondary-rpc-url <url>]
        [--block-number <n>] [--json] [--out <capture.json>]
   tare verify custody-replay <capture.json> [--json]

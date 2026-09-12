@@ -15,7 +15,7 @@ export async function withServer(handler: Handler, run: (url: string) => Promise
     response.setHeader('connection', 'close');
     let body = '';
     request.on('data', (chunk: Buffer) => { body += chunk.toString(); });
-    request.on('end', () => handler(JSON.parse(body) as unknown, response, request));
+    request.on('end', () => handler(body ? JSON.parse(body) as unknown : undefined, response, request));
   });
   await new Promise<void>((resolve, reject) => {
     server.once('error', reject);

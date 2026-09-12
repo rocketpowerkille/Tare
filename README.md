@@ -42,6 +42,11 @@ Bazantic and Chainlink instead mark specific prizes as Continuity-only. See the
 **Phase six local V1 monitoring is implemented:** Substreams events trigger existing
 resolution and Graph/RPC checks, with resumable checkpoints, deduplication and
 reorg retractions. Hosted acceptance remains pending; see [monitoring](docs/PHASE_6.md).
+The deadline-safe Graph composition operation additionally joins The Graph Token
+API wallet balance with the live Studio accounting subgraph, then checks both
+against RPC at the subgraph block. This path does not depend on the unfinished
+historical share-ledger backfill. Hosted acceptance needs `GRAPH_MARKET_API_TOKEN`
+and is repeated with `pnpm verify:hosted:graph-products`.
 
 **Phase seven has a confidential policy workflow and Solidity exit receiver:** private
 thresholds drive signed verdicts, with a guarded Base Sepolia execution path.
@@ -168,6 +173,8 @@ operator. No transaction, connection request, or signature is made.
 | `live nested-replay <capture>` | Replay nested accounting and valuation offline |
 | `verify accounting --vault <V1-vault>` | Cross-check indexed underlying accounting against pinned RPC |
 | `verify accounting-replay <capture>` | Recompute underlying accounting comparisons |
+| `verify graph-products --address <owner> --vault <V1-vault>` | Compose live Token API and Studio data with same-block RPC checks |
+| `verify graph-replay <capture>` | Recompute the Graph product composition without network access |
 | `verify custody --address <holder>` | Cross-check WETH/native ETH custody across two RPC hosts |
 | `verify custody-replay <capture>` | Replay the scoped custody metric |
 | `verify base-custody --address <owner> --deployment <file>` | Verify the allowlisted Base Sepolia two-layer control across two RPC hosts |

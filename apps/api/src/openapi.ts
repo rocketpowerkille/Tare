@@ -10,7 +10,7 @@ const blockNumber = {
 } as const;
 const operations = [
   'resolve-v1', 'resolve-v2', 'resolve-erc4626', 'verify-shares', 'verify-accounting',
-  'verify-weth', 'verify-base-custody',
+  'verify-graph-composition', 'verify-weth', 'verify-base-custody',
 ] as const;
 const genericObject = { type: 'object', additionalProperties: true } as const;
 const emptyObject = { type: 'object', additionalProperties: false, properties: {} } as const;

@@ -22,6 +22,15 @@ const bazanticExample = `baz curl https://zvnss2njirhqjllnbfsv3sneca.bazgateway.
   --account <grant-name> \\
   --json`;
 
+const graphExample = `curl https://tare-api.onrender.com/api/analyze \\
+  -H "Authorization: Bearer $TARE_API_TOKEN" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "operation": "verify-graph-composition",
+    "owner": "0x9fc3dc011b461664c835f2527fffb1169b3c213e",
+    "vault": "0xbeef01735c132ada46aa9aa4c54623caa92a64cb"
+  }'`;
+
 export function DevelopersPage() {
   return <div className="developer-page page-width">
     <header className="page-intro compact-intro">
@@ -39,6 +48,11 @@ export function DevelopersPage() {
     <section className="developer-section">
       <div className="section-heading"><p className="kicker">Bazantic sandbox</p><h2>Create a short-lived Explorer session</h2><p>The paid gateway request settles with Base Sepolia test USDC. Read the token from <code>body.accessToken</code> in the JSON response. Mainnet access is not enabled.</p></div>
       <CodeBlock code={bazanticExample} label="Bazantic CLI" />
+    </section>
+
+    <section className="developer-section">
+      <div className="section-heading"><p className="kicker">The Graph</p><h2>Compose Token API and Studio accounting</h2><p>This operation compares the wallet's vault-share balance and the subgraph accounting checkpoint with direct Ethereum RPC reads. The Graph Market token remains server-side.</p></div>
+      <CodeBlock code={graphExample} label="cURL" />
     </section>
 
     <section className="developer-section">

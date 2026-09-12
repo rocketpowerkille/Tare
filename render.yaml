@@ -34,6 +34,8 @@ services:
         value: https://api.studio.thegraph.com/query/1760123/tare-live-accounting/0.1.0
       - key: TARE_GRAPH_DEPLOYMENT
         value: QmWSiZRvaFzYkohhsM2D9yHD4Nc7ZnZFRWz8pUcwfQi3j2
+      - key: GRAPH_MARKET_API_TOKEN
+        sync: false
       - key: TARE_BASE_RPC_URL
         value: https://sepolia.base.org
       - key: TARE_BASE_SECONDARY_RPC_URL

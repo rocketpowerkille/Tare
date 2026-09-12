@@ -3,6 +3,7 @@ import { resolveLivePosition, replayLiveCapture } from '../../resolver/src/live.
 import { resolveNestedPosition, replayNestedCapture } from '../../resolver/src/nested.js';
 import { verifyShares, replayShareVerification } from '../../verification/src/shares.js';
 import { verifyAccounting, replayAccounting } from '../../verification/src/accounting.js';
+import { verifyGraphComposition, replayGraphComposition } from '../../verification/src/graph-composition.js';
 import { verifyWethCustody, replayCustody } from '../../verification/src/custody.js';
 import { verifyBaseSepoliaCustody, replayBaseSepoliaCustody } from '../../verification/src/base-sepolia-custody.js';
 import { BaseSepoliaCustodyDeploymentSchema } from '../../verification/src/base-sepolia-custody-capture.js';
@@ -21,6 +22,8 @@ export interface ServiceConfig {
   graphUrl?: string;
   expectedDeployment?: string;
   graphApiKey?: string;
+  graphMarketToken?: string;
+  tokenApiUrl?: string;
   morphoUrl?: string;
   baseRpcUrl?: string;
   baseSecondaryRpcUrl?: string;
@@ -41,6 +44,8 @@ export function configFromEnv(env: NodeJS.ProcessEnv = process.env): ServiceConf
     rpcUrl: env.TARE_RPC_URL, secondaryRpcUrl: env.TARE_SECONDARY_RPC_URL,
     graphUrl: env.TARE_GRAPH_URL, expectedDeployment: env.TARE_GRAPH_DEPLOYMENT,
     graphApiKey: env.GRAPH_API_KEY,
+    graphMarketToken: env.GRAPH_MARKET_API_TOKEN,
+    tokenApiUrl: env.TARE_GRAPH_TOKEN_API_URL,
     morphoUrl: env.TARE_MORPHO_URL,
     baseRpcUrl: env.TARE_BASE_RPC_URL, baseSecondaryRpcUrl: env.TARE_BASE_SECONDARY_RPC_URL,
     baseMainnetRpcUrl: env.TARE_BASE_MAINNET_RPC_URL, arbitrumRpcUrl: env.TARE_ARBITRUM_RPC_URL,
@@ -79,7 +84,8 @@ export class TareService {
       name: 'tare', apiVersion: 1, chainId: 1, readOnly: true, examples,
       live: { 'resolve-v1': rpc || Boolean(this.config.baseMainnetRpcUrl || this.config.arbitrumRpcUrl), 'resolve-v2': rpc,
         'resolve-erc4626': rpc || Boolean(this.config.baseMainnetRpcUrl || this.config.arbitrumRpcUrl || this.config.baseRpcUrl), 'verify-shares': graph,
-        'verify-accounting': graph, 'verify-weth': rpc && Boolean(this.config.secondaryRpcUrl),
+        'verify-accounting': graph, 'verify-graph-composition': graph && Boolean(this.config.graphMarketToken),
+        'verify-weth': rpc && Boolean(this.config.secondaryRpcUrl),
         'verify-base-custody': Boolean(this.config.baseRpcUrl && this.config.baseSecondaryRpcUrl
           && this.config.baseCustodyDeployment) },
       limits: { maxInputBytes: MAX_INPUT_BYTES, concurrentOperations: 2 },
@@ -165,6 +171,7 @@ export class TareService {
       case 'resolve-erc4626': return replayErc4626Capture(request.capture);
       case 'verify-shares': return replayShareVerification(request.capture);
       case 'verify-accounting': return replayAccounting(request.capture);
+      case 'verify-graph-composition': return replayGraphComposition(request.capture);
       case 'verify-weth': return replayCustody(request.capture);
       case 'verify-base-custody': return replayBaseSepoliaCustody(request.capture);
     }
@@ -175,8 +182,8 @@ export class TareService {
     if (!this.capabilities().live[request.operation]) {
       throw new ServiceError(503, 'not-configured', `Configure local providers for ${request.operation} first.`);
     }
-    const { rpcUrl, graphUrl, secondaryRpcUrl, expectedDeployment, graphApiKey } = this.config;
-    const rpc = { rpcUrl: rpcUrl!, ...(request.blockNumber === undefined ? {} : { blockNumber: request.blockNumber }) };
+    const { rpcUrl, graphUrl, secondaryRpcUrl, expectedDeployment, graphApiKey, graphMarketToken, tokenApiUrl } = this.config;
+    const rpc = { rpcUrl: rpcUrl!, ...(!('blockNumber' in request) || request.blockNumber === undefined ? {} : { blockNumber: request.blockNumber }) };
     const graph = { ...rpc, graphUrl: graphUrl!, ...(expectedDeployment ? { expectedDeployment } : {}) };
     switch (request.operation) {
       case 'resolve-v1': {
@@ -194,6 +201,10 @@ export class TareService {
       }
       case 'verify-shares': return verifyShares({ ...graph, owner: request.owner, vault: request.vault }, graphApiKey);
       case 'verify-accounting': return verifyAccounting({ ...graph, vault: request.vault }, graphApiKey);
+      case 'verify-graph-composition': return verifyGraphComposition({
+        ...graph, owner: request.owner, vault: request.vault,
+        tokenApiUrl: tokenApiUrl ?? 'https://token-api.thegraph.com',
+      }, graphMarketToken!, graphApiKey);
       case 'verify-weth': return verifyWethCustody({ ...rpc, owner: request.owner, secondaryRpcUrl: secondaryRpcUrl! });
       case 'verify-base-custody': return verifyBaseSepoliaCustody({
         owner: request.owner,

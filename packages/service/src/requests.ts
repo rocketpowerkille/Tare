@@ -12,6 +12,7 @@ export const AnalyzeSchema = z.discriminatedUnion('operation', [
   z.strictObject({ operation: z.literal('resolve-erc4626'), ...position, chainId: SupportedEvmChainSchema.default(1) }),
   z.strictObject({ operation: z.literal('verify-shares'), ...position, blockNumber: graphBlock }),
   z.strictObject({ operation: z.literal('verify-accounting'), vault: AddressSchema, blockNumber: graphBlock }),
+  z.strictObject({ operation: z.literal('verify-graph-composition'), owner: AddressSchema, vault: AddressSchema }),
   z.strictObject({ operation: z.literal('verify-weth'), owner: AddressSchema, blockNumber: UintSchema.optional() }),
   z.strictObject({ operation: z.literal('verify-base-custody'), owner: AddressSchema, blockNumber: UintSchema.optional() }),
 ]);
@@ -20,7 +21,7 @@ export const DiscoverSchema = z.strictObject({
   maxPositions: z.number().int().min(1).max(100).default(25),
 });
 export const ReplaySchema = z.strictObject({
-  operation: z.enum(['resolve-v1', 'resolve-v2', 'resolve-erc4626', 'verify-shares', 'verify-accounting', 'verify-weth', 'verify-base-custody']),
+  operation: z.enum(['resolve-v1', 'resolve-v2', 'resolve-erc4626', 'verify-shares', 'verify-accounting', 'verify-graph-composition', 'verify-weth', 'verify-base-custody']),
   capture: z.json(),
 });
 export const ExampleSchema = z.strictObject({ id: z.enum(['steakhouse-usdc', 'ov-usdc-v2', 'weth-custody']) });

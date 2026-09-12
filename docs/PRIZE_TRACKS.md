@@ -17,7 +17,7 @@ Fresh pool on their prize pages; they mark individual prizes as Continuity-only.
 
 | Prize | Integration status | Qualification status |
 | --- | --- | --- |
-| Best Use of Composable or Standardized Graph Products | Partial | The Studio subgraph is live and the monitor composes it with the standardized `ethereum-common` Substreams package. The Substreams side has only local acceptance. Live Graph Market streaming still needs an API token and hosted worker. |
+| Best Use of Composable or Standardized Graph Products | Complete in code, hosted acceptance pending | `verify-graph-composition` composes two live Graph products in one result. The Graph Token API supplies the wallet's vault-share balance, while Tare's Studio subgraph supplies normalized vault accounting. RPC checks the share balance and all 56 accounting reads at the subgraph block. The existing standardized `ethereum-common` Substreams monitor adds reorg-safe streaming. Set `GRAPH_MARKET_API_TOKEN`, redeploy, then retain a successful `pnpm verify:hosted:graph-products` run. |
 | Best AI Tooling or AI Use Case with The Graph, From Scratch | Complete in code, redeploy required | The live Studio subgraph is load-bearing evidence for deterministic analysis exposed to agents through Tare's MCP/API and Bazantic surface. Unpinned runs now anchor on the subgraph's current indexed head before confirming and reading that exact hash through RPC. A fresh local-to-live acceptance matched all 56 reads with zero findings. Render must be redeployed once more before the hosted API contains this alignment fix. A two-to-four-minute submission video remains evidence packaging, not integration work. |
 | Best AI Tooling or AI Use Case with The Graph, Continuity | Ineligible if Start Fresh | This is the same technical track in the Continuity pool. Do not apply to both pools. |
 
@@ -25,6 +25,12 @@ The full historical share ledger is not required for the completed AI track. Tar
 must describe the deployed subgraph as a bounded current-accounting slice and must
 not claim historical share reconstruction. The post-deploy live acceptance command
 is `pnpm verify:hosted:graph`.
+
+The composable track also avoids the unfinished historical ledger. It uses the
+Token API balance endpoint and the deadline-safe current-accounting subgraph. A
+Token API observation newer than the subgraph block is rejected as unaligned,
+and any Token API/RPC balance difference becomes a mismatch. The required hosted
+secret is the JWT labelled **API Token** in The Graph Market, not the API-key ID.
 
 ## Chainlink
 
@@ -51,12 +57,9 @@ testnet-only.
 
 ### The Graph
 
-1. Can the live `tare-live-accounting` Studio subgraph plus a live consumer of the
-   standardized `ethereum-common` Substreams package qualify as composition for the
-   standardized/composable track?
-2. Can you provide or confirm the correct Graph Market API-token flow for a
-   deadline-bounded hosted acceptance run?
-3. Does the 56/56 same-block Studio-to-RPC comparison qualify for the From Scratch
+1. Can the live Token API wallet balance plus Tare's live Studio accounting
+   subgraph qualify as two Graph products composed in one verification report?
+2. Does the 56/56 same-block Studio-to-RPC comparison qualify for the From Scratch
    AI track without the unfinished historical creation-block backfill?
 
 ### Bazantic

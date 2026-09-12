@@ -15,6 +15,7 @@ if (origin.protocol !== 'https:' || origin.username || origin.password || origin
 const token = process.env.TARE_API_TOKEN ?? process.env.SECRET_TARE_API_TOKEN;
 if (!token) throw new Error('Set TARE_API_TOKEN or SECRET_TARE_API_TOKEN before hosted verification.');
 const verifyLiveGraph = process.argv.includes('--live-graph');
+const verifyGraphProducts = process.argv.includes('--graph-products');
 
 async function response(path, init = {}) {
   const result = await fetch(new URL(path, origin), {
@@ -82,5 +83,32 @@ if (verifyLiveGraph) {
     throw new Error(`Hosted Graph and RPC accounting acceptance failed: ${JSON.stringify(details)}`);
   }
   console.log('/api/agent-analyze live Graph/RPC accounting ok');
+}
+if (verifyGraphProducts) {
+  if (capabilities.live?.['verify-graph-composition'] !== true) {
+    throw new Error('Hosted Graph product composition is not configured. Set GRAPH_MARKET_API_TOKEN on Render.');
+  }
+  const composition = await (await response('/api/agent-analyze', {
+    method: 'POST',
+    headers: { ...headers, 'content-type': 'application/json' },
+    body: JSON.stringify({
+      operation: 'verify-graph-composition',
+      owner: '0x9fc3dc011b461664c835f2527fffb1169b3c213e',
+      vault: '0xbeef01735c132ada46aa9aa4c54623caa92a64cb',
+    }),
+  })).json();
+  if (composition.sourceMode !== 'live-graph-products-rpc'
+    || composition.status !== 'matched'
+    || composition.verification !== 'two-live-graph-products-with-rpc-cross-check'
+    || composition.checks?.accountingStatus !== 'matched'
+    || composition.checks?.accountingReads !== 56
+    || composition.checks?.tokenApiAmountRaw !== composition.checks?.rpcAmountRaw
+    || !Array.isArray(composition.products) || composition.products.length !== 2
+    || !Array.isArray(composition.findings) || composition.findings.length !== 0) {
+    throw new Error(`Hosted Graph product composition failed: ${JSON.stringify({
+      status: composition.status, checks: composition.checks, findings: composition.findings,
+    })}`);
+  }
+  console.log('/api/agent-analyze live Token API + Studio + RPC composition ok');
 }
 console.log(`Hosted Tare acceptance passed at ${origin.origin}.`);

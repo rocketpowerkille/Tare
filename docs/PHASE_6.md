@@ -4,6 +4,23 @@ Local V1 monitoring is implemented. Hosted Substreams + Graph/RPC acceptance is
 pending provider configuration. The worker is read-only and emits local JSON;
 it does not send external notifications or execute transactions.
 
+The deadline path for the composable-products prize no longer depends on waiting
+for a stream event. `verify-graph-composition` combines The Graph Token API with
+the live Studio accounting subgraph, then checks both products against Ethereum
+RPC at the subgraph block. The Substreams worker remains the continuous monitoring
+path and demonstrates cursor, replay and undo handling.
+
+Configure `GRAPH_MARKET_API_TOKEN` with the JWT from The Graph Market and run:
+
+```sh
+pnpm cli verify graph-products --address YOUR_PUBLIC_ADDRESS --vault SUPPORTED_V1_VAULT --json
+pnpm verify:hosted:graph-products
+```
+
+The hosted command uses the known public Steakhouse USDC position. A successful
+acceptance must report two live Graph products, equal Token API and RPC share
+balances, a matched Studio accounting result, 56 accounting reads and no findings.
+
 ## Run
 
 Build with `pnpm build`. Download the published package from
@@ -68,7 +85,7 @@ for each relevant new block. Replayed duplicates and undo need no new evidence.
 
 ## Verification
 
-`pnpm verify` passes 131 tests, including protobuf decoding, local gRPC request/response acceptance,
+`pnpm verify` includes protobuf decoding, local gRPC request/response acceptance,
 reconnect, restart, event deduplication, rollback, retained-history limits, failed
 reads/writes and CLI replay. These are local tests, not hosted execution evidence.
 The published package checksum, descriptor and request construction were also

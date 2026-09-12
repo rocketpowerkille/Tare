@@ -6,6 +6,7 @@ const sections = [
   ['how-it-works', 'How it works'],
   ['reading-a-report', 'Read a report'],
   ['using-the-explorer', 'Use the explorer'],
+  ['graph-verification', 'Graph verification'],
   ['access', 'Access'],
   ['limits', 'Limits and safety'],
   ['faq', 'Common questions'],
@@ -65,6 +66,17 @@ export function DocsPage() {
         </ol>
         <div className="plain-example"><strong>Just want to learn first?</strong><p>Open a saved example from the explorer. Saved examples explain the report format, but they are not a fresh check of your position.</p></div>
         <AppLink href="/explore" className="button primary">Open the explorer <ArrowRight size={17} /></AppLink>
+      </section>
+
+      <section className="doc-section" id="graph-verification">
+        <p className="section-label">Graph verification</p><h2>One check, two Graph products, one blockchain reference</h2>
+        <p>The Graph composition check is designed for an Ethereum MetaMorpho V1 position. It does not ask you to understand data providers. You provide the wallet and supported vault, then Tare performs three bounded comparisons.</p>
+        <ol className="numbered-steps">
+          <li><span>1</span><div><strong>Token API reads the position</strong><p>The Graph Token API reports the wallet's current balance of vault-share tokens.</p></div></li>
+          <li><span>2</span><div><strong>The subgraph reads the vault</strong><p>Tare's Subgraph Studio deployment supplies the normalized accounting checkpoint for the same supported vault.</p></div></li>
+          <li><span>3</span><div><strong>RPC checks both claims</strong><p>Tare reads the share balance and the complete vault accounting set directly at the subgraph block. A newer Token API update, a missing record, or a different value becomes an incomplete or mismatch result.</p></div></li>
+        </ol>
+        <div className="callout safe"><CheckCircle2 size={21} /><div><strong>Why this matters.</strong><p>The Token API makes the wallet balance easy to retrieve. The subgraph gives Tare a reusable accounting model. The RPC comparison keeps the two Graph products from becoming unverified assumptions.</p></div></div>
       </section>
 
       <section className="doc-section" id="access">

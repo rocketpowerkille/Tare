@@ -11,13 +11,23 @@ export function validateHttpUrl(input: string): string {
 
 /** Enforces a byte bound while streaming, not after buffering a provider response. */
 export async function postJson(url: string, body: unknown, timeoutMs: number, maxBytes = 1024 * 1024, authorization?: string): Promise<unknown> {
+  return requestJson(url, timeoutMs, maxBytes, {
+    method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json', ...(authorization ? { authorization } : {}) },
+    body: JSON.stringify(body),
+  });
+}
+
+export async function getJson(url: string, timeoutMs: number, maxBytes = 1024 * 1024, authorization?: string): Promise<unknown> {
+  return requestJson(url, timeoutMs, maxBytes, {
+    method: 'GET', headers: { accept: 'application/json', ...(authorization ? { authorization } : {}) },
+  });
+}
+
+async function requestJson(url: string, timeoutMs: number, maxBytes: number, init: RequestInit): Promise<unknown> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(validateHttpUrl(url), {
-      method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json', ...(authorization ? { authorization } : {}) },
-      body: JSON.stringify(body), signal: controller.signal, redirect: 'error',
-    });
+    const response = await fetch(validateHttpUrl(url), { ...init, signal: controller.signal, redirect: 'error' });
     if (!response.ok) { await response.body?.cancel(); throw new SourceFailure('http', `Source returned HTTP ${response.status}`); }
     const reader = response.body?.getReader();
     if (!reader) throw new SourceFailure('invalid-response', 'Source returned an empty body');

@@ -60,6 +60,7 @@ export type OperationId =
   | 'resolve-erc4626'
   | 'verify-shares'
   | 'verify-accounting'
+  | 'verify-graph-composition'
   | 'verify-weth'
   | 'verify-base-custody';
 

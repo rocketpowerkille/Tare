@@ -78,7 +78,7 @@ export const mcpOpenapi = {
                 properties: {
                   operation: {
                     type: 'string',
-                    enum: ['resolve-v1', 'resolve-v2', 'resolve-erc4626', 'verify-shares', 'verify-accounting', 'verify-weth', 'verify-base-custody'],
+                    enum: ['resolve-v1', 'resolve-v2', 'resolve-erc4626', 'verify-shares', 'verify-accounting', 'verify-graph-composition', 'verify-weth', 'verify-base-custody'],
                   },
                   owner: address,
                   vault: address,
