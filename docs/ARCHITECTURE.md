@@ -1,5 +1,9 @@
 # Architecture
 
+For the current submission overview, start with [the README](../README.md).
+This document retains the module and development-phase rationale. Current
+acceptance boundaries are in [the verification record](TEAM_HANDOFF.md).
+
 Phase seven keeps private policy rules and V1 report projection in `packages/policy`.
 The isolated `workflows/cre` package owns enclave secret access, API acquisition,
 redacted signing and guarded Base Sepolia report submission. Its V1 projection trusts the
@@ -21,11 +25,15 @@ owns HTTP and the generated OpenAPI contract; `apps/mcp` owns MCP stdio transpor
 existing reports without recalculating or relabeling their evidence. Neither
 accepts a provider URL, credential or arbitrary filesystem path in a request.
 `apps/api/src/access.ts` owns optional hosted authentication, origin validation
-and bounded per-client quotas. The server stays behind a loopback reverse proxy.
+and bounded per-client quotas. Local serving defaults to loopback; an external
+bind requires configured hosted access.
 `packages/service/src/composition.ts` recomputes and joins the resolution, share
 capture and direct Graph response; it reuses the existing verifiers. The web
-controller owns requests and temporary access tokens, while `report.js` owns
-rendering and downloadable evidence. The CLI remains independently usable.
+controller owns requests and temporary access tokens. React report components
+under `apps/web/src/components/explorer/` own rendering and downloadable evidence.
+`packages/receipts/src/explanation.ts` creates deterministic explanation context;
+the browser copy action does not call an LLM or Bazantic. The CLI remains usable
+independently.
 See [phase five](PHASE_5.md).
 
 The CLI entry point parses and dispatches commands; wallet, snapshot, demo, live
@@ -124,8 +132,9 @@ GraphQL is discovery-only and unpinned. RPC accounting uses one block hash plus 
 final confirmation; it is not an independent source consensus. Successful and
 failed contract reads are retained for deterministic replay. Collateral/oracle/IRM
 references are risk dependencies, not holdings to multiply into exposure.
-Complete live receipts cover vault-to-Blue loan receivables only. Verification and
-the metric remain unavailable pending phase four. See [phase three](PHASE_3.md).
+Complete V1 resolution receipts cover vault-to-Blue loan receivables only. They do
+not independently verify lending backing. Separate eligible comparison operations
+are described below; they do not upgrade loan recoverability. See [phase three](PHASE_3.md).
 
 ## Phase-four share-ledger comparison (live accounting accepted, history pending)
 
@@ -143,10 +152,10 @@ deployment identity and block alignment before comparing asset, decimals, supply
 and owner shares. `apps/cli/src/verify.ts` exposes comparison and offline replay.
 The receipt schema recomputes its checks from captured evidence during validation.
 
-The actual mappings pass a local Graph Node/Anvil indexing and rollback test.
-The deadline-safe hosted accounting deployment passed all 56 same-block Graph/RPC
-comparisons. The separate creation-block share-ledger deployment still needs to
-finish its historical sync and pass combined share/accounting acceptance. Share
+Retained records describe local Graph Node/Anvil indexing and rollback acceptance
+and a hosted 56-read accounting match. These are historical results, not fresh
+provider checks in this documentation review. The separate creation-block ledger
+still lacks hosted historical acceptance in the repository. Share
 agreement is not backing verification. Remaining gates are in [phase four](PHASE_4.md).
 
 The accounting mapping runs separately at end of block. `accounting-reads.ts`
@@ -177,8 +186,9 @@ See [phase six](PHASE_6.md) for protocol scope, persistence and operational limi
 ## Monitoring language boundary
 
 The resolver, provider clients, protocol adapters, verification, API, MCP server,
-web application, and monitoring consumer remain TypeScript. Standardized
-Subgraph mappings use AssemblyScript and do not require Rust.
+web application, and monitoring consumer remain TypeScript. Tare's custom
+subgraph mappings use AssemblyScript and do not require Rust. Hosted continuous
+Substreams acceptance remains pending.
 
 Rust may appear only in `graph/substreams/` if Tare must author a custom
 Substreams block-extraction module. That module compiles to WebAssembly and emits

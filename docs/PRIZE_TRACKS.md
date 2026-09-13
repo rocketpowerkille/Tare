@@ -1,83 +1,59 @@
-# ETHOnline 2026 partner track status
+# ETHOnline 2026 prize review
 
-Point-in-time status: **2026-09-12 IST**. The qualification source is the
-[official ETHOnline 2026 prize page](https://ethglobal.com/events/ethonline2026/prizes).
-This matrix separates a working integration from prize eligibility and submission
-evidence.
-
-## Track classification
-
-Tare's first repository commit is dated 2026-09-06, after ETHOnline began on
-2026-09-04. Unless the ETHGlobal project was registered differently, Tare appears
-net-new. The phrase **Start Fresh** is used explicitly by The Graph for its AI
-track's From Scratch pool. Bazantic and Chainlink do not define a general Start
-Fresh pool on their prize pages; they mark individual prizes as Continuity-only.
+Reviewed on 2026-09-13 using the official
+[Graph category page](https://ethglobal.com/events/ethonline2026/prizes/the-graph),
+[Chainlink category page](https://ethglobal.com/events/ethonline2026/prizes/chainlink),
+and [event prize page, including Bazantic](https://ethglobal.com/events/ethonline2026/prizes).
+Technical fit is an assessment, not sponsor approval or confirmed eligibility.
 
 ## The Graph
 
-| Prize | Integration status | Qualification status |
+| Official category | Assessment | Evidence still needed |
 | --- | --- | --- |
-| Best Use of Composable or Standardized Graph Products | Hosted-verified | `verify-graph-composition` composes two live Graph products in one result. The Graph Token API supplies the wallet's vault-share balance, while Tare's Studio subgraph supplies normalized vault accounting. Hosted acceptance on 2026-09-12 matched the Token API balance and all 56 Studio accounting reads to RPC at the subgraph block with no findings. The standardized `ethereum-common` Substreams monitor adds a separate reorg-safe streaming path. A concise submission video remains. |
-| Best AI Tooling or AI Use Case with The Graph, From Scratch | Hosted-verified | The live Studio subgraph is load-bearing evidence for deterministic analysis exposed to agents through Tare's MCP/API and Bazantic surface. Unpinned runs anchor on the current indexed head before confirming and reading that exact hash through RPC. The hosted two-product acceptance matched all 56 accounting reads with zero findings. A two-to-four-minute submission video remains evidence packaging, not integration work. |
-| Best AI Tooling or AI Use Case with The Graph, Continuity | Ineligible if Start Fresh | This is the same technical track in the Continuity pool. Do not apply to both pools. |
+| Best Use of Composable or Standardized Graph Products | Strong candidate through Token API plus Studio composition. | Show both live products materially affecting the result; ask the sponsor to confirm this pairing. |
+| Best AI Tooling or AI Use Case with The Graph (From Scratch) | Candidate through structured evidence and Recipe-guided interpretation. | Show meaningful agent reasoning using live Graph evidence, not only a saved example. Confirm the registered track. |
+| Best AI Tooling or AI Use Case with The Graph (Continuity) | Do not select for a From Scratch project. | Eligibility depends on the actual prior work and registration. |
 
-The full historical share ledger is not required for the completed AI track. Tare
-must describe the deployed subgraph as a bounded current-accounting slice and must
-not claim historical share reconstruction. The post-deploy live acceptance command
-is `pnpm verify:hosted:graph`.
-
-The composable track also avoids the unfinished historical ledger. It uses the
-Token API balance endpoint and the deadline-safe current-accounting subgraph. A
-Token API observation newer than the subgraph block is rejected as unaligned,
-and any Token API/RPC balance difference becomes a mismatch. The required hosted
-secret is the JWT labelled **API Token** in The Graph Market, not the API-key ID.
+The official requirements distinguish live provider data from mocks and static
+captures. The composable category requires composition or meaningful standardized
+schema use, not one isolated subgraph query. See [the integration evidence](GRAPH_INTEGRATION.md).
+The unfinished historical share ledger is not a substitute for this demonstration.
 
 ## Chainlink
 
-| Prize | Integration status | Qualification status |
+| Official category | Assessment | Evidence still needed |
 | --- | --- | --- |
-| Best Confidential Workflow | Complete | A meaningful private policy and authenticated API response run in the confidential handler. Hosted execution produced a consensus report and delivered a bounded Base Sepolia exit through the production Keystone Forwarder. |
-| Best Chainlink-Powered Upgrade | Continuity-only, likely ineligible | The onchain state-change requirement is satisfied technically, but the prize page restricts this prize to Continuity Track participants and Tare appears net-new. |
-| Automated Liquidation Protection Challenge | Not pursued | This is a separate challenge on Ethereum Sepolia with its own join contract and scenario. Tare's bounded Base Sepolia vault exit does not automatically qualify. |
+| Best Confidential Workflow | Strong technical fit. | Show private input processing, the confidential handler, and retained successful execution evidence. |
+| Best Chainlink-Powered Upgrade | Not recommended without Continuity eligibility. | A testnet state change does not remove the track restriction. |
+| Automated Liquidation Protection Challenge | Not pursued. | Tare does not document joining the official Ethereum Sepolia challenge. |
+
+The confidential category accepts meaningful confidential execution with private
+input and simulation or deployment evidence. The historical Base Sepolia exit
+supports a technical claim, not automatic qualification. See
+[the workflow guide](CHAINLINK_CONFIDENTIAL_WORKFLOW.md).
 
 ## Bazantic
 
-| Prize | Integration status | Qualification status |
+| Official category | Assessment | Evidence still needed |
 | --- | --- | --- |
-| Help an Agent Use Your Hackathon Project | Technically complete, likely ineligible | The live gateway, MCP tools, published Recipe and controlled raw-versus-Recipe comparison satisfy the technical requirements. The prize page restricts this prize to Continuity Track participants and Tare appears net-new. |
-| Best Recipe that uses ETHGlobal sponsor APIs | Complete and published | The published `tare-graph-accounting-assurance` Recipe binds the direct Graph Studio `graph_tare_accounting_head` tool with Tare's `tare_analyze_compact` tool. On 2026-09-12 the Graph call reported a healthy expected deployment at block `25961875`, Tare matched all 56 accounting checks with zero findings, and Bazantic returned `matched`. Preserve the test result for submission evidence. |
-| Agentify a New API | Complete and published | Tare is a new API with a live six-tool sandbox gateway. The published two-service Recipe calls The Graph Studio directly and then calls Tare for the bounded accounting assurance result. The post-deploy test passed with both tools. A separate paid sandbox request completed the Base Sepolia 402 flow and issued a 15-minute Tare session. |
+| Help an Agent Use Your Hackathon Project | Continuity-only; not recommended for From Scratch. | The old timing pair does not establish identical prompt/settings controls. |
+| Best Recipe that uses EthGlobal Hackathon Sponsor APIs | Strong candidate through Tare plus the direct Graph gateway. | Record both services materially affecting one completed result, and supply account attribution. |
+| Agentify a new API | Eligibility not established. | Confirm a qualifying additional service unavailable on Bazantic and outside sponsor APIs at event start. Adding Graph does not establish this condition. |
 
-Bazantic's listed qualifications do not require a completed paid request. The
-operator-credential tests remain valid integration evidence unless Bazantic says
-otherwise. The paid demo settles with Base Sepolia test USDC. Production mainnet
-payment access is not enabled.
+The earlier documentation marked Agentify complete based on the Graph gateway.
+That was too broad. Ask Bazantic whether Tare itself can satisfy the new-service
+condition in the proposed two-service arrangement; do not assume so.
+The [integration guide](BAZANTIC_INTEGRATION.md) separates gateway, Recipe,
+customer access, and actual settlement evidence.
 
-## Sponsor questions
+## Decisions to confirm
 
-### The Graph
+1. Confirm From Scratch versus Continuity registration and disclose prior work.
+   A first Git commit alone does not prove project origin or eligibility.
+2. Ask The Graph to confirm the Token API plus custom Studio product pairing.
+3. Ask Bazantic to confirm the additional-service interpretation for Agentify.
+4. Preserve a screen recording and raw artifacts for the actual chosen categories.
+5. Add a repository-wide license. Public source visibility alone does not establish
+   the intended open-source license.
 
-1. Can the live Token API wallet balance plus Tare's live Studio accounting
-   subgraph qualify as two Graph products composed in one verification report?
-2. Does the 56/56 same-block Studio-to-RPC comparison qualify for the From Scratch
-   AI track without the unfinished historical creation-block backfill?
-
-### Bazantic
-
-1. Tare was started during ETHOnline and appears net-new. Please confirm that this makes it ineligible
-   for the Continuity-only raw-versus-Recipe prize even though the integration is complete.
-2. For the sponsor-API Recipe and Agentify prizes, may The Graph's Studio API be added as the
-   second service, with its output passed into Tare for verification?
-3. Please confirm that operator-credential Recipe tests qualify because the prize
-   requirements do not state that a paid request is required.
-
-### Chainlink
-
-1. Please confirm that the completed private-registry Confidential Workflow and
-   production-forwarder Base Sepolia transaction are sufficient evidence for Best
-   Confidential Workflow.
-2. Please confirm that a net-new project cannot enter Best
-   Chainlink-Powered Upgrade.
-3. Is the liquidation challenge strictly limited to projects that joined its
-   Ethereum Sepolia contract, or can an existing confidential risk-policy workflow
-   be adapted before the deadline?
+Do not list prize pools as expected winnings or claim sponsor endorsement.

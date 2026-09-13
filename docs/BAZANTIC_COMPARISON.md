@@ -1,4 +1,4 @@
-# Bazantic controlled Recipe comparison
+# Historical Bazantic Recipe comparison
 
 Point-in-time result: **2026-09-12 IST**.
 
@@ -7,9 +7,15 @@ This record compares Tare's raw Bazantic gateway tools with the published
 submission recording and preserves the conditions, measured results and claim
 boundary without treating a single run as a general benchmark.
 
-## Controlled setup
+## Retained setup and evidence limits
 
-The only material difference was the Recipe's workflow guidance. Both cases used:
+The original note reports the following shared conditions. Raw outputs and the
+complete model settings are not retained with it, and the input representations
+shown below differ. An identical-prompt controlled comparison is therefore not
+verified in this repository. The model identifier is retained as originally
+reported, not independently validated against a current provider catalog.
+
+Reported shared conditions were:
 
 - the same Bazantic account and Tare gateway;
 - `anthropic/claude-opus-5`;
@@ -66,11 +72,12 @@ but with less consistent report structure.
 
 ## Honest interpretation
 
-This is a controlled product demonstration, not a statistically significant
-performance benchmark. It shows that for this fixed task and model, Recipe
-guidance preserved the factual answer while reducing observed latency and token
-use and improving report consistency. Do not claim that every Recipe execution
-will reproduce the exact percentages.
+This is one historical product-demonstration pair, not a statistically significant
+benchmark. The note reports equal conservative conclusions and different measured
+latency/token usage. Without identical prompts, complete settings, and raw
+artifacts, it does not isolate a causal effect of Recipe guidance. The percentages
+are arithmetic differences in the recorded pair, not expected improvements.
+These results concern the older evaluator, not the newer plain-language Recipe.
 
 The live result also does **not** prove an executable vault position or independent
 loan backing. It correctly reports the absence of sufficient/executable evidence.
@@ -81,14 +88,19 @@ to reproduce these operator-credential Recipe tests.
 
 Capture a short continuous demo that shows:
 
-1. the live Tare gateway and its four MCP tools;
+1. the gateway's actual enabled tools at recording time;
 2. the published `DeFi Vault Backing Evidence Evaluator` Recipe;
 3. the raw baseline prompt, model, enabled tools and completed metrics;
 4. the equivalent Recipe inputs, model, enabled tools and completed metrics;
 5. the matching conservative conclusion and the Recipe's structured sections;
-6. the measured deltas: 31.34% lower latency and 17.54% fewer tokens;
+6. the recorded measurements, with the single-pair and input-difference caveats;
 7. the Bazantic username required by the submission.
 
 Keep secrets, authorization headers, API tokens and wallet keys out of the
 recording. If the Base-mainnet balance or funding panel appears, state that the
 demonstrated Recipe tests used the operator credential and made no payment.
+
+For a new controlled run, hold the prompt, model, model settings, API access,
+enabled tools, and input evidence constant. Change only Recipe guidance. Retain
+both raw answers, tool calls, latency, token usage when available, and factual
+review. Follow [the current integration guide](BAZANTIC_INTEGRATION.md).

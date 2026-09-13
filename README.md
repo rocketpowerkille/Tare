@@ -1,249 +1,351 @@
 # Tare
 
-Compact agent responses include a deterministic explanation context for plain-language
-interpretation without adding an AI provider or new verification claims. See the
-[plain-language Bazantic Recipe specification](docs/BAZANTIC_PLAIN_LANGUAGE_RECIPE.md).
+## DeFi Evidence, Explained
 
-**Phases two and three are implemented within their documented scope:** evidence
-snapshots and offline adapters, plus multi-chain Morpho V1 and V2 discovery,
-allocation accounting and reproducible RPC receipts. See [phase two](docs/PHASE_2.md)
-and [phase three](docs/PHASE_3.md) for acceptance evidence and limitations.
+Tare helps DeFi researchers, protocol reviewers, and AI agents understand what a
+supported vault position represents. It traces wallet exposure through supported
+vault layers, compares eligible indexed and direct blockchain observations, and
+returns reports separating observations, calculations, reference prices, scoped
+checks, and unresolved claims. This is a technical MVP, not a universal safety
+verifier, proof-of-reserves system, or solvency oracle.
 
-**Phase four implementation and local acceptance are delivered:** share and
-underlying accounting indexing, real Graph Node rollback tests, live V2→V1→Blue
-resolution, timestamped prices and a real WETH custody 1x control. The deadline-safe
-`tare-live-accounting` Graph Studio deployment passed a 56/56 same-block Graph/RPC
-comparison. The separate full-history share ledger is still syncing and cannot
-finish before the deadline, so historical share reconstruction is explicitly
-outside the submission path. The
-submission uses the pinned live-accounting deployment and its completed 56/56
-same-block RPC comparison instead.
-See [phase four](docs/PHASE_4.md) for the exact acceptance boundary.
+[Open Tare](https://tare-api.onrender.com/) |
+[Explorer](https://tare-api.onrender.com/explore) |
+[Submission guide](docs/SUBMISSION_GUIDE.md) |
+[Bazantic Recipe](https://bazantic.com/recipes/explain-defi-vault-evidence-clearly)
 
-**Phase five Tare-side implementation is complete:** API, MCP and the modular web
-application share the existing resolver. The web application includes a product
-overview, guided explorer, beginner documentation and developer reference. Hosted
-access controls and deterministic Recipe composition are tested; public recordings
-need no configuration. A tested
-Docker/Render package is deployed at `https://tare-api.onrender.com`; public,
-authenticated and two-provider Base Sepolia acceptance passed. Run
-`pnpm verify:hosted` with a local access token to repeat the deployed UI/API checks.
-After a deployment, `pnpm verify:hosted:graph` also runs the live Graph Studio to
-Ethereum RPC accounting cross-check. Unpinned accounting requests start from The
-Graph's latest indexed block, confirm the same block hash through RPC, then compare
-the complete bounded 56-read set. This does not depend on the unfinished historical
-share backfill.
-Bazantic platform authoring and live acceptance are recorded in the team handoff.
-The repository-side contract and Recipe text for the required second sponsor
-service are in [the Bazantic multi-service runbook](docs/BAZANTIC_MULTI_SERVICE.md).
-See [phase five](docs/PHASE_5.md) for the implementation and rollout checklist.
+## Why Tare exists
 
-Prize eligibility is narrower than technical integration. Tare appears net-new
-based on its first commit date and should use The Graph's From Scratch AI pool.
-Bazantic and Chainlink instead mark specific prizes as Continuity-only. See the
-[partner prize matrix](docs/PRIZE_TRACKS.md) before selecting ETHGlobal tracks.
+A token balance does not explain the economic position behind a vault share.
+Nested vaults can allocate into lending markets, whose collateral is a dependency
+rather than an asset owned directly by the shareholder. Dashboards and APIs can
+report correct numbers without explaining those distinctions. Sources can also
+disagree or describe different blocks.
 
-**Phase six local V1 monitoring is implemented:** Substreams events trigger existing
-resolution and Graph/RPC checks, with resumable checkpoints, deduplication and
-reorg retractions. Hosted acceptance remains pending; see [monitoring](docs/PHASE_6.md).
-The deadline-safe Graph composition operation additionally joins The Graph Token
-API wallet balance with the live Studio accounting subgraph, then checks both
-against RPC at the subgraph block. This path does not depend on the unfinished
-historical share-ledger backfill. Hosted acceptance passed on 2026-09-12 with the
-known Steakhouse USDC position: the Token API balance matched RPC and all 56 Studio
-accounting reads matched RPC. Repeat it with `pnpm verify:hosted:graph-products`.
+Tare assembles a bounded report explaining what was observed, what was calculated,
+which comparisons were eligible, and what remains unknown. This matters for people
+and for agents that might otherwise read an accounting quote as a backing claim.
 
-**Phase seven has a confidential policy workflow and Solidity exit receiver:** private
-thresholds drive signed verdicts, with a guarded Base Sepolia execution path.
-The Base Sepolia producer independently pins two RPC hosts, checks allowlisted bytecode
-and reconciles direct two-layer custody. Deterministic failure cases passed through a
-test forwarder, then a separate hosted private-registry workflow delivered a bounded
-100-share exit through Chainlink's production Base Sepolia Keystone Forwarder. That
-workflow is paused after successful acceptance. The control assets are test-only, and
-current Ethereum V1 reports cannot authorize exits.
-See [phase seven](docs/PHASE_7.md) for the exact execution and claim boundary.
+A vault accounting quote is not proof of custody, solvency, liquidity,
+redeemability, or complete backing.
 
-Tare is an exposure resolver for nested vault positions. Phase one is a working
-**offline, synthetic-data resolver** with local watch-only wallet profiles. An
-explicit `live` command now uses Morpho's public GraphQL API and read-only EVM RPC.
-The original snapshot and synthetic adapter commands remain offline.
+## What Tare adds beyond a block explorer
 
-Live resolution covers one protocol family and its loan receivables, not every
-position or underlying collateral. Synthetic demos and the real captured example
-are labeled separately. Morpho loan backing remains unverified; its scoped metric
-is unavailable even when a USD price is observed. The separate WETH custody
-command supports a narrow wrapper-only metric with explicit provider limitations.
+Explorers remain useful for inspecting contracts and transactions. Their features
+vary, and many already provide APIs and detailed provenance. Tare adds a
+position-specific interpretation and comparison layer, not a replacement.
 
-## Run
+| Capability | Typical explorer workflow | Tare's supported workflow |
+| --- | --- | --- |
+| Token balances | Inspect balances and contract reads. | Include relevant balances in a position report. |
+| Position interpretation | Interpret protocol contracts separately. | Apply supported adapter semantics. |
+| Nested tracing | Follow several contracts and transactions. | Traverse supported layers with bounded integer attribution. |
+| Indexed versus RPC comparison | Assemble the comparison separately. | Compare eligible observations within a declared read set. |
+| Provenance | Inspect block, transaction, and contract details. | Carry source, block, and capture identity into the result. |
+| Value classification | Interpret balances, quotes, and prices. | Separate observed, derived, and market-priced values. |
+| Unknowns | Investigate gaps manually. | Return explicit findings and limitations. |
+| Agent access | Use explorer APIs where offered. | Use compact evidence context through HTTP and MCP. |
 
-Use Node.js 24+ and pnpm 11.19.0.
+Not every report performs every check. Coverage depends on the operation,
+configured providers, supported adapter, and available evidence.
 
-```sh
-pnpm install --frozen-lockfile
-pnpm verify
-pnpm cli --help
-pnpm demo
-pnpm cli resolve fixtures/synthetic/deep.json --json
-pnpm cli snapshot validate fixtures/synthetic/control.json
-pnpm demo:phase2
-pnpm cli replay fixtures/recordings/multi-asset.json --json
-pnpm demo:phase3
-pnpm serve
-pnpm cli live example --rpc-url https://ethereum-rpc.publicnode.com
-```
+## A reproducible example
 
-After building, `pnpm serve` opens the service at `http://127.0.0.1:4318`.
-The web application routes are `/`, `/explore`, `/docs` and `/developers`.
-Run `pnpm build:web` to type-check and bundle only the browser application.
-For MCP clients, launch `node` with the absolute path to
-`dist/apps/mcp/src/main.js`; see the [interface guide](docs/PHASE_5.md).
+The saved [Steakhouse USDC capture](fixtures/live/steakhouse-usdc.capture.json)
+contains an Ethereum position at block **25937756**. It is historical evidence.
 
-`verify` builds strict TypeScript, runs the unit and CLI integration tests, and
-executes both synthetic demo sets and the real capture replay, without external
-network access. The separate `live example` command contacts public sources.
-After building, you can also run
-`node dist/apps/cli/src/main.js --help` directly. The demo command works from any
-working directory. User-provided file paths are relative to the current directory.
-
-## Configure a watch-only wallet
-
-Copy the public account address from MetaMask and choose the chain ID. Replace
-`YOUR_PUBLIC_ADDRESS` below; it is deliberately not a usable sample account.
-
-```sh
-pnpm cli wallet add metamask --address YOUR_PUBLIC_ADDRESS --chain-id 1
-pnpm cli wallet list
-pnpm cli wallet show metamask
-pnpm cli wallet remove metamask
-```
-
-This is a watch-only profile: only its name, public EVM address, and chain ID are
-stored. Do not supply a recovery phrase, private key, or MetaMask password.
-Addresses are checked for 20-byte hexadecimal format and normalized to lowercase;
-mixed-case checksum verification and ENS resolution are not implemented.
-
-Profiles default to `.tare/wallets/` under the current directory, excluded from Git.
-Use `--home <directory>` or `TARE_HOME` for a consistent location across directories.
-Existing profile names are not overwritten. No default profile is silently selected.
-The repository does not assume that any profile exists and never stores a private key.
-
-`resolve snapshot.json --wallet metamask` checks that the snapshot's owner and chain
-match the selected local profile. It does **not** discover holdings or prove wallet
-ownership. Included demo snapshots use the synthetic address
-`0x1111111111111111111111111111111111111111`; they will reject an unrelated real
-wallet profile rather than attribute demo holdings to it.
-
-### Read the real native balance
-
-The balance command works with any EVM-compatible HTTP(S) JSON-RPC endpoint. It
-first calls `eth_chainId`, refuses a network mismatch, reads the latest block, and
-then calls `eth_getBalance` at that exact block number. The RPC URL is supplied at
-read time and is not saved in the wallet profile.
-
-For Base Sepolia:
-
-```sh
-pnpm cli wallet balance base-sepolia --rpc-url https://sepolia.base.org --symbol ETH
-pnpm cli wallet balance base-sepolia --rpc-url https://sepolia.base.org --symbol ETH --json
-```
-
-Use `TARE_RPC_URL` instead of `--rpc-url` when an endpoint contains a provider
-token that should not be written to shell history. Native decimals default to 18;
-override them with `--decimals` for a chain whose native asset differs.
-
-This reports an RPC-observed native balance, not its fiat value. It does not
-discover ERC-20 balances, NFTs, vault positions, or independently verify the RPC
-operator. No transaction, connection request, or signature is made.
-
-## Commands and outputs
-
-| Command | Purpose |
+| Field | Captured value or interpretation |
 | --- | --- |
-| `demo all` | Control, three-layer, source-outage, and cyclic fixtures |
-| `resolve <file>` | Resolve a validated local snapshot |
-| `resolve <file> --json` | Emit a schema-versioned JSON receipt |
-| `resolve <file> --out receipt.json` | Save a receipt without overwriting a file |
-| `resolve <file> --max-depth 2 --max-visits 100` | Bound traversal work |
-| `snapshot validate <file>` | Validate the fixture schema, not completeness or truth |
-| `snapshot normalize <recording> --out <file>` | Normalize an offline recording into a version-two snapshot |
-| `replay <recording> --json` | Normalize and resolve a synthetic adapter recording |
-| `demo phase2` | Run six version-two accounting and failure cases |
-| `live discover --address <address>` | Discover indexed Morpho V1 and V2 positions on Ethereum, Base, or Arbitrum |
-| `live resolve --address <address> --vault <vault> --chain-id <id> --rpc-url <url>` | Resolve a supported Morpho V1 vault asset position at one block |
-| `live example --rpc-url <url>` | Discover and resolve a public Steakhouse USDC depositor |
-| `live replay <capture>` | Recompute a retained RPC capture without network calls |
-| `verify shares --address <address> --vault <vault> --rpc-url <url> --graph-url <url>` | Compare Tare's indexed share ledger with RPC at one block |
-| `verify replay <report>` | Recompute saved Graph/RPC checks without network calls |
-| `live nested --address <owner> --vault <V2-vault>` | Resolve a supported V2→V1→Blue position and observe its USD price |
-| `live nested-replay <capture>` | Replay nested accounting and valuation offline |
-| `verify accounting --vault <V1-vault>` | Cross-check indexed underlying accounting against pinned RPC |
-| `verify accounting-replay <capture>` | Recompute underlying accounting comparisons |
-| `verify graph-products --address <owner> --vault <V1-vault>` | Compose live Token API and Studio data with same-block RPC checks |
-| `verify graph-replay <capture>` | Recompute the Graph product composition without network access |
-| `verify custody --address <holder>` | Cross-check WETH/native ETH custody across two RPC hosts |
-| `verify custody-replay <capture>` | Replay the scoped custody metric |
-| `verify base-custody --address <owner> --deployment <file>` | Verify the allowlisted Base Sepolia two-layer control across two RPC hosts |
-| `verify base-custody-replay <capture>` | Replay Base evidence without claiming freshness or execution eligibility |
-| `demo phase4` | Synthetic 1x/3x methodology controls and blocked cases |
-| `wallet add/list/show/remove` | Manage local watch-only profiles |
-| `wallet balance <name> --rpc-url <url>` | Read a block-pinned native balance from an EVM RPC endpoint |
+| Wallet | `0x334f5d28a71432f8fc21c7b2b6f5dbbcd8b32a7b` |
+| Vault | `0xbeef01735c132ada46aa9aa4c54623caa92a64cb` |
+| Observed shares | `25214434140816810935371051` raw units. This capture does not supply share decimals. |
+| Observed contract conversion quote | `28728443339809` USDC raw units, or **28,728,443.339809 USDC** using six decimals. |
+| Derived exposure | The resolver attributes the quote across 12 Morpho Blue markets. Five raw units remain unattributed from integer rounding. |
+| Price and indexed comparison | This capture alone contains neither a Chainlink price check nor a Graph comparison. |
 
-Exit codes: **0** successful command or complete resolution; **1** invalid input
-or I/O failure; **2** partial resolution. `demo` exits 0 when all selected cases
-match their expected complete/partial states, including intentional failure cases.
-Machine-readable output goes to stdout and errors to stderr.
+The conversion quote is a contract observation. Attributing that quote to lending
+markets is a calculation. Neither is a direct USDC balance in the wallet, and the
+quote must not simply be added to direct holdings without checking overlap. It
+does not establish custody, liquidity, solvency, backing, or redeemability.
 
-Coverage lists terminal visits and unresolved findings, not an invented percentage.
-If the global visit budget is exhausted, one finding represents all remaining
-unvisited work; it is not a count of every missing branch. Source health is declared
-by offline input snapshots; live receipts measure requests, failures and elapsed
-time. Export parents must already exist. Live discovery is supplied by Morpho's
-GraphQL API, not The Graph. Phase four adds a separate The Graph client and custom
-subgraph. Hosted live accounting has passed; full-history share-ledger validation
-is still pending.
+Reproduce it with `pnpm cli live replay fixtures/live/steakhouse-usdc.capture.json`.
+The proposed Gauntlet WETH quantities are omitted because they are not verified
+in this repository. See [capture provenance](fixtures/live/README.md).
 
-## Repository structure
+## Evidence model
+
+| Category | Meaning | Example in Tare |
+| --- | --- | --- |
+| Observed | A source reports a value at a block or timestamp. | RPC share balance or contract conversion quote. |
+| Derived | A calculation uses observed values. | Integer-attributed market exposure. |
+| Market-priced | An external reference price values an amount. | Eligible Chainlink USD estimate. |
+| Checked | A comparison establishes agreement within its scope. | Selected Graph accounting reads match RPC. |
+| Inferred | An interpretation depends on stated semantics or assumptions. | A share represents a vault-reported claim. |
+| Not verified | Available evidence does not establish a claim. | Recoverability of Morpho loans. |
+
+There is no universal confidence score. A scoped custody-control metric must not
+be applied to unrelated vaults. Read the [evidence model](docs/EVIDENCE_MODEL.md).
+
+## Report lifecycle
+
+Live acquisition reads configured providers. Saved evidence retains its original
+observation time. Replay recomputes from a capture without making it fresh.
+An incomplete result lacks required evidence; a mismatch reports a disagreement;
+an unavailable source could not supply a qualifying observation. These are not
+interchangeable, and a complete trace is not a complete backing verification.
+
+## Architecture
 
 ```text
-apps/cli/src/              Command parsing and local CLI workflows
-apps/api/src/              HTTP/OpenAPI, access controls and static serving
-apps/mcp/src/              Tare's stdio MCP tools
-apps/web/                  Explorer, capture import and report downloads
-packages/service/src/     Shared dispatch and deterministic evidence composition
-packages/monitor/src/     Event transitions, evidence evaluation and durable progress
-packages/policy/src/      Private policy rules and Tare evidence projection
-packages/domain/src/      Runtime schemas, branded addresses, result types
-packages/adapters/src/    Fixture normalization and MetaMorpho/Morpho Blue accounting
-packages/sources/src/     Bounded files, HTTP, GraphQL and block-pinned RPC readers
-packages/resolver/src/    Deterministic traversal and integer attribution
-packages/wallet/src/      Watch-only profile validation and persistence
-packages/receipts/src/    JSON serialization and terminal formatting
-packages/verification/    Block-aligned Graph/RPC share checks and evidence replay
-graph/subgraph/           AssemblyScript share ledger, schema, manifest and isolated tooling
-workflows/cre/            Confidential CRE workflow and isolated Bun/SDK tooling
-contracts/                Base-Sepolia-only Solidity exit receiver and Foundry tests
-deployments/              Public test deployment identities and acceptance manifests
-fixtures/synthetic/       Control, deep, degraded, and cycle inputs
-fixtures/recordings/      Synthetic adapter responses and multi-position cases
-fixtures/live/            Real public RPC capture, receipt and provenance
-tests/                    Resolver and subprocess CLI integration tests
-docs/                     Phase plan, architecture, accounting policy
-.github/workflows/        Linux/Windows offline CI checks
+Wallet or vault input
+  -> HTTP API / CLI / stdio MCP
+  -> Discovery and supported traversal
+  -> Eligible RPC and Graph acquisition/comparison
+  -> Chainlink reference valuation, where eligible
+  -> Evidence classification and report
+  -> Web UI / JSON / compact agent result / configured policy workflow
 ```
 
-Core directories are logical modules under one TypeScript package and lockfile;
-Graph and CRE tooling have isolated dependencies. These are not separately
-published workspace packages. This keeps the core small while
-preserving boundaries between adapters, verification and the CLI/API/MCP/web interfaces.
-The project remains TypeScript-first. Rust is permitted only for an approved,
-isolated custom Substreams module after the live resolver and RPC verification
-path works end to end; it is not a general replacement path for core components.
+Acquisition, protocol adapters, calculations, verification, and formatting are
+separate modules. Replay reuses the comparison logic. The browser runs applicable
+operations, not one universal verification pipeline. See
+[architecture](docs/ARCHITECTURE.md) and the separate sponsor paths below.
 
-See [phase-one steps and exit criteria](docs/PHASE_1.md),
-[phase-two implementation](docs/PHASE_2.md),
-[phase-three implementation](docs/PHASE_3.md),
-[phase-four progress and acceptance](docs/PHASE_4.md),
-[current team handoff](docs/TEAM_HANDOFF.md),
-[architecture](docs/ARCHITECTURE.md), [accounting](docs/ACCOUNTING.md),
-[language strategy and Rust boundary](docs/LANGUAGE_STRATEGY.md),
-[scope](SCOPE.md), and [field notes](FIELD_NOTES.md).
+## The Graph integration
+
+The Graph supplies indexed evidence, not a decorative badge. The custom Studio
+subgraph records a bounded Steakhouse USDC accounting read set. Unpinned accounting
+checks select its indexed head, confirm the hash through RPC, and compare exact
+reads. The Token API contributes a separate wallet share-balance observation to
+the Ethereum product-composition operation.
+
+Retained acceptance notes report **56 of 56** accounting reads matching at block
+`25953771`, and a later two-service run at `25961875`. Zero findings means no
+disagreement within those checks, not verified loan backing. These are historical
+notes, not a claim of current endpoint health; raw hosted outputs remain a
+submission-evidence gap.
+
+The separate creation-block share ledger has no completed historical acceptance
+in this repository. The accounting-only deployment does not substitute for it.
+See [Graph integration and reproduction](docs/GRAPH_INTEGRATION.md).
+
+## Chainlink integration
+
+Eligible Ethereum amounts use Chainlink reference prices with block-pinned reads
+and round, answer, and timestamp checks. A price does not establish custody.
+
+Separately, a CRE Confidential Workflow uses `handlerInTee` to acquire authenticated
+Tare evidence and evaluate private policy thresholds. It returns a bounded verdict
+and evidence commitment for DON reporting; eligible testnet execution goes through
+the Keystone Forwarder to the one-use receiver.
+
+```text
+Scheduled CRE trigger -> confidential evidence + policy evaluation
+  -> redacted result -> DON report -> Base Sepolia forwarder -> bounded receiver
+```
+
+| Private inside the workflow | Public or externally verifiable |
+| --- | --- |
+| API credentials and secret policy thresholds | Verdict and evidence commitment. |
+| Authenticated responses and intermediate calculations | Published execution terms and transaction. |
+| Secret-bearing configuration | Public target configuration and recorded post-state. |
+
+Not all configuration is private. The workflow trusts the configured Tare service
+for its economic evidence. A retained hosted run redeemed a disposable Base Sepolia
+control; the latest retained workflow binding is **paused**, with execution
+disabled. Opening Explorer does not trigger that scheduled workflow. See
+[the confidential workflow and transaction record](docs/CHAINLINK_CONFIDENTIAL_WORKFLOW.md).
+
+## Bazantic integration
+
+```text
+Agent uses a published Bazantic Recipe
+  -> Bazantic gateway/MCP tools -> Tare compact evidence
+  -> Recipe-guided agent explanation
+```
+
+Bazantic provides the gateway, hosted MCP exposure, reusable Recipes, and sandbox
+access flow. The current gateway schema defines `tare_status`,
+`tare_discover_vaults`, `tare_analyze_compact`, `tare_example_compact`, and
+`tare_start_bazantic_sandbox_session`. These differ from the local stdio tools.
+
+The published [plain-language Recipe](https://bazantic.com/recipes/explain-defi-vault-evidence-clearly)
+uses deterministic explanation context. A separate retained two-service Recipe
+uses the Graph Studio gateway and Tare's comparison. An older raw-versus-Recipe
+timing note is a single historical pair, not a benchmark or a fully controlled
+same-prompt experiment.
+
+Sandbox session issuance authorizes Explorer access for 15 minutes by default.
+It is separate from an actual settlement receipt and from vault evidence.
+Operator-credential Recipe tests make no payment. The UI's copy-context action
+does not call Bazantic or an LLM; direct API reports must not be described as
+Recipe executions. See [Bazantic integration](docs/BAZANTIC_INTEGRATION.md).
+
+## AI agent use case
+
+An agent can mistake shares for assets, reference pricing for backing, or a saved
+capture for a fresh check. Tare returns exact values, provenance, evidence
+categories, omission counts, and interpretation boundaries. The external agent
+should answer with:
+
+1. A short answer.
+2. Directly observed values.
+3. Derived values.
+4. Evidence sources checked.
+5. What those checks support.
+6. What remains unknown.
+7. Technical provenance.
+
+Tare does not configure or call an LLM provider. The
+[Recipe specification](docs/BAZANTIC_PLAIN_LANGUAGE_RECIPE.md) defines the external
+agent's interpretation rules.
+
+## Demo flow
+
+Start with the saved Steakhouse position and its concrete accounting quote. Show
+the market path, block, and unknown backing. Then show a separately labeled live
+Graph comparison when available, the Bazantic Recipe explanation, and the retained
+CRE testnet result. Do not combine different blocks into one apparent observation.
+Follow the [three-minute script](docs/DEMO_SCRIPT.md).
+
+## Sponsor submission matrix
+
+| Official category | Technical fit | Remaining evidence or eligibility question |
+| --- | --- | --- |
+| The Graph: Best Use of Composable or Standardized Graph Products | Strong candidate through Token API plus Studio. | Record both live products and their material comparison; confirm sponsor interpretation. |
+| The Graph: Best AI Tooling or AI Use Case with The Graph (From Scratch) | Candidate through evidence-guided agent use. | Demonstrate live Graph-dependent reasoning and confirm project track. |
+| Chainlink: Best Confidential Workflow | Strong technical fit with retained hosted execution. | Show private-handler code and public execution evidence. |
+| Bazantic: Best Recipe that uses EthGlobal Hackathon Sponsor APIs | Strong candidate through the two-service Recipe. | Preserve raw calls, result, recording, and account attribution. |
+| Bazantic: Agentify a new API | Eligibility not established. | The additional non-sponsor service requirement is not established by adding Graph. |
+| Continuity-only categories | Not recommended without track confirmation. | Do not infer eligibility from working integrations. |
+| Chainlink: Automated Liquidation Protection Challenge | Not pursued. | Tare's Base Sepolia exit is not the official challenge integration. |
+
+Names and rules were checked on the official
+[Graph](https://ethglobal.com/events/ethonline2026/prizes/the-graph),
+[Chainlink](https://ethglobal.com/events/ethonline2026/prizes/chainlink), and
+[event prize page containing Bazantic](https://ethglobal.com/events/ethonline2026/prizes).
+The [prize review](docs/PRIZE_TRACKS.md) separates fit from eligibility.
+
+## Limitations
+
+- Morpho V1 traversal covers Ethereum, Base, and Arbitrum when RPC is configured.
+  Nested V2 traversal is limited to supported Ethereum USDC V1 adapters.
+- Generic ERC-4626 analysis reports contract accounting, not arbitrary downstream
+  composition. Discovery is not verification or an exhaustive vault registry.
+- Graph composition is Ethereum-only. The custom accounting subgraph covers one
+  vault; historical share acceptance and hosted continuous Substreams monitoring
+  remain incomplete.
+- Missing indexed data, RPC history, provider disagreement, or unavailable prices
+  can prevent a check. Different RPC hostnames do not prove operator independence.
+- Lending custody, full backing, solvency, liquidity, loan recoverability, and
+  redeemability are not established by accounting agreement or a USD estimate.
+- Captures are unsigned. Digests identify evidence bytes, not cryptographic proof
+  of provider truth. Recorded and replayed results are historical.
+- Execution is a separate bounded Base Sepolia experiment. No production audit or
+  mainnet execution is claimed. The TEE retains a configured-service trust boundary.
+- API and gateway availability depends on hosting and credentials. The retained
+  Render binding warns that the free instance can spin down.
+
+## Quick start
+
+Use Node **24 or later** and the repository-pinned **pnpm 11.19.0**. Bun is needed
+only for CRE; Docker with Linux containers is needed for Graph Node and container
+contract tests. From the repository root:
+
+```sh
+corepack pnpm install --frozen-lockfile
+corepack pnpm build
+corepack pnpm serve
+```
+
+Open [localhost](http://127.0.0.1:4318). Without provider variables, use saved
+examples; live checks will be unavailable. `pnpm` below means the pinned version
+selected by Corepack. The repository has no `dev` script; rebuild after edits.
+
+Set only the required provider/access variables described in
+[.env.example](.env.example). `.env` is ignored and not automatically loaded by the
+default server or CLI. To load an intentionally configured local file, run
+`node --env-file=.env dist/apps/api/src/main.js`; its configured port may differ.
+Never paste credentials into requests, captures, screenshots, or Git.
+
+```sh
+pnpm check
+pnpm verify
+pnpm test:web
+pnpm test:web:browser
+pnpm cli live replay fixtures/live/steakhouse-usdc.capture.json
+pnpm mcp
+```
+
+The browser suite requires Playwright, an installed browser, and the running local
+server. Graph builds, CRE compilation, and container test prerequisites are in
+the [Graph guide](docs/GRAPH_INTEGRATION.md),
+[CRE guide](docs/CHAINLINK_CONFIDENTIAL_WORKFLOW.md), and
+[verification record](docs/TEAM_HANDOFF.md).
+
+## Routes and interfaces
+
+| Interface | Entry point |
+| --- | --- |
+| Web | `/`, `/explore`, `/docs`, `/developers`. |
+| Public service metadata | `GET /healthz`, `/api/access-options`, `/openapi.json`, `/openapi-mcp.json`, `/openapi-mcp-v2.json`, `/openapi-mcp-v3.json`, `/openapi-graph.json`. |
+| HTTP evidence operations | Protected `GET /api/status`; JSON `POST /api/analyze`, `/api/discover`, `/api/example`, `/api/replay`, `/api/compose`. |
+| Compact agent operations | JSON `POST /api/agent-analyze`, `/api/agent-example`. |
+| Sandbox authorization | `POST /api/bazantic/session`, subject to configured gateway authorization. |
+| CLI and local MCP | `pnpm cli --help` and `pnpm mcp`. |
+| Hosted agent gateway | [Tare Bazantic gateway](https://zvnss2njirhqjllnbfsv3sneca.bazgateway.com). |
+| Evidence exports | Browser report/capture downloads and bounded CLI exports. No hosted report-permalink store is implemented. |
+
+Request schemas are in [service requests](packages/service/src/requests.ts).
+Use the generated OpenAPI contracts rather than assuming all operations accept
+the same fields. Hosted authentication does not change evidence semantics.
+
+## Repository map
+
+| Path | Responsibility |
+| --- | --- |
+| `apps/web`, `apps/api`, `apps/cli`, `apps/mcp` | Browser, HTTP, command-line, and stdio interfaces. |
+| `packages/domain`, `packages/adapters`, `packages/resolver` | Schemas, supported protocol rules, and bounded resolution. |
+| `packages/sources`, `packages/verification` | Acquisition and reproducible comparisons. |
+| `packages/service`, `packages/receipts` | Operation dispatch and report/agent projections. |
+| `packages/policy`, `workflows/cre`, `contracts` | Private policy, CRE execution, and testnet receiver. |
+| `graph/subgraph`, `graph/integration` | AssemblyScript mappings and real local indexing tests. |
+| `fixtures`, `deployments` | Retained evidence and historical deployment records. |
+| `tests`, `scripts`, `docs` | Regression tests, verification tooling, and runbooks. |
+
+These are logical modules under one root package, not separate pnpm workspaces.
+
+## Testing and acceptance
+
+The [dated verification record](docs/TEAM_HANDOFF.md) distinguishes current local
+tests from historical hosted acceptance. Tests exercise malformed input, source
+disagreement, incomplete evidence, replay, authentication, exact unit display, and
+agent claim boundaries. Browser fixtures are not live-provider acceptance.
+
+Historical CRE manifests retain transaction and post-state evidence. Hosted Graph
+and Bazantic successes are also described in dated notes, but their raw output
+artifacts still need collecting for submission. No new payment or transaction is
+required merely to read this repository.
+
+## Security and responsible use
+
+Read-only analysis requires public addresses, not wallet keys or seed phrases.
+Keep provider credentials, bearer tokens, session codes, and deployment keys local.
+The API applies input limits, authentication where configured, origin checks, and
+quotas. These controls do not constitute a security audit.
+
+Testnet execution requires separate explicit authorization. Reports are research
+artifacts with declared limitations, not investment advice or proof of solvency.
+A dedicated private security-reporting channel is not verified in this repository.
+Do not publish vulnerabilities containing credentials in public issues.
+
+## License and acknowledgements
+
+No repository-wide license file is present in the reviewed revision. Some contract
+files carry MIT SPDX headers, but that does not establish a license for the whole
+project. The maintainers must choose and add the intended license before claiming
+the complete repository is open source.
+
+Tare uses The Graph, Chainlink, Bazantic, Morpho interfaces, and open-source
+libraries including React, Vite, TypeScript, Zod, and the MCP SDK. Dependency
+licenses remain their own. These integrations do not imply sponsor endorsement.

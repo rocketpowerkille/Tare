@@ -1,8 +1,9 @@
-# Phase four — hosted deployment indexing, acceptance pending
+# Phase four: historical indexing and accounting acceptance
 
 The Ethereum implementation and local Graph Node acceptance tests are delivered.
-Graph Studio version `0.1.0` is deployed and syncing under
-`tare-steakhouse-usdc-ethereum`. **The full phase-four milestone is not closed:**
+Graph Studio version `0.1.0` was deployed under
+`tare-steakhouse-usdc-ethereum`. Current synchronization was not checked in the
+2026-09-13 documentation review. **The full phase-four milestone is not closed:**
 a fully indexed mainnet Graph/RPC acceptance capture remains required. Broader
 standardized indexing and multiple-network coverage are not implemented.
 
@@ -43,17 +44,17 @@ integration job; its remote run has not been observed from this workspace.
 
 ```sh
 # Configure TARE_RPC_URL. --out saves a capture for the new commands.
-tare live nested --address 0xba3356e6a4eac76980067dbaa3758e5e5685cfb7 --vault 0x18032c694f8ebfdcc030cb8c54c3701a107c2f72 --out nested.json
-tare live nested-replay nested.json --json
+pnpm cli live nested --address 0xba3356e6a4eac76980067dbaa3758e5e5685cfb7 --vault 0x18032c694f8ebfdcc030cb8c54c3701a107c2f72 --out nested.json
+pnpm cli live nested-replay nested.json --json
 
 # Also configure TARE_SECONDARY_RPC_URL for a distinct provider.
-tare verify custody --address 0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb --out custody.json
-tare verify custody-replay custody.json --json
+pnpm cli verify custody --address 0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb --out custody.json
+pnpm cli verify custody-replay custody.json --json
 
 # After the Tare deployment has indexed the selected mainnet block:
-tare verify shares --address 0x334f5d28a71432f8fc21c7b2b6f5dbbcd8b32a7b --vault 0xbeef01735c132ada46aa9aa4c54623caa92a64cb --block-number 25937756 --out shares.json
-tare verify accounting --vault 0xbeef01735c132ada46aa9aa4c54623caa92a64cb --block-number 25937756 --out accounting.json
-tare verify accounting-replay accounting.json --json
+pnpm cli verify shares --address 0x334f5d28a71432f8fc21c7b2b6f5dbbcd8b32a7b --vault 0xbeef01735c132ada46aa9aa4c54623caa92a64cb --block-number 25937756 --out shares.json
+pnpm cli verify accounting --vault 0xbeef01735c132ada46aa9aa4c54623caa92a64cb --block-number 25937756 --out accounting.json
+pnpm cli verify accounting-replay accounting.json --json
 ```
 
 Graph commands use `TARE_GRAPH_URL`, `TARE_RPC_URL`, optional `GRAPH_API_KEY`, and
@@ -90,11 +91,13 @@ evidence quickly while the creation-block share ledger continues its independent
 historical backfill. The live-only deployment does not claim historical share
 reconstruction.
 
-Hosted accounting acceptance completed against Studio version `0.1.0`, deployment
+The retained hosted accounting acceptance note reports Studio version `0.1.0`, deployment
 `QmWSiZRvaFzYkohhsM2D9yHD4Nc7ZnZFRWz8pUcwfQi3j2`, at Ethereum block `25953771`.
 The public endpoint reported no indexing errors and Tare matched all 56 Graph
 observations to block-pinned RPC reads with zero mismatches. This closes the live
-accounting gate, but not the separate full-history share-ledger gate.
+accounting gate in that historical run, but not the separate full-history
+share-ledger gate. Raw hosted output is not attached to this note. See
+[the current Graph guide](GRAPH_INTEGRATION.md) for source and acceptance boundaries.
 
 The WETH metric covers only the canonical wrapper's claim against native ETH
 custody, excluding the holder's other liabilities. Distinct hostnames establish
@@ -113,14 +116,14 @@ observed USD valuation.
 - [x] Timestamped valuation, real WETH 1x control, and partial/mismatch tests.
 - [x] Deadline-safe live Studio accounting: 56/56 Graph/RPC reads matched at one
   canonical Ethereum block with the deployment CID pinned.
-- [ ] Full-history share reconstruction remains a post-submission task. It is not a
-  deadline gate because the creation-block backfill cannot finish in time. Submission
+- [ ] Full-history share reconstruction remains unaccepted. It is not a
+  submission dependency; no completion-time prediction is made. Submission
   evidence uses the separate pinned `tare-live-accounting` deployment and its
   completed 56/56 same-block Graph/RPC comparison. Do not present that deployment
   as historical share reconstruction.
 - [ ] Broader standardized indexing/multiple-network coverage, if retained as a
   submission milestone. This implementation remains Ethereum-only.
 
-API/MCP/web remains phase five, monitoring phase six, optional execution phase
-seven. No mainnet transactions are signed or broadcast. Anvil transactions are
+API/MCP/web is documented in phase five, monitoring in phase six, and execution in
+phase seven. No mainnet execution is claimed. Anvil transactions are
 confined to the localhost integration test.
