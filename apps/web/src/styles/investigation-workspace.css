@@ -1,0 +1,40 @@
+.investigation-workspace { margin-top: 24px; }
+.investigation-tools { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.investigation-tools button { display: flex; align-items: center; gap: 16px; padding: 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); text-align: left; font: inherit; cursor: pointer; min-width: 0; }
+.investigation-tools button[aria-selected=true] { border-color: var(--green); background: var(--green-soft); box-shadow: inset 0 3px var(--green); }
+.investigation-tools button:hover { border-color: var(--green); }
+.investigation-tools button > span:nth-child(2) { flex: 1; min-width: 0; }
+.investigation-tools strong { display: block; margin-bottom: 6px; }
+.investigation-tools strong + span { display: block; color: var(--muted); font-size: .85rem; line-height: 1.5; }
+.investigation-tools svg { flex-shrink: 0; color: var(--green); }
+.investigation-tool-icon { display: grid; place-items: center; width: 48px; height: 48px; border: 1px solid var(--line); border-radius: 12px; flex-shrink: 0; }
+.investigation-workspace [role=tabpanel] > section { margin-top: 16px; padding: 32px; }
+.investigation-workspace h2 { margin-block: 8px 12px; font-size: clamp(1.4rem, 2vw, 1.8rem); }
+.investigation-workspace .section-label { margin-top: 0; }
+.wallet-investigation-start { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 40px; margin-top: 28px; }
+.wallet-investigation-start form { min-width: 0; padding-top: 8px; }
+.wallet-investigation-start label { display: block; font-weight: 600; }
+.wallet-investigation-start input { width: 100%; min-width: 0; padding: 14px; margin-top: 12px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--canvas); color: var(--ink); font: inherit; }
+.wallet-investigation-start form p { font-size: .85rem; color: var(--muted); margin-block: 12px 24px; }
+.wallet-investigation-start .button { white-space: normal; }
+.investigation-preview { border-left: 1px solid var(--line); padding-left: 32px; }
+.investigation-preview h3 { font-size: .95rem; }
+.investigation-preview ol { margin: 0; padding-left: 24px; }
+.investigation-preview li { padding-left: 8px; margin-bottom: 20px; }
+.investigation-preview li::marker { color: var(--green); font-weight: 600; }
+.investigation-preview strong, .investigation-preview span { display: block; font-size: .85rem; line-height: 1.6; }
+.investigation-preview span { color: var(--muted); margin-top: 4px; }
+.session-evidence-compact { background: var(--surface); border-color: var(--line); padding: 16px 24px; }
+.session-evidence-compact > p { margin-block: 10px; }
+.session-evidence-compact small { margin-top: 10px; }
+@media (max-width: 800px) {
+  .investigation-tools button { align-items: flex-start; padding: 16px; gap: 12px; }
+  .investigation-tool-icon { display: none; }
+  .wallet-investigation-start { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .investigation-preview { border-left: 0; border-top: 1px solid var(--line); padding: 16px 0 0; }
+}
+@media (max-width: 480px) {
+  .investigation-tools { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .investigation-workspace [role=tabpanel] > section { padding: 20px 16px; }
+  .session-evidence-compact { padding: 16px; }
+}

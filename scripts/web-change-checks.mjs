@@ -20,7 +20,13 @@ export async function checkChanges({ page, origin, fixture, capabilities, fits }
   });
   await page.goto(origin + '/investigate');
   const panel = page.locator('.change-investigator');
-  await panel.locator(':scope > summary').focus(); await page.keyboard.press('Enter');
+  const tools = page.getByRole('tablist', { name: 'Choose an investigation' });
+  await page.getByLabel('Public wallet address', { exact: true }).fill(previous.owner);
+  assert.equal(await panel.isVisible(), false, 'Only the selected investigation is visible');
+  assert.equal(calls.length, 0, 'Opening the workspace must not acquire evidence');
+  await tools.getByRole('tab', { name: /Wallet overview/ }).focus();
+  await page.keyboard.press('ArrowRight');
+  assert.equal(await tools.getByRole('tab', { name: /Changes over time/ }).getAttribute('aria-selected'), 'true');
   await page.getByLabel('Change investigation wallet', { exact: true }).fill(previous.owner);
   await page.getByLabel('Change investigation vault', { exact: true }).fill(previous.vault.address);
   await page.getByLabel('Previous block', { exact: true }).fill('22');
@@ -64,8 +70,8 @@ export async function checkChanges({ page, origin, fixture, capabilities, fits }
     reportType: 'wallet-investigation', owner: previous.owner, results: [previous, second].map(report => ({ vault: report.vault.address, report, status: 'complete' })),
   } }));
   const wallet = page.locator('.wallet-investigation');
-  await wallet.locator(':scope > summary').click();
-  await page.getByLabel('Public wallet address', { exact: true }).fill(previous.owner);
+  await tools.getByRole('tab', { name: /Wallet overview/ }).click();
+  assert.equal(await page.getByLabel('Public wallet address', { exact: true }).inputValue(), previous.owner, 'Switching tools preserves input');
   await page.getByRole('button', { name: 'Investigate wallet', exact: true }).click();
   await wallet.locator('.exposure-overlap').waitFor();
   await wallet.locator('.exposure-overlap > details > summary').first().focus(); await page.keyboard.press('Enter');
@@ -73,6 +79,13 @@ export async function checkChanges({ page, origin, fixture, capabilities, fits }
   assert.match(await wallet.locator('.exposure-overlap').innerText(), /dependencies, not holdings/);
   await fits('expanded exposure overlap at 320px');
   await wallet.locator('.exposure-overlap').screenshot({ path: new URL('../tmp/ui-review/overlap-mobile.png', import.meta.url).pathname.replace(/^\/(?=[A-Z]:)/, '') });
+  await tools.getByRole('tab', { name: /Changes over time/ }).click();
+  await panel.locator('.change-report').waitFor();
+  assert.equal(await wallet.isVisible(), false);
+  await tools.getByRole('tab', { name: /Changes over time/ }).focus();
+  await page.keyboard.press('Home');
+  await wallet.locator('.exposure-overlap').waitFor();
+  assert.equal(calls.length, 4, 'Switching tools preserves reports without new acquisition');
   await page.unroute('**/api/investigation/options');
   await page.unroute('**/api/investigation/wallet');
   console.log('Bounded changes: pinned requests, validation, missing Graph, raw deltas, uploads, downloads, overlap, keyboard and responsive checks passed (fixtures only).');

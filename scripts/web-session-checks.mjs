@@ -29,11 +29,11 @@ export async function checkSession({ browser, origin, capabilities }) {
     const navigation = page.getByRole('navigation', { name: 'Primary navigation' });
     assert.deepEqual((await navigation.getByRole('link').allTextContents()).slice(0, 2), ['Explorer', 'Investigate']);
     await navigation.getByRole('link', { name: 'Investigate', exact: true }).click();
-    await page.locator('.change-investigator').waitFor();
+    await page.locator('.wallet-investigation').waitFor();
     assert.equal(await page.locator('#example').count(), 0);
     assert.equal(await navigation.getByRole('link', { name: 'Investigate', exact: true }).getAttribute('aria-current'), 'page');
     await page.reload();
-    await page.locator('.change-investigator').waitFor();
+    await page.locator('.wallet-investigation').waitFor();
     assert.equal(received, `Bearer ${token}`, 'Investigate restores the same accepted session');
     assert.equal(await page.locator('#access-token').count(), 0);
     const disconnect = page.getByRole('button', { name: 'Disconnect session', exact: true });
@@ -50,7 +50,7 @@ export async function checkSession({ browser, origin, capabilities }) {
     token = 'tare_sandbox_v1.Zml4dHVyZQ.fixture-signature';
     await page.locator('#access-token').fill(token);
     await page.getByRole('button', { name: 'Connect', exact: true }).click();
-    await page.locator('.change-investigator').waitFor();
+    await page.locator('.wallet-investigation').waitFor();
     assert.equal(received, `Bearer ${token}`, 'A different session can connect after disconnect');
     await page.setViewportSize({ width: 390, height: 844 });
     await page.getByRole('button', { name: 'Toggle navigation' }).click();

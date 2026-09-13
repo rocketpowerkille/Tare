@@ -15,8 +15,7 @@ import { EvidenceTimeline } from '../components/explorer/EvidenceTimeline';
 import { SessionEvidence } from '../components/explorer/SessionEvidence';
 import { ConnectionTimeline } from '../components/explorer/ConnectionTimeline';
 import { PositionDiagram } from '../components/explorer/PositionDiagram';
-import { WalletInvestigation } from '../components/explorer/WalletInvestigation';
-import { ChangeInvestigator } from '../components/explorer/ChangeInvestigator';
+import { InvestigationWorkspace } from '../components/explorer/InvestigationWorkspace';
 import { AppLink } from '../components/AppLink';
 import type { StageStatus } from '../lib/progress';
 import type { AccessOptions, Capabilities, DiscoveryResult, JsonRecord, OperationId, PositionAnalyzeInput } from '../lib/types';
@@ -164,11 +163,8 @@ export function ExplorerPage({ mode = 'explore' }: { mode?: keyof typeof workspa
     {error && !authRequired && <div className="error-banner" role="alert"><AlertCircle size={20} /><div><strong>This check could not be completed.</strong><p>Review the input or try again. No new conclusion was produced.</p><details><summary>Technical details</summary><p>{error}</p></details>{!capabilities && <button className="button secondary" onClick={() => void connect(token)}>Retry connection</button>}</div></div>}
 
     {capabilities && <>
-      {!authRequired && <SessionEvidence token={token} />}
-      {mode === 'investigate' ? <>
-        <WalletInvestigation token={token} disabled={busy || authRequired || connecting} />
-        <ChangeInvestigator token={token} capabilities={capabilities} disabled={busy || authRequired || connecting} />
-      </> : <div className="explorer-grid">
+      {!authRequired && <SessionEvidence token={token} compact={mode === 'investigate'} />}
+      {mode === 'investigate' ? <InvestigationWorkspace token={token} capabilities={capabilities} disabled={busy || authRequired || connecting} /> : <div className="explorer-grid">
         <div className="control-stack">
           {mode === 'explore' ? <OperationForm capabilities={capabilities} busy={busy || authRequired || connecting} operation={operation} onOperationChange={setOperation} onQueryChange={clearQueryResult} onDiscover={discover} onRun={analyze} /> : <>
           <ExamplePanel examples={capabilities.examples} busy={busy || authRequired || connecting} onRun={id => void run('Replaying saved evidence, with no live blockchain query.', () => api.example(token, id), false, true, id)} />

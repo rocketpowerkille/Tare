@@ -51,7 +51,9 @@ export function ChangeInvestigator({ token, capabilities, disabled }: { token: s
       if (current === generation.current && uploadId === uploads.current[side]) { setReports(previous => ({ ...previous, [side]: value })); setError(''); }
     } catch (failure) { if (current === generation.current && uploadId === uploads.current[side]) setError((failure as Error).message); }
   }
-  return <details className="investigation-assistant change-investigator"><summary>Investigate changes between two blocks</summary>
+  return <section className="investigation-assistant change-investigator" aria-labelledby={`${id}-title`}>
+    <p className="section-label">One position · Two observations</p>
+    <h2 id={`${id}-title`}>See what changed.</h2>
     <p>Compare one Ethereum Morpho V1 wallet position at two explicit blocks. This is on-demand analysis, not continuous monitoring. It cannot explain why a change happened.</p>
     <label htmlFor={`${id}-mode`}>Evidence input</label><select id={`${id}-mode`} value={mode} disabled={busy} onChange={event => { setMode(event.target.value); setReports({}); setStages([]); setError(''); generation.current++; }}>
       <option value="live">Request two pinned blocks</option><option value="saved">Compare two saved reports</option>
@@ -79,5 +81,5 @@ export function ChangeInvestigator({ token, capabilities, disabled }: { token: s
       <ChangeReport current={reports.current} previous={reports.previous} />
       <InvestigationAssistant report={reports.current} initialPrevious={reports.previous} token={token} />
     </>}
-  </details>;
+  </section>;
 }
