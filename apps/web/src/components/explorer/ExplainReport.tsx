@@ -1,18 +1,19 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { explanationContext, explanationPrompt } from '../../../../../packages/receipts/src/explanation';
 import type { JsonRecord } from '../../lib/types';
 import type { ReportAccess } from '../../lib/agent-handoff';
 import { BazanticHandoff } from './BazanticHandoff';
+import { InvestigationAssistant } from './InvestigationAssistant';
 
-export function ExplainReport({ report, modules, access }: { report: JsonRecord; modules: JsonRecord[]; access?: ReportAccess }) {
+export function ExplainReport({ report, modules, access, token = '', evidence: originalEvidence }: { report: JsonRecord; modules: JsonRecord[]; access?: ReportAccess; token?: string; evidence?: JsonRecord }) {
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState(false);
-  const evidence = modules.length ? {
+  const evidence = useMemo(() => originalEvidence ?? (modules.length ? {
     reportType: 'comprehensive-position-check',
     status: modules.some(module => module.status === 'mismatch') ? 'mismatch'
       : modules.some(module => module.eligible && ['incomplete', 'unavailable'].includes(String(module.status))) ? 'incomplete' : report.status ?? report.kind,
     primary: report, modules,
-  } : report;
+  } : report), [report, modules, originalEvidence]);
   const context = explanationContext(evidence);
   async function copy() {
     try {
@@ -22,9 +23,9 @@ export function ExplainReport({ report, modules, access }: { report: JsonRecord;
       window.setTimeout(() => setCopied(false), 1600);
     } catch { setCopyError(true); }
   }
-  return <details className="explain-report">
+  return <><InvestigationAssistant report={evidence} token={token} /><details className="explain-report">
     <summary>Explain this report <span className="explanation-path-label">AI assistant or Bazantic Recipe</span></summary>
-    <p>Tare has prepared evidence-grounded context for an AI explanation. Choose how you want to continue. No explanation has been generated here by Tare or Bazantic.</p>
+    <p>Other explanation paths: copy the evidence context or open the external Recipe. These actions do not execute the in-page assistant.</p>
     <p>This explanation summarizes the returned evidence. It does not add new verification.</p>
     {context.freshness === 'saved-evidence' && <p className="source-caution">This explanation is based on saved evidence, not a fresh blockchain check.</p>}
     <div className="explanation-status-grid">
@@ -66,5 +67,5 @@ export function ExplainReport({ report, modules, access }: { report: JsonRecord;
       </section>
       <BazanticHandoff context={context} access={access} />
     </div>
-  </details>;
+  </details></>;
 }

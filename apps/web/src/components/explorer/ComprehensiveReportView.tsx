@@ -13,7 +13,7 @@ function download(value: unknown) {
   URL.revokeObjectURL(url);
 }
 
-export function ComprehensiveReportView({ report, access }: { report: JsonRecord; access?: ReportAccess }) {
+export function ComprehensiveReportView({ report, access, token = '' }: { report: JsonRecord; access?: ReportAccess; token?: string }) {
   const status = text(report.status) ?? 'incomplete';
   const modules = list(report.modules).filter(isRecord);
   return <div className="composed-report">
@@ -23,7 +23,7 @@ export function ComprehensiveReportView({ report, access }: { report: JsonRecord
       </StatusBadge>
       <span>Combined position and source report. Completion is not proof of backing.</span>
     </div>
-    <ReportView report={record(report.primary)} modules={modules} access={access} />
+    <ReportView report={record(report.primary)} modules={modules} access={access} token={token} evidence={report} />
     <div className="combined-download"><button className="button secondary" type="button" onClick={() => download(report)}><Download size={16} />Download combined report</button><p>Includes the primary position, source responses, statuses and limitations.</p></div>
   </div>;
 }

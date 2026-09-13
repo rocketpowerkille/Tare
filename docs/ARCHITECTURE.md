@@ -95,6 +95,14 @@ copy explanation context or link to the public Recipe; copying does not execute
 a Recipe. Sandbox authorization metadata is distinct from settlement and vault
 evidence. See [Bazantic integration](BAZANTIC_INTEGRATION.md).
 
+The optional [investigation assistant](BAZANTIC_INVESTIGATION.md) adds process-local
+expiring report references, a server-side unsigned Recipe connection, cited
+answers and deterministic report comparison. It stops on payment challenges.
+Browser wallet investigation reuses bounded discovery and eligible checks before
+offering a Recipe explanation. Supplied Graph snapshots can be compared with
+independent pinned RPC while remaining labeled caller-supplied, not authenticated
+Graph observations. These additions do not change existing report calculations.
+
 ## Monitoring
 
 The TypeScript monitoring consumer separates stream decoding, block/undo

@@ -2,9 +2,10 @@ import assert from 'node:assert/strict';
 import { createApiServer } from '../../apps/api/src/server.js';
 import type { HostedConfig } from '../../apps/api/src/access.js';
 import { TareService } from '../../packages/service/src/index.js';
+import type { InvestigationConfig } from '../../apps/api/src/investigation-routes.js';
 
-export async function withApi(run: (url: string) => Promise<void>, service = new TareService(), hosted?: HostedConfig) {
-  const server = createApiServer(service, hosted);
+export async function withApi(run: (url: string) => Promise<void>, service = new TareService(), hosted?: HostedConfig, investigation?: InvestigationConfig) {
+  const server = createApiServer(service, hosted, investigation);
   await new Promise<void>((resolve, reject) => {
     server.once('error', reject);
     server.listen(0, '127.0.0.1', resolve);

@@ -14,6 +14,7 @@ import { EvidenceTimeline } from '../components/explorer/EvidenceTimeline';
 import { SessionEvidence } from '../components/explorer/SessionEvidence';
 import { ConnectionTimeline } from '../components/explorer/ConnectionTimeline';
 import { PositionDiagram } from '../components/explorer/PositionDiagram';
+import { WalletInvestigation } from '../components/explorer/WalletInvestigation';
 import type { StageStatus } from '../lib/progress';
 import type { AccessOptions, Capabilities, DiscoveryResult, JsonRecord, OperationId, PositionAnalyzeInput } from '../lib/types';
 
@@ -144,6 +145,7 @@ export function ExplorerPage() {
 
     {capabilities && <>
       {!authRequired && <SessionEvidence token={token} />}
+      <WalletInvestigation token={token} disabled={busy || authRequired || connecting} />
       <div className="explorer-grid">
         <div className="control-stack">
           <OperationForm capabilities={capabilities} busy={busy || authRequired || connecting} operation={operation} onOperationChange={setOperation} onQueryChange={clearQueryResult} onDiscover={discover} onRun={analyze} />
@@ -154,7 +156,7 @@ export function ExplorerPage() {
           <div className="activity-line" role="status" aria-live="polite">{busy ? <LoaderCircle className="spin" size={16} /> : <Radio size={16} />}<span>{activity}</span></div>
           <EvidenceTimeline stages={stages} busy={busy} />
           {busy && partial && <section className="partial-evidence"><p className="section-label">Position response received</p><p>Inspect the returned path while remaining evidence checks finish. This is not the final report.</p><PositionDiagram report={partial} /></section>}
-          {report ? (report.reportType === 'comprehensive-position-check' ? <ComprehensiveReportView report={report} access={reportAccess} /> : <ReportView report={report} access={reportAccess} />) : busy ? <div className="skeleton-stack" aria-hidden="true"><div className="skeleton" /><div className="skeleton short" /><div className="skeleton" /></div> : <div className="result-empty"><div className="empty-symbol"><FileSearch size={31} /></div><p className="section-label">Your evidence report</p><h2>An answer you can inspect.</h2><p>Run a check to see the position path, observed amounts and missing evidence. Or begin with a saved report.</p><button className="text-button" type="button" onClick={() => document.getElementById('example')?.focus()}>Try a saved example <ArrowRight size={16} /></button></div>}
+          {report ? (report.reportType === 'comprehensive-position-check' ? <ComprehensiveReportView report={report} access={reportAccess} token={token} /> : <ReportView report={report} access={reportAccess} token={token} />) : busy ? <div className="skeleton-stack" aria-hidden="true"><div className="skeleton" /><div className="skeleton short" /><div className="skeleton" /></div> : <div className="result-empty"><div className="empty-symbol"><FileSearch size={31} /></div><p className="section-label">Your evidence report</p><h2>An answer you can inspect.</h2><p>Run a check to see the position path, observed amounts and missing evidence. Or begin with a saved report.</p><button className="text-button" type="button" onClick={() => document.getElementById('example')?.focus()}>Try a saved example <ArrowRight size={16} /></button></div>}
         </section>
       </div>
     </>}

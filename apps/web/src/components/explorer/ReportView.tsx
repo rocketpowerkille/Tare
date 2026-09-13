@@ -82,7 +82,8 @@ function download(value: unknown, filename: string) {
   URL.revokeObjectURL(url);
 }
 
-export function ReportView({ report, modules = [], access }: { report: JsonRecord; modules?: JsonRecord[]; access?: ReportAccess }) {
+const noModules: JsonRecord[] = [];
+export function ReportView({ report, modules = noModules, access, token = '', evidence }: { report: JsonRecord; modules?: JsonRecord[]; access?: ReportAccess; token?: string; evidence?: JsonRecord }) {
   const sectionId = useId();
   const capture = record(report.capture);
   const metric = record(report.metric);
@@ -129,7 +130,7 @@ export function ReportView({ report, modules = [], access }: { report: JsonRecor
     </section>
     <dl className="fact-grid">{facts.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{['Wallet', 'Vault', 'Observed at block', 'Evidence ID'].includes(label) && value !== 'Not included in this report' ? <CopyValue value={value} label={label} /> : value}</dd></div>)}</dl>
     <ValueConversion report={report} modules={modules} />
-    <ExplainReport report={report} modules={modules} access={access} />
+    <ExplainReport report={report} modules={modules} access={access} token={token} evidence={evidence} />
     <PositionOverview report={report} />
     <div id={`${sectionId}-Evidence-path`}><PositionDiagram report={report} /></div>
     {modules.length > 0 && <div id={`${sectionId}-Source-checks`}><EvidenceSources report={report} modules={modules} /></div>}

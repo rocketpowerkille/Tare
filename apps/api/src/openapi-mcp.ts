@@ -15,6 +15,32 @@ export const mcpOpenapi = {
     description: 'Read-only tools for finding supported vaults, acquiring evidence and replaying retained examples.',
   },
   paths: {
+    '/api/agent-compare-accounting': {
+      post: {
+        operationId: 'tare_compare_indexed_accounting',
+        summary: 'Compare a supplied Graph accounting snapshot against independent pinned Ethereum RPC reads.',
+        description: 'Pass the exact data object from graph_tare_accounting_head using its snapshot query. Claimed source identity is not authenticated by this comparison. Preserves deployment, block, read-set and value mismatches. Never establishes backing.',
+        requestBody: { required: true, content: { 'application/json': { schema: {
+          type: 'object', additionalProperties: false, required: ['vault', 'graph'], properties: {
+            vault: address, graph: { type: 'object', description: 'Exact Graph data object containing _meta and accountingState including reads. Do not reconstruct or alter values.' },
+          },
+        } } } }, responses: { '200': success },
+      },
+    },
+    '/api/agent-report-context': {
+      post: {
+        operationId: 'tare_report_context',
+        summary: 'Read one page of an expiring browser-submitted Tare report snapshot, including separate source checks.',
+        description: 'Requires the configured gateway identity and reference. Read every page, cite fact IDs, preserve omission notices. Does not perform a new blockchain check or authenticate uploaded source claims. Never share the reference in the final answer.',
+        requestBody: { required: true, content: { 'application/json': { schema: {
+          type: 'object', additionalProperties: false, required: ['reference'], properties: {
+            reference: { type: 'string', pattern: '^[a-f0-9]{48}$' },
+            page: { type: 'integer', minimum: 0, maximum: 63, default: 0 },
+          },
+        } } } },
+        responses: { '200': success },
+      },
+    },
     '/api/status': {
       get: {
         operationId: 'tare_status',

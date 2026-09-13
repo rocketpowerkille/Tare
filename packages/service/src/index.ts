@@ -16,6 +16,7 @@ import { AddressSchema, SupportedEvmChainSchema } from '../../domain/src/index.j
 import { AnalyzeSchema, DiscoverSchema, ReplaySchema, ExampleSchema, MAX_INPUT_BYTES, ServiceError } from './requests.js';
 import { composePosition } from './composition.js';
 import { valuePositionWithChainlink } from '../../verification/src/valuation.js';
+import { verifySuppliedAccounting } from '../../verification/src/supplied-accounting.js';
 
 export interface ServiceConfig {
   rpcUrl?: string;
@@ -221,6 +222,15 @@ export class TareService {
         ...(request.blockNumber === undefined ? {} : { blockNumber: request.blockNumber }),
       });
     }
+  }
+
+  async compareIndexedSnapshot(input: unknown) {
+    if (!this.config.rpcUrl || !this.config.expectedDeployment) throw new ServiceError(503, 'not-configured', 'A configured Ethereum RPC and pinned Graph deployment are required.');
+    if (Buffer.byteLength(JSON.stringify(input)) > MAX_INPUT_BYTES) throw new ServiceError(413, 'input-too-large', 'Snapshot exceeds the input limit.');
+    if (this.active >= 2) throw new ServiceError(429, 'busy', 'Two operations are running; retry when one finishes.');
+    this.active++;
+    try { return await verifySuppliedAccounting(input, this.config.rpcUrl, this.config.expectedDeployment); }
+    finally { this.active--; }
   }
 
   private rpcForChain(chainId: number) {

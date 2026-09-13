@@ -22,7 +22,8 @@ Public gateway reference:
 [Tare](https://zvnss2njirhqjllnbfsv3sneca.bazgateway.com).
 Its source specification is [the MCP OpenAPI module](../apps/api/src/openapi-mcp.ts),
 served at `/openapi-mcp.json` with existing versioned aliases. Current code defines
-five operations; older six-tool notes are not the current schema.
+seven operations, including two additive investigation tools. The stdio inventory
+below remains unchanged.
 
 | Gateway tool | Operation |
 | --- | --- |
@@ -31,6 +32,8 @@ five operations; older six-tool notes are not the current schema.
 | `tare_analyze_compact` | Run a supported analysis and return a compact projection. |
 | `tare_example_compact` | Replay a named saved example, explicitly not fresh evidence. |
 | `tare_start_bazantic_sandbox_session` | Request a short-lived sandbox access session under gateway authorization. |
+| `tare_report_context` | Retrieve pages of an expiring, browser-submitted pinned report under the configured gateway identity. |
+| `tare_compare_indexed_accounting` | Compare supplied indexed observations with independent pinned RPC without claiming authenticated Graph provenance. |
 
 The independent [local stdio server](../apps/mcp/src/server.ts), started with
 `pnpm mcp`, exposes `tare_status`, `tare_analyze`, `tare_replay`, `tare_example`, and
@@ -48,7 +51,9 @@ view cannot include everything. Amount formatting requires actual returned units
 and decimals. Missing USD estimates remain missing.
 
 The external agent performs the explanation. Tare has no server-side LLM provider,
-model key, or hidden paid explanation call. Browser users can copy context or open
+model key, or hidden paid explanation call. The optional, disabled-by-default
+[investigation assistant](BAZANTIC_INVESTIGATION.md) calls a Bazantic Recipe and
+stops on payment challenges. Browser users can also copy context or open
 the public Recipe, while the original report, raw JSON, and downloads remain
 available. The copy action alone demonstrates neither a gateway call nor payment.
 

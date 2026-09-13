@@ -1,0 +1,17 @@
+.investigation-assistant { margin-block: 24px; padding: 24px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); min-width: 0; }
+.investigation-assistant h3 { margin: 8px 0 16px; }
+.investigation-assistant p { line-height: 1.65; overflow-wrap: anywhere; }
+.investigation-assistant textarea { display: block; width: 100%; min-height: 88px; resize: vertical; margin-block: 8px 16px; padding: 12px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface); color: var(--ink); font: inherit; }
+.assistant-presets, .assistant-citations { display: flex; gap: 8px; flex-wrap: wrap; margin-block: 16px; }
+.assistant-presets button { white-space: normal; text-align: left; }
+.assistant-consent { display: flex; align-items: flex-start; gap: 12px; margin-top: 24px; font-size: .9rem; line-height: 1.6; }
+.assistant-consent input { flex: 0 0 auto; width: 18px; height: 18px; margin-top: 4px; }
+.assistant-answer { margin-top: 24px; border-top: 1px solid var(--line); padding-top: 16px; }
+.assistant-answer h4, .assistant-facts h4 { margin-block: 16px 8px; overflow-wrap: anywhere; }
+.assistant-prose { white-space: pre-wrap; }
+.assistant-citations a { font-family: ui-monospace, monospace; font-size: .75rem; overflow-wrap: anywhere; max-width: 100%; }
+.investigation-assistant pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 320px; overflow: auto; max-width: 100%; background: var(--surface-subtle); padding: 16px; border-radius: 8px; }
+.investigation-assistant details { margin-top: 16px; min-width: 0; }
+.investigation-assistant input[type=file] { width: 100%; min-width: 0; }
+.assistant-facts section:target { outline: 2px solid var(--green); outline-offset: 4px; }
+@media (max-width: 600px) { .investigation-assistant { padding: 16px; } .assistant-presets { display: grid; grid-template-columns: 1fr; } }

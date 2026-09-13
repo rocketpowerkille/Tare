@@ -23,6 +23,11 @@ async function request<T>(path: string, token: string, input?: unknown): Promise
 }
 
 export const api = {
+  investigateWallet: (token: string, owner: string) => request<JsonRecord>('/api/investigation/wallet', token, { owner }),
+  investigationOptions: (token: string) => request<JsonRecord>('/api/investigation/options', token),
+  investigationSnapshot: (token: string, report: JsonRecord, previous?: JsonRecord) => request<JsonRecord>('/api/investigation/snapshot', token, { report, ...(previous ? { previous } : {}) }),
+  investigationRun: (token: string, input: { reference: string; requestId: string; question: string; consent: true }) => request<JsonRecord>('/api/investigation/run', token, input),
+  investigationRunStatus: (token: string, id: string) => request<JsonRecord>(`/api/investigation/run/${encodeURIComponent(id)}`, token),
   accessOptions: () => request<AccessOptions>('/api/access-options', ''),
   capabilities: (token: string) => request<Capabilities>('/api/status', token),
   discover: (token: string, owner: string) => request<DiscoveryResult>('/api/discover', token, { owner, maxPositions: 25 }),

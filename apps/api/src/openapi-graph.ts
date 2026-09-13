@@ -1,4 +1,5 @@
 const accountingHeadQuery = 'query TareGatewayStatus{_meta{block{number hash} deployment hasIndexingErrors}}';
+const accountingSnapshotQuery = 'query TareGatewaySnapshot($block:Block_height!,$vault:ID!){_meta(block:$block){block{number hash} deployment hasIndexingErrors} accountingState(id:$vault,block:$block){id chainId blockNumber blockHash timestamp reads(first:264){to data result}}}';
 
 /**
  * A narrow contract for adding Tare's live Graph Studio deployment as a second
@@ -16,7 +17,7 @@ export const graphOpenapi = {
     '/query/1760123/tare-live-accounting/0.1.0': {
       post: {
         operationId: 'graph_tare_accounting_head',
-        summary: 'Read the live Tare accounting subgraph status.',
+        summary: 'Read the Tare accounting index head or a bounded block-pinned accounting snapshot.',
         description: 'The final verdict must reject indexing errors and any deployment other than Tare\'s pinned accounting deployment.',
         requestBody: {
           required: true,
@@ -29,9 +30,18 @@ export const graphOpenapi = {
                 properties: {
                   query: {
                     type: 'string',
-                    enum: [accountingHeadQuery],
+                    enum: [accountingHeadQuery, accountingSnapshotQuery],
                     default: accountingHeadQuery,
-                    description: 'Use this exact bounded status query.',
+                    description: 'Choose the exact head query or snapshot query. A snapshot requires variables with the returned head hash and requested vault.',
+                  },
+                  variables: {
+                    type: 'object', additionalProperties: false, required: ['block', 'vault'], properties: {
+                      block: { type: 'object', additionalProperties: false, required: ['hash'], properties: {
+                        hash: { type: 'string', pattern: '^0x[0-9a-fA-F]{64}$' },
+                      } },
+                      vault: { type: 'string', pattern: '^0x[0-9a-fA-F]{40}$' },
+                    },
+                    description: 'For the snapshot query only: use the exact hash from the head response and the requested vault.',
                   },
                 },
               },
@@ -51,6 +61,7 @@ export const graphOpenapi = {
                       type: 'object',
                       required: ['_meta'],
                       properties: {
+                        accountingState: { type: 'object', nullable: true, description: 'Present for the snapshot query: id, chainId, blockNumber, blockHash, timestamp, and up to 264 {to,data,result} reads. Forward this exact object with _meta to tare_compare_indexed_accounting.' },
                         _meta: {
                           type: 'object',
                           required: ['block', 'deployment', 'hasIndexingErrors'],

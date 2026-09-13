@@ -9,6 +9,9 @@ import { graphOpenapi } from './openapi-graph.js';
 import { compactEvidenceReport } from '../../../packages/receipts/src/compact.js';
 import { ApiAccess } from './access.js';
 import type { HostedConfig } from './access.js';
+import { InvestigationRoutes } from './investigation-routes.js';
+import type { InvestigationConfig } from './investigation-routes.js';
+import { investigateWallet } from '../../../packages/service/src/wallet-investigation.js';
 
 const specificationPaths = new Set([
   '/openapi.json', '/openapi-mcp.json', '/openapi-mcp-v2.json', '/openapi-mcp-v3.json', '/openapi-graph.json',
@@ -50,8 +53,10 @@ async function readBody(request: IncomingMessage) {
   return JSON.parse(Buffer.concat(chunks).toString('utf8')) as unknown;
 }
 
-export function createApiServer(service = new TareService(), hosted?: HostedConfig) {
+export function createApiServer(service = new TareService(), hosted?: HostedConfig, investigation?: InvestigationConfig) {
   const access = new ApiAccess(hosted);
+  const investigations = new InvestigationRoutes(investigation, hosted);
+  let walletInvestigationActive = false;
   const server = createServer({ requestTimeout: 15000, headersTimeout: 10000, maxHeaderSize: 8192 }, (request, response) => {
     response.setHeader('cache-control', 'no-store');
     response.setHeader('x-content-type-options', 'nosniff');
@@ -73,6 +78,20 @@ export function createApiServer(service = new TareService(), hosted?: HostedConf
     const path = new URL(request.url ?? '/', 'http://tare.local').pathname;
     const publicAccessOptions = path === '/api/access-options';
     const identity = access.check(request, path.startsWith('/api/') && !publicAccessOptions);
+    if (path === '/api/investigation/wallet') {
+      if (request.method !== 'POST') throw new ServiceError(405, 'method-not-allowed', 'Use POST.');
+      if (walletInvestigationActive) throw new ServiceError(429, 'busy', 'A wallet investigation is already running.');
+      walletInvestigationActive = true;
+      try { return json(response, 200, await investigateWallet(service, await readBody(request))); }
+      finally { walletInvestigationActive = false; }
+    }
+    if (path.startsWith('/api/investigation/') || path === '/api/agent-report-context') {
+      return json(response, 200, await investigations.handle(path, request, identity, () => readBody(request)));
+    }
+    if (path === '/api/agent-compare-accounting') {
+      if (request.method !== 'POST') throw new ServiceError(405, 'method-not-allowed', 'Use POST.');
+      return json(response, 200, await service.compareIndexedSnapshot(await readBody(request)));
+    }
     const asset = await webAsset(path);
     if (path === '/healthz' || path === '/api/status' || publicAccessOptions || specificationPaths.has(path) || asset) {
       if (request.method !== 'GET') throw new ServiceError(405, 'method-not-allowed', 'Use GET.');

@@ -1,3 +1,5 @@
+import { investigationPaths } from './openapi-investigation.js';
+
 const address = {
   type: 'string',
   pattern: '^0x[0-9a-fA-F]{40}$',
@@ -102,6 +104,7 @@ export const openapi = {
     description: 'Trace nested-vault exposure and verification gaps. Raw integers are decimal strings; inspect status, sourceMode, findings and metric scope.',
   },
   paths: {
+    ...investigationPaths,
     '/healthz': { get: { operationId: 'tare_health', summary: 'Check whether the API process is accepting requests.',
       security: [], responses: { '200': { description: 'The API process is healthy.' } } } },
     '/api/access-options': { get: {
