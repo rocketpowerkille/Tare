@@ -5,10 +5,7 @@ import {
   BAZANTIC_GRANT_DOCS,
   BAZANTIC_PRICE_USDC,
   CIRCLE_TESTNET_FAUCET,
-  TERMINALS,
-  type Terminal,
   bazanticGrantCommand,
-  bazanticSessionCommand,
   bazanticSessionUrl,
   bazanticTokenCommand,
 } from '../lib/bazantic';
@@ -17,9 +14,8 @@ export function BazanticAccessGuide({ gatewayUrl, sessionPath }: {
   gatewayUrl: string;
   sessionPath: string;
 }) {
-  const [terminal, setTerminal] = useState<Terminal>('powershell');
   const grantCommand = bazanticGrantCommand();
-  const sessionCommand = bazanticSessionCommand(gatewayUrl, sessionPath, terminal);
+  const sessionCommand = bazanticTokenCommand(gatewayUrl, sessionPath);
   const endpoint = bazanticSessionUrl(gatewayUrl, sessionPath);
 
   return <div className="bazantic-guide">
@@ -39,26 +35,14 @@ export function BazanticAccessGuide({ gatewayUrl, sessionPath }: {
       </div></li>
       <li><span>2</span><div><strong>Create a testnet grant</strong><CopyCommand command={grantCommand} label="Copy grant command" /></div></li>
       <li><span>3</span><div>
-        <strong>Call the public Tare gateway</strong>
-        <div className="terminal-selector" role="group" aria-label="Choose your terminal">
-          {TERMINALS.map(option => <button
-            key={option.id}
-            type="button"
-            aria-pressed={terminal === option.id}
-            onClick={() => setTerminal(option.id)}
-          >{option.label}</button>)}
-        </div>
-        <CopyCommand key={terminal} command={sessionCommand} label="Copy paid call" />
-        <p>Copy the whole command; keep each continuation character at the end of its line.</p>
-        <details>
-          <summary>Git Bash: print only the access code</summary>
-          <p>Use this instead of the command above. It makes one session request and uses Node.js to print only your code in the terminal. It does not use your clipboard. Running either command again requests another paid session.</p>
-          <CopyCommand command={bazanticTokenCommand(gatewayUrl, sessionPath)} label="Copy token-only command" />
-        </details>
+        <strong>Get your access code</strong>
+        <p>Run in Git Bash on Windows, or a Bash / Zsh terminal on macOS or Linux—not PowerShell or Command Prompt. This makes one session request and uses Node.js to print only your access code.</p>
+        <CopyCommand command={sessionCommand} label="Copy token-only command" />
+        <p>Copy the whole command; keep each backslash at the end of its line. Running it approves a request capped at {BAZANTIC_PRICE_USDC} test USDC. Running it again requests another paid session. It does not use a clipboard utility.</p>
       </div></li>
       <li><span>4</span><div>
         <strong>Paste the returned code</strong>
-        <p>Copy <code>body.accessToken</code> from the JSON response, or the single code printed by the Git Bash option. Paste the entire code without quotation marks into the access-code field. The session costs {BAZANTIC_PRICE_USDC} test USDC.</p>
+        <p>Copy the single code printed in your terminal and paste it into the access-code field, without quotation marks. The session costs {BAZANTIC_PRICE_USDC} test USDC. If the command reports “No access code returned,” resolve the error first—do not paste the error as a code.</p>
         <div className="access-token-example">
           <span>Example format only, not a working access code</span>
           <code onCopy={event => event.preventDefault()}>tare_sandbox_v1.[session data].[signature]</code>

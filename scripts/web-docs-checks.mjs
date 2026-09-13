@@ -29,9 +29,8 @@ export async function checkDocs({ page, origin, fits }) {
   assert.equal(await page.evaluate(() => navigator.clipboard.readText()), 'npm i -g @bazantic/cli@latest');
   await page.getByRole('button', { name: 'Copy login command', exact: true }).click();
   assert.equal(await page.evaluate(() => navigator.clipboard.readText()), 'baz login');
-  await page.getByText('Git Bash: print only the access code', { exact: true }).focus();
+  await page.getByRole('button', { name: 'Copy token-only command', exact: true }).focus();
   await page.keyboard.press('Enter');
-  await page.getByRole('button', { name: 'Copy token-only command', exact: true }).click();
   assert.match(await page.evaluate(() => navigator.clipboard.readText()), /node --input-type=module/);
   for (const width of [1440, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 1000 });

@@ -116,20 +116,28 @@ macOS or Linux shell quoting, not PowerShell or Command Prompt:
 npm i -g @bazantic/cli@latest
 baz login
 baz grant create --name tare-demo --cap 0.01 --network base-sepolia --service zvnss2njirhqjllnbfsv3sneca
-baz curl https://zvnss2njirhqjllnbfsv3sneca.bazgateway.com/api/bazantic/session -X POST -H "Content-Type: application/json" -d '{}' --account tare-demo --max-amount 0.001 --json
+baz curl https://zvnss2njirhqjllnbfsv3sneca.bazgateway.com/api/bazantic/session \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -d '{}' \
+  --account tare-demo \
+  --max-amount 0.001 \
+  --yes \
+  --json | command node --input-type=module -e 'let input = ""; for await (const chunk of process.stdin) input += chunk; try { const result = JSON.parse(input); const token = result.body?.accessToken; if (result.ok !== true || typeof token !== "string" || !/^tare_sandbox_v1\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(token)) throw new Error(); console.log(token); } catch { console.error("No access code returned. Check your grant, test USDC balance and gateway availability. Do not paste this error as a code."); process.exitCode = 1; }'
 ```
 
-Inspect the quote and explicitly approve only the intended sandbox request.
-Never share the returned access code. Paste `body.accessToken` into Explorer.
+Running the session command approves one sandbox request capped at 0.001 test USDC.
+Never share the returned access code. Paste the single code printed in the terminal
+into Explorer. If extraction reports an error, resolve it before continuing; do not
+paste the error as a code.
 The default lifetime is 900 seconds; configuration can change it. An authorization
 card cannot reconstruct a transaction receipt from that token.
 
-The Explorer setup guide includes shell-specific commands and a **Git Bash:
-print only the access code** alternative. It pipes the single session response
+The Explorer and developer setup guides use this token-only command as the primary
+access path. It pipes the single session response
 through Node.js and prints only a valid-shaped successful token, without using a
-clipboard utility or making another network call. Use it instead of the full-JSON
-call, not after it: another session call is another payment request. The normal
-UI command includes `--yes` and a 0.001 cap, so executing it explicitly
+clipboard utility or making another network call. Another session call is another
+payment request. The command includes `--yes` and a 0.001 cap, so executing it explicitly
 approves that bounded testnet request. Copying alone makes no request.
 The guide shows a non-working token format
 example; do not paste that illustration, quotes, or the whole JSON response.

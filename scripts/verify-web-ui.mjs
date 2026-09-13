@@ -223,7 +223,9 @@ try {
   assert.equal(await example.locator('button').count(), 0);
   assert.equal(await example.locator('code').evaluate(el => getComputedStyle(el).userSelect), 'none');
   assert.equal(await example.locator('code').evaluate(el => el.dispatchEvent(new Event('copy', { bubbles: true, cancelable: true }))), false);
-  await page.getByText('Git Bash: print only the access code', { exact: true }).click();
+  assert.equal(await page.getByRole('button', { name: 'Copy paid call', exact: true }).count(), 0);
+  assert.equal(await page.locator('.bazantic-guide .terminal-selector').count(), 0);
+  assert.equal(await page.getByRole('button', { name: 'Copy token-only command', exact: true }).isVisible(), true);
   await page.getByRole('button', { name: 'Copy token-only command', exact: true }).click();
   const tokenCommand = await page.evaluate(() => navigator.clipboard.readText());
   assert.match(tokenCommand, /node --input-type=module/);
