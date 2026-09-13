@@ -13,6 +13,8 @@
 
 .theme-toggle:hover { background: var(--surface-subtle); }
 
+:root:not([data-theme="dark"]) :focus-visible { outline-color: var(--green); }
+
 :root[data-theme="dark"] .status-success,
 :root[data-theme="dark"] .callout.safe,
 :root[data-theme="dark"] .trace-schematic li:last-child { border-color: #41694f; }
