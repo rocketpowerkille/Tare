@@ -2,12 +2,36 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import ts from 'typescript';
+import { spawnSync } from 'node:child_process';
 
 // Load the pure browser presentation helpers without adding them to the API build.
 const types = ts.transpileModule(await readFile(new URL('../apps/web/src/lib/types.ts', import.meta.url), 'utf8'), { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
 const typesUrl = `data:text/javascript;base64,${Buffer.from(types).toString('base64')}`;
 const bazantic = ts.transpileModule(await readFile(new URL('../apps/web/src/lib/bazantic.ts', import.meta.url), 'utf8'), { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
 const bazanticUrl = `data:text/javascript;base64,${Buffer.from(bazantic).toString('base64')}`;
+const { bazanticTokenCommand } = await import(bazanticUrl);
+
+test('Git Bash token command prints only a successful session token and rejects errors without leaking responses', () => {
+  const command = bazanticTokenCommand('https://example.test', '/api/bazantic/session');
+  assert.equal(command.match(/baz curl/g).length, 1);
+  assert.match(command, /--max-amount 0\.001/);
+  assert.doesNotMatch(command, /clipboard|clip\.exe|Set-Clipboard/);
+  const script = command.split(" | node --input-type=module -e '")[1].slice(0, -1);
+  assert.ok(!script.includes("'"), 'Node script must remain safe inside Bash single quotes');
+  const run = input => spawnSync(process.execPath, ['--input-type=module', '-e', script], { input, encoding: 'utf8' });
+  const token = 'tare_sandbox_v1.Zml4dHVyZQ.test-signature';
+  const success = run(JSON.stringify({ ok: true, body: { accessToken: token }, paid: { irrelevant: 'verbose payment metadata' } }));
+  assert.equal(success.status, 0);
+  assert.equal(success.stdout.trim(), token);
+  assert.equal(success.stderr, '');
+  for (const input of ['', 'not JSON', JSON.stringify({ ok: false, body: { accessToken: token } }), JSON.stringify({ ok: true, body: {} }), JSON.stringify({ ok: true, body: { accessToken: 'invalid\ncode' } })]) {
+    const failure = run(input);
+    assert.equal(failure.status, 1);
+    assert.equal(failure.stdout, '');
+    assert.match(failure.stderr, /No access code returned/);
+    assert.ok(!failure.stderr.includes(token));
+  }
+});
 async function webModule(name) {
   const source = await readFile(new URL(`../apps/web/src/lib/${name}.ts`, import.meta.url), 'utf8');
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText.replaceAll("'./types'", JSON.stringify(typesUrl)).replaceAll("'./bazantic'", JSON.stringify(bazanticUrl));

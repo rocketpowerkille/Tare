@@ -43,3 +43,18 @@ export function bazanticSessionCommand(
     '--json',
   ].join(` ${continuation}\n  `);
 }
+
+/** Git Bash pipeline: one session request, then local token extraction without clipboard access. */
+export function bazanticTokenCommand(gatewayUrl: string, sessionPath: string) {
+  const extract = [
+    'let input = "";',
+    'for await (const chunk of process.stdin) input += chunk;',
+    'try {',
+    'const result = JSON.parse(input);',
+    'const token = result.body?.accessToken;',
+    'if (result.ok !== true || typeof token !== "string" || !/^tare_sandbox_v1\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$/.test(token)) throw new Error();',
+    'console.log(token);',
+    '} catch { console.error("No access code returned. Check your grant, test USDC balance and gateway availability. Do not paste this error as a code."); process.exitCode = 1; }',
+  ].join(' ');
+  return `${bazanticSessionCommand(gatewayUrl, sessionPath, 'git-bash')} | node --input-type=module -e '${extract}'`;
+}

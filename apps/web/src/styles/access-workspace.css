@@ -5,7 +5,7 @@
   border-radius: var(--radius);
   background: var(--surface);
 }
-.connection-timeline ol, .access-tracker {
+.connection-timeline ol {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
@@ -25,7 +25,7 @@
   font-family: monospace;
   color: var(--muted);
 }
-.connection-timeline p, .setup-note {
+.connection-timeline p {
   font-size: .78rem;
   color: var(--muted);
   line-height: 1.6;
@@ -41,12 +41,9 @@
 .developer-access > summary { font-size: .9rem; font-weight: 600; cursor: pointer; }
 .developer-access > summary span { color: var(--muted); font-size: .78rem; margin-left: 8px; }
 .developer-access .bazantic-guide { margin-top: 24px; }
-.access-tracker { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-.access-tracker li { border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
-.access-tracker li[aria-current="step"] { border-color: var(--blue); background: var(--blue-soft); }
-.access-tracker li.done { border-color: var(--green); background: var(--green-soft); }
-.access-tracker label { display: flex; gap: 8px; align-items: start; font-size: .76rem; margin: 0; }
-.access-tracker input { width: 16px; height: 16px; min-height: 0; flex-shrink: 0; margin: 0; accent-color: var(--green); }
+.access-token-example { padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-subtle); }
+.access-token-example span { display: block; color: var(--muted); font-size: .78rem; margin-bottom: 8px; }
+.access-token-example code { display: block; overflow-wrap: anywhere; user-select: none; }
 .session-evidence h2 { font-size: 1.05rem; margin-block: 16px 8px; }
 .partial-evidence { padding: 24px; background: var(--surface-subtle); border-bottom: 1px solid var(--line); }
 .partial-evidence > p { font-size: .84rem; }
@@ -62,10 +59,8 @@
 .explain-report pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: .73rem; max-height: 420px; overflow: auto; }
 @media (max-width: 800px) {
   .connection-timeline ol { grid-template-columns: 1fr; }
-  .access-tracker { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 480px) {
   .connection-timeline, .partial-evidence { padding: 16px; }
-  .access-tracker { grid-template-columns: 1fr; }
   .developer-access > summary span { display: block; margin: 8px 0 0; }
 }
