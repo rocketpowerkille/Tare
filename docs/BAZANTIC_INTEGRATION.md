@@ -10,9 +10,11 @@ The frontend's copy-context convenience is not this execution path.
 Browser -> direct Tare API -> evidence report -> optional copy to an assistant
 Agent -> published Bazantic Recipe -> gateway/MCP -> Tare -> agent explanation
 Customer -> sandbox gateway payment -> short-lived session -> direct Explorer API
+Browser report + explicit consent -> Tare temporary context -> Bazantic Recipe
+  -> gateway retrieves context pages -> cited answer reviewed and displayed
 ```
 
-The last path can authorize a direct API report without making that report a
+The sandbox session path can authorize a direct API report without making that report a
 Recipe execution. A valid session is authorization evidence, not automatically a
 settlement receipt and never evidence of vault backing.
 
@@ -24,6 +26,10 @@ Its source specification is [the MCP OpenAPI module](../apps/api/src/openapi-mcp
 served at `/openapi-mcp.json` with existing versioned aliases. Current code defines
 seven operations, including two additive investigation tools. The stdio inventory
 below remains unchanged.
+
+Use `https://tare.visk404.dev/openapi-mcp-v3.json` when refreshing the Tare
+gateway. Refreshing tool specifications does not necessarily add the HTTP routes
+to the gateway's serving table; review and apply route changes separately.
 
 | Gateway tool | Operation |
 | --- | --- |
@@ -63,6 +69,7 @@ available. The copy action alone demonstrates neither a gateway call nor payment
 | --- | --- |
 | [Explain DeFi Vault Evidence Clearly](https://bazantic.com/recipes/explain-defi-vault-evidence-clearly) | The maintainer confirmed publication and testing. The public URL is also configured in the UI. A new controlled raw-versus-guided artifact pair is not retained. |
 | `DeFi Vault Backing Evidence Evaluator` | Historical operator testing was reported. It does not establish current gateway health or a controlled performance improvement. |
+| `tare-pinned-report-investigation` | Maintainer-reported deployed in-page success on 2026-09-13: saved Steakhouse context, seven sections and linked fact IDs. This is not fresh Graph/Chainlink acceptance, guaranteed free execution or a controlled benchmark. See the [pinned Recipe specification](recipes/pinned-report-investigation.json). |
 | `tare-graph-accounting-assurance` | A completed Graph-plus-Tare run at block `25961875` was reported on 2026-09-12. Raw test output is not included in this repository. |
 
 The two-service Recipe uses the separate
@@ -101,9 +108,13 @@ allow Base Sepolia test USDC and the Tare gateway; a mainnet balance alone is no
 proof of testnet funding. `tare-demo` below is a local grant name, not a shared
 project account. Use a new name if it already exists.
 
-These are the retained working CLI forms, not a claim about the latest CLI release:
+Install/update the CLI and sign in first. Login manages the Bazantic account; the
+grant separately authorizes bounded spending. These examples use Git Bash,
+macOS or Linux shell quoting, not PowerShell or Command Prompt:
 
 ```sh
+npm i -g @bazantic/cli@latest
+baz login
 baz grant create --name tare-demo --cap 0.01 --network base-sepolia --service zvnss2njirhqjllnbfsv3sneca
 baz curl https://zvnss2njirhqjllnbfsv3sneca.bazgateway.com/api/bazantic/session -X POST -H "Content-Type: application/json" -d '{}' --account tare-demo --max-amount 0.001 --json
 ```
@@ -113,10 +124,55 @@ Never share the returned access code. Paste `body.accessToken` into Explorer.
 The default lifetime is 900 seconds; configuration can change it. An authorization
 card cannot reconstruct a transaction receipt from that token.
 
+The Explorer setup guide includes shell-specific commands and a **Git Bash:
+print only the access code** alternative. It pipes the single session response
+through Node.js and prints only a valid-shaped successful token, without using a
+clipboard utility or making another network call. Use it instead of the full-JSON
+call, not after it: another session call is another payment request. The normal
+UI command includes `--yes` and a 0.001 cap, so executing it explicitly
+approves that bounded testnet request. Copying alone makes no request.
+The guide shows a non-working token format
+example; do not paste that illustration, quotes, or the whole JSON response.
+
 Historical notes report successful sandbox payment and session issuance. The
 redacted raw paid response should still be retained for submission. Operator
 Recipe tests use the operator credential and make no payment. Neither path proves
 custody or solvency. No paid request was repeated for this documentation task.
+
+## Domain and gateway maintenance
+
+The public application moved to `https://tare.visk404.dev`. The old Render
+subdomain is not the canonical URL. Keep historical deployment manifests intact;
+their old URL records where that earlier run occurred.
+
+For this deployment set `TARE_PUBLIC_ORIGIN=https://tare.visk404.dev` (no path,
+trailing slash or port), preserve existing `TARE_API_KEYS`, and configure the
+reverse proxy to preserve the trusted public Host. Set the platform health-check
+path to `/healthz`, not an absolute URL. The API accepts only its configured host
+and tightly scoped authenticated gateway exceptions; an internal probe host or
+port that differs may be rejected. Inspect logs instead of weakening origin checks.
+
+The **Tare gateway upstream** must point to the reachable Tare domain. The
+**Graph gateway upstream** remains `https://api.studio.thegraph.com`; importing
+Tare's `/openapi-graph.json` does not move the Graph data source onto Tare.
+If disabling the old Render URL, first update every caller still using it.
+DNS verification and a TLS certificate alone do not update app origin policy.
+
+After deploying new gateway operations, the retained CLI workflow is:
+
+```sh
+# Read-only preview of serving-route differences.
+baz gateway resync zvnss2njirhqjllnbfsv3sneca --json
+# Review the proposal and explicitly confirm only intended route changes.
+baz gateway resync zvnss2njirhqjllnbfsv3sneca
+```
+
+On 2026-09-13 the maintainer applied the two new context/comparison routes,
+bringing the Tare serving table to seven routes. Route additions have pricing;
+review those amounts and the sandbox setting rather than assuming a schema
+refresh is free or that it changes existing prices. Then check Recipe tool
+bindings and a consented run. A gateway 402 challenge alone does not establish
+successful forwarding, payment settlement or session issuance.
 
 ## Evaluating Recipe output
 

@@ -5,6 +5,7 @@ import { mkdir, readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { checkWorkspace } from './web-workspace-checks.mjs';
 import { checkTheme } from './web-theme-checks.mjs';
+import { checkDocs } from './web-docs-checks.mjs';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.TARE_PLAYWRIGHT_MODULE || 'playwright');
@@ -40,6 +41,7 @@ try {
     }
   }
   console.log('All four application routes fit at 1440, 1024, 768, 390 and 320px.');
+  await checkDocs({ page, origin, fits });
   await page.goto(origin + '/');
   await page.getByRole('button', { name: 'Toggle navigation' }).click();
   await page.getByRole('navigation', { name: 'Mobile navigation' }).getByRole('link', { name: 'Examples' }).click();

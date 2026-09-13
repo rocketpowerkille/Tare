@@ -1,13 +1,14 @@
 import { Check, Copy, ExternalLink, Terminal } from '../components/Icons';
 import { useState } from 'react';
-import { bazanticGrantCommand, bazanticSessionCommand } from '../lib/bazantic';
+import { BAZANTIC_GATEWAY_URL, BAZANTIC_SESSION_PATH } from '../lib/bazantic';
+import { BazanticAccessGuide } from '../components/BazanticAccessGuide';
+import { DeveloperEndpoints } from '../components/DeveloperEndpoints';
 
-const curlExample = `curl https://tare-api.onrender.com/api/analyze \\
+const curlExample = `curl https://tare.visk404.dev/api/agent-example \\
   -H "Authorization: Bearer $TARE_API_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "operation": "verify-base-custody",
-    "owner": "0xF1feA08EbBa92eD342Acc5639dB312C3694Bc391"
+    "id": "steakhouse-usdc"
   }'`;
 
 const mcpExample = `{
@@ -19,10 +20,7 @@ const mcpExample = `{
   }
 }`;
 
-const bazanticGrantExample = bazanticGrantCommand();
-const bazanticExample = bazanticSessionCommand();
-
-const graphExample = `curl https://tare-api.onrender.com/api/analyze \\
+const graphExample = `curl https://tare.visk404.dev/api/analyze \\
   -H "Authorization: Bearer $TARE_API_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -37,47 +35,34 @@ export function DevelopersPage() {
       <p className="kicker">Developer guide</p>
       <h1>Use Tare through HTTP, MCP, or the command line.</h1>
       <p className="lead">Every interface uses the same validated service layer and preserves the same evidence boundaries.</p>
-      <div className="developer-links"><a href="/openapi.json">OpenAPI 3.0 <ExternalLink size={15} /></a><a href="/openapi-mcp.json">Agent contract <ExternalLink size={15} /></a></div>
+      <div className="developer-links"><a href="/openapi.json">OpenAPI 3.0 <ExternalLink size={15} /></a><a href="/openapi-mcp-v3.json">Tare gateway contract <ExternalLink size={15} /></a><a href="/openapi-graph.json">Graph gateway contract <ExternalLink size={15} /></a></div>
     </header>
 
     <section className="developer-section">
-      <div className="section-heading"><p className="kicker">HTTP API</p><h2>Run a live Base Sepolia custody check</h2><p>Hosted requests use a bearer token. Provider URLs and credentials stay on the server.</p></div>
-      <CodeBlock code={curlExample} label="cURL" />
+      <div className="section-heading"><p className="kicker">HTTP API</p><h2>Start with a reproducible saved report</h2><p>Set TARE_API_TOKEN privately in your shell to a configured Tare code or valid Explorer session. This direct API example performs no payment or fresh blockchain query. Provider URLs and credentials stay on the server.</p></div>
+      <CodeBlock code={curlExample} label="Git Bash / macOS / Linux" />
+      <p className="developer-note">Run GET /api/status with the same bearer token before choosing a live operation. A single /api/analyze call does not run the browser's whole Graph and Chainlink pipeline. Local setup uses Node 24 or later and pnpm 11.19.0: install dependencies, run pnpm build, then pnpm serve. Default URL: http://127.0.0.1:4318. The server does not load .env automatically.</p>
     </section>
 
     <section className="developer-section" id="bazantic-sandbox">
-      <div className="section-heading"><p className="kicker">Bazantic sandbox</p><h2>Create a short-lived Explorer session</h2><p>Install <code>@bazantic/cli</code>, sign in, and fund your Bazantic receiving address with Base Sepolia test USDC. Create a bounded testnet grant, then call Tare's public gateway. Read the session token from <code>body.accessToken</code>. Mainnet access is not enabled.</p></div>
-      <div className="developer-code-stack">
-        <CodeBlock code={bazanticGrantExample} label="1. Create a Base Sepolia grant" />
-        <CodeBlock code={bazanticExample} label="2. Call the public Tare gateway" />
-      </div>
-      <p className="developer-note">Bazantic Playground is a provider test console and only lists gateways owned by the current account. Customers call this public gateway with the CLI or an agent payment source.</p>
+      <div className="section-heading"><p className="kicker">Bazantic sandbox</p><h2>Create a short-lived Explorer session</h2><p>These commands use the public Tare gateway. Login, a spend grant, an Explorer session and Recipe execution are separate steps. Session authorization is not vault evidence or a settlement receipt.</p></div>
+      <BazanticAccessGuide gatewayUrl={BAZANTIC_GATEWAY_URL} sessionPath={BAZANTIC_SESSION_PATH} />
+      <p className="developer-note">The paid call includes --yes and a 0.001 test USDC maximum. Use only one command alternative per requested session. If tare-demo already exists, use a new grant name and the same name in --account. Returned expiresAt is authoritative; 15 minutes is the default. Mainnet payment access is not supported by this session flow.</p>
     </section>
 
     <section className="developer-section">
       <div className="section-heading"><p className="kicker">The Graph</p><h2>Compose Token API and Studio accounting</h2><p>This operation compares the wallet's vault-share balance and the subgraph accounting checkpoint with direct Ethereum RPC reads. The Graph Market token remains server-side.</p></div>
-      <CodeBlock code={graphExample} label="cURL" />
+      <CodeBlock code={graphExample} label="Git Bash / macOS / Linux" />
+      <p className="developer-note">Requires configured Ethereum RPC, Graph Token API access and eligible Studio coverage. Accounting uses its indexed head; source blocks may differ from the position trace. Accounting agreement is not backing. A completed historical subgraph sync still needs separate ledger/RPC acceptance.</p>
     </section>
 
-    <section className="developer-section">
-      <div className="section-heading"><p className="kicker">Endpoints</p><h2>A small, explicit surface</h2></div>
-      <div className="endpoint-table">
-        <div className="endpoint-row endpoint-head"><span>Method</span><span>Path</span><span>Purpose</span></div>
-        <div className="endpoint-row"><code>GET</code><code>/api/access-options</code><span>List public access methods without exposing secrets.</span></div>
-        <div className="endpoint-row"><code>GET</code><code>/api/status</code><span>List capabilities, examples, and limits.</span></div>
-        <div className="endpoint-row"><code>POST</code><code>/api/bazantic/session</code><span>Issue a short-lived session after a Bazantic sandbox payment.</span></div>
-        <div className="endpoint-row"><code>POST</code><code>/api/discover</code><span>Find Morpho V1 and V2 positions across three mainnets plus configured ERC-4626 registry entries.</span></div>
-        <div className="endpoint-row"><code>POST</code><code>/api/analyze</code><span>Acquire fresh read-only evidence.</span></div>
-        <div className="endpoint-row"><code>POST</code><code>/api/replay</code><span>Recalculate a compatible saved capture.</span></div>
-        <div className="endpoint-row"><code>POST</code><code>/api/example</code><span>Replay a retained public example.</span></div>
-        <div className="endpoint-row"><code>POST</code><code>/api/compose</code><span>Join compatible resolution and share evidence.</span></div>
-      </div>
-    </section>
+    <DeveloperEndpoints />
 
     <section className="developer-section two-up">
       <div>
         <div className="section-heading"><p className="kicker">MCP</p><h2>Connect an agent locally</h2><p>Build the project first, then point an MCP client at the stdio server.</p></div>
         <CodeBlock code={mcpExample} label="MCP configuration" />
+        <p>Local stdio tools: <code>tare_status</code>, <code>tare_analyze</code>, <code>tare_replay</code>, <code>tare_example</code>, <code>tare_compose</code>. Configure providers in the MCP process environment. Its tool names differ from the gateway's compact surface.</p>
       </div>
       <div className="sdk-panel" id="sdk">
         <Terminal size={23} />
@@ -85,6 +70,35 @@ export function DevelopersPage() {
         <p>There is no published SDK package yet. The API uses standard JSON over HTTP, and the OpenAPI document can generate a typed client in most languages.</p>
         <a href="/openapi.json" className="text-link">Download the OpenAPI contract <ExternalLink size={15} /></a>
       </div>
+    </section>
+
+    <section className="developer-section" id="agent-access">
+      <div className="section-heading"><p className="kicker">Agent access</p><h2>Gateway tools and Recipes are separate from local MCP</h2></div>
+      <p>The Tare gateway exposes <code>tare_status</code>, <code>tare_discover_vaults</code>, <code>tare_analyze_compact</code>, <code>tare_example_compact</code>, <code>tare_start_bazantic_sandbox_session</code>, <code>tare_report_context</code> and <code>tare_compare_indexed_accounting</code>. Bazantic may also supply its own info tool.</p>
+      <p>Use the gateway's connected schema, including its requestBody wrapper where present. The small agent contract does not expose value-position. Its discovery vault hint is not accepted by the current runtime: send owner and optional maxPositions only. Similarly, replay does not support value-position even though the shared full OpenAPI list includes it.</p>
+      <a className="text-link" href={`${BAZANTIC_GATEWAY_URL}/mcp`}>Tare gateway MCP endpoint <ExternalLink size={15} /></a>
+      <p>The separate Graph Studio gateway exposes <code>graph_tare_accounting_head</code>. Forward its unchanged Graph data object to <code>tare_compare_indexed_accounting</code> for a scoped RPC comparison. Caller-supplied Graph bytes remain labeled as such; this is not independent authentication or proof of backing.</p>
+    </section>
+
+    <section className="developer-section" id="investigation">
+      <div className="section-heading"><p className="kicker">In-page Bazantic assistant</p><h2>Explain a pinned report, not a substituted analysis</h2></div>
+      <ol className="numbered-steps">
+        <li><span>1</span><div><strong>Check options and create a snapshot</strong><p>Read /api/investigation/options. Submit report and optional previous report to /api/investigation/snapshot. Keep the returned reference private; it expires after 10 minutes.</p></div></li>
+        <li><span>2</span><div><strong>Start one consented run</strong><p>POST reference, a UUID requestId, question and consent: true to /api/investigation/run. Poll /api/investigation/run/&#123;id&#125; with the same access identity. Duplicate keys or the same snapshot/question reuse a retained record.</p></div></li>
+        <li><span>3</span><div><strong>Inspect the result</strong><p>Complete means all context pages were read and the seven-section answer passed format, citation-ID and sensitive-output checks. It is not a factual correctness guarantee. Review-required withholds the answer; unavailable reports execution failure. Original evidence stays unchanged.</p></div></li>
+      </ol>
+      <p>The pinned Recipe calls only tare_report_context. It returns JSON sections with title, text and citations, unlike the public plain-language Recipe's prose answer. Tare's runner supplies the reference and required titles in the question. Do not interchange these Recipe definitions.</p>
+      <p>Execution is disabled by default. Operators set TARE_RECIPE_ENABLED=true and TARE_INVESTIGATION_RECIPE to their published pinned-report handle. The gateway must reach the same API instance and use the configured TARE_BAZANTIC_CLIENT_ID identity. Both the tool specification and its serving routes must be synced.</p>
+      <p>Snapshots are browser-submitted claims, not authenticated source proofs. State is process-local, with 10-minute retention, at most 512 facts and 512,000 bytes of context. Use one instance; restarts lose references. Bazantic may retain execution data. No LLM provider SDK, model key or payer is added. Maximum authorized spend is 0 USDC; HTTP 402 stops execution with no automatic retry.</p>
+      <p>A run's receipt field is execution metadata, not a payment receipt. Settlement is not confirmed and cost remains null. An Explorer session does not authorize Recipe spending. Copying explanation context and opening the external Recipe remain separate alternatives.</p>
+      <a className="text-link" href="https://bazantic.com/recipes/explain-defi-vault-evidence-clearly" target="_blank" rel="noreferrer">Open public plain-language Recipe <ExternalLink size={15} /></a>
+    </section>
+
+    <section className="developer-section" id="operations">
+      <div className="section-heading"><p className="kicker">Operations and troubleshooting</p><h2>Configuration is not evidence</h2></div>
+      <p>Use the custom domain https://tare.visk404.dev, not the former Render subdomain. Set TARE_PUBLIC_ORIGIN to the exact HTTPS origin and update the Tare gateway upstream when moving domains. The Graph gateway upstream stays on Graph Studio. A healthy /healthz response does not verify provider access, payment or Recipe execution.</p>
+      <p>401 means invalid, missing or expired access; 403 can indicate an untrusted Host/Origin or the wrong gateway identity; 415 requires application/json; 429 indicates a quota or concurrency limit. Check error.code and error.message. A 200 response can still contain an incomplete report or a review-required assistant result.</p>
+      <p>Review-required diagnostics distinguish invalid JSON/schema, wrong section order, unread pages, unknown citations and sensitive output. Do not bypass the validator. A timeout may leave remote execution unresolved, so do not automatically create another run.</p>
     </section>
 
     <section className="developer-section">
@@ -103,10 +117,14 @@ export function DevelopersPage() {
 
 function CodeBlock({ code, label }: { code: string; label: string }) {
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState(false);
   async function copy() {
-    await navigator.clipboard.writeText(code);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1600);
+    try {
+      await navigator.clipboard.writeText(code);
+      setError(false);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch { setError(true); }
   }
-  return <div className="code-block"><div className="code-toolbar"><span>{label}</span><button type="button" onClick={() => void copy()}>{copied ? <Check size={15} /> : <Copy size={15} />}{copied ? 'Copied' : 'Copy'}</button></div><pre><code>{code}</code></pre></div>;
+  return <div className="code-block"><div className="code-toolbar"><span>{label}</span><button type="button" aria-label={`Copy ${label} example`} onClick={() => void copy()}>{copied ? <Check size={15} /> : <Copy size={15} />}<span role="status">{copied ? 'Copied' : 'Copy'}</span></button></div><pre><code>{code}</code></pre>{error && <p role="alert">Clipboard unavailable. Select and copy the example manually.</p>}</div>;
 }

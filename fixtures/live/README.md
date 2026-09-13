@@ -81,7 +81,7 @@ holder; all attribution uses RPC evidence, not unpinned API amounts.
   it does not establish backing, reserves, or withdrawable cash.
 
 ```sh
-tare live nested-replay fixtures/live/ov-usdc-v2.capture.json --json
+pnpm cli live nested-replay fixtures/live/ov-usdc-v2.capture.json --json
 ```
 
 ## WETH native custody control
@@ -103,7 +103,7 @@ Matching provider data does not prove provider independence or cryptographic sta
 authenticity. This result cannot be used as the Morpho portfolio's collateral metric.
 
 ```sh
-tare verify custody-replay fixtures/live/weth-custody.capture.json --json
+pnpm cli verify custody-replay fixtures/live/weth-custody.capture.json --json
 ```
 
 ## Base Sepolia two-layer custody control

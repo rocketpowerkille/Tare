@@ -118,6 +118,16 @@ Graph product acceptance. No deployment is required for documentation review.
 
 ## Why Graph changes the result
 
+The additive two-service agent path accepts an unchanged Graph `data` snapshot
+through `/api/agent-compare-accounting` (`tare_compare_indexed_accounting`). It
+checks the pinned deployment and read set against independently acquired RPC.
+Its source mode, `agent-supplied-graph-live-rpc`, explicitly preserves the fact
+that forwarded Graph bytes are caller-supplied, not authenticated by their labels.
+This is separate from Tare acquiring Graph evidence itself. See the
+[investigation guide](BAZANTIC_INVESTIGATION.md#two-service-graph-path) for the
+head-then-snapshot query and tool binding. No schema refresh or Recipe publication
+deploys a subgraph or completes historical backfilling.
+
 The verifier consumes Graph observations as comparison inputs. Altered amounts,
 wrong deployment IDs, missing reads, block disagreement, or provider errors change
 the report's findings or availability. The result cannot claim Graph agreement

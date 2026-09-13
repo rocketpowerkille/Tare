@@ -116,6 +116,13 @@ No custom Rust extraction module is required by the implemented consumer.
 Schemas belong in `packages/domain`; sources acquire evidence; adapters implement
 protocol semantics; resolvers calculate; verifiers compare; receipt code presents.
 Interface code coordinates those modules without redefining their accounting.
+The [HTTP/MCP reference](API_REFERENCE.md) inventories current routes and strict
+operation inputs. `/api/analyze` performs one operation; the web comprehensive
+check coordinates multiple requests. Position/layer stages arrive together with
+the primary response, not through a backend event stream. The separate
+`/api/investigation/wallet` endpoint bounds multi-position acquisition. Assistant
+execution uses POST snapshot/run and GET run-status polling, not an LLM provider
+called by the browser. Its temporary state is process-local, not durable sharing.
 Original captures and failure cases remain under `fixtures` and `tests`.
 [CI configuration](../.github/workflows/ci.yml) lists the separate application,
 Graph, CRE, and contract checks.

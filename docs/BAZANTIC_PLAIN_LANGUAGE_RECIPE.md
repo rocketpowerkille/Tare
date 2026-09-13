@@ -7,8 +7,13 @@ Public Recipe: [Explain DeFi Vault Evidence Clearly](https://bazantic.com/recipe
 Use Tare when a user wants to understand a DeFi wallet position, vault composition,
 nested allocation, valuation, evidence source, backing claim or verification limitation.
 Use returned Tare evidence to explain the result while preserving exact source,
-block, status and limitations. The external agent writes the explanation. Tare
-does not call an LLM or add verification by summarizing a report.
+block, status and limitations. The external agent writes the explanation. Context
+generation does not call a model or add verification. The optional in-page
+[investigation assistant](BAZANTIC_INVESTIGATION.md) delegates to a different
+pinned-report Recipe through Bazantic without adding an LLM provider SDK or key.
+
+This public Recipe returns prose. Do not use its prose-only instructions for
+`tare-pinned-report-investigation`, whose in-page renderer requires cited JSON.
 
 ## Actual tool surfaces
 
@@ -23,6 +28,8 @@ schema rather than assuming the local stdio server has the same names.
 | `tare_analyze_compact` | Acquire one supported live operation. Use the actual operation and required fields from the tool schema. Inspect `explanationContext` and the original compact fields together. |
 | `tare_example_compact` | The user requests a saved example or explicitly accepts a replay. Never silently substitute it for a failed live check. |
 | `tare_start_bazantic_sandbox_session` | Only when an Explorer session is requested and testnet payment is authorized. A paid agent tool call and an Explorer access token are different things. Do not call this merely to explain a vault. Never include its access token in an explanation. |
+| `tare_report_context` | Separate pinned-report Recipe only: retrieve every page of a supplied expiring reference using the configured gateway identity. No new source query. |
+| `tare_compare_indexed_accounting` | Separate two-service path: compare an unchanged supplied Graph snapshot with pinned RPC; supplied source identity is not authenticated. |
 
 For position analysis use `resolve-v1`, `resolve-v2` or `resolve-erc4626` only when
 eligible. `verify-graph-composition`, `verify-accounting` and `verify-shares` have
@@ -172,9 +179,11 @@ With explanation context they are tested under 20 KiB. The old 4 KiB acceptance
 claim refers to the original projection and is not a claim about the enriched size.
 
 The report UI's “Explain this report” action copies a prompt containing the same
-context. It does not send data to an assistant. Users decide whether to share the
-public position data with their chosen assistant. No LLM dependency, key, model
-selection, report persistence or AI-generated explanation was added.
+context. That copy action does not send data to an assistant. Users decide whether
+to share the public position data with their chosen assistant. The separate
+**Ask with Bazantic** action now supports explicit, consented Recipe execution and
+temporary report context. It adds no direct LLM dependency or provider key and
+does not replace the technical report. There is still no durable public report store.
 
 
 ## Web and agent access

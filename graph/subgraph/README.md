@@ -6,6 +6,7 @@ underlying accounting. Actual Graph Node indexing and rollback acceptance are
 documented in the [integration runbook](../integration/README.md).
 
 ```sh
+cd graph/subgraph
 npm ci --ignore-scripts --no-audit --no-fund
 npm run build
 ```
@@ -56,7 +57,7 @@ market parameters/state and positions at every block from 25937756.
 expensive and require archive access. Identity and read failures stop indexing;
 stale state is never silently treated as current.
 
-## Deadline-safe live accounting deployment
+## Separate accounting-only deployment
 
 `subgraph.live.yaml` is a second, deliberately narrower Studio deployment for
 `tare-live-accounting`. It contains only the accounting block handler and starts
@@ -65,7 +66,7 @@ Graph/RPC accounting comparison without waiting for the complete share-transfer
 history. It does not claim to reconstruct historical account balances and does
 not replace the full `subgraph.yaml` ledger.
 
-Refresh its `startBlock` immediately before any later deployment. Build it with
+For a separately authorized new deployment, review its `startBlock`. Build it with
 `npm run build:live`, then deploy it to the separate Studio project so deploying a
 new version does not archive the full-history version. The handler performs the
 complete bounded accounting read set on every block from that point forward.
@@ -76,7 +77,8 @@ Studio version `0.1.0` is deployed at `tare-live-accounting` with manifest CID
 At Ethereum block `25953771`, `_meta` reported the same CID, the exact block hash
 and no indexing errors. Tare compared all 56 indexed accounting reads with an
 independent public RPC at that block: 56 matched and zero mismatched. The ignored
-local capture is reproducible and is not a substitute for the public endpoint.
+local capture is not retained in this repository. This is a historical acceptance
+note, not a claim that a later query reproduces the same block or current health.
 
 Graph Studio version `0.1.0` is deployed at
 `tare-steakhouse-usdc-ethereum` with manifest CID

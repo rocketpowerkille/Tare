@@ -99,6 +99,12 @@ as `PAUSED`, with `executionEnabled: false`. It points to the Render API and
 records incomplete evidence for the already-consumed control. Current registry
 state was not queried during this documentation review.
 
+That retained Render URL is historical. The current application uses
+`https://tare.visk404.dev`; do not edit the old execution record to imply it used
+the new domain. A future workflow reconfiguration needs a separate authenticated
+test against the intended origin. No workflow was resumed by the UI, assistant,
+or documentation changes.
+
 The example cron expression `0 */5 * * * *` means every five minutes. It is an
 example schedule, not evidence that the paused deployment runs every five minutes
 today. Pausing CRE does not disable Explorer's separate price-feed reads.

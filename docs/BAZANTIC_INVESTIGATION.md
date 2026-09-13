@@ -18,6 +18,14 @@ Recipe unexpectedly returned an answer rather than a payment challenge. No recei
 was returned. This does not establish permanent free access or a payment network,
 and does not establish acceptance of the new pinned-context Recipes.
 
+Later on 2026-09-13, the maintainer reported a successful deployed
+`tare-pinned-report-investigation` answer for the saved Steakhouse report. The
+display contained seven sections and linked fact IDs after response-format fixes.
+That is a reported in-page product result, not a retained raw execution artifact,
+fresh source acceptance, permanent free service or a general correctness claim.
+The wallet and indexed-accounting JSON specifications are separate Recipes;
+their presence in the repository does not establish publication or acceptance.
+
 Paid sponsorship remains disabled. Enabling it requires network confirmation,
 an appropriately scoped grant, explicit spending approval, and durable spend and
 idempotency accounting. Do not assume a Tare-service grant covers a Recipe gateway.
@@ -86,6 +94,25 @@ vault and operation, and pairs only unique fact fields. Both values remain intac
 no cross-unit arithmetic is performed. Repeated allocations are not paired by
 array order. Differences are not proof of profit, loss or a transaction.
 
+## Using it in Explorer
+
+1. Connect if the deployment requires access, then run a supported check or a
+   saved example. A saved example stays historical in the explanation.
+2. In **Ask about this report**, choose a question or type up to 1500 characters.
+   Optionally attach a previous report JSON, not a raw capture.
+3. Read the transfer notice and explicitly check consent. Only then select
+   **Ask with Bazantic**. The technical report remains available while it runs.
+4. Follow citations to the exact classified facts. Read the omission notice and
+   full report as well; a bounded context is not the full report.
+5. Inspect the Recipe execution record. `complete` means structural checks passed,
+   not that every sentence was fact-checked. `review-required` withholds an
+   invalid answer. `unavailable` includes upstream, payment or timeout failures.
+
+Copy context and the external public Recipe remain separate alternatives. They do
+not automatically execute the configured pinned-report Recipe. A temporary
+reference is neither a public report permalink nor an Explorer access code.
+For exact route bodies and statuses, see the [API reference](API_REFERENCE.md).
+
 ## Two-service Graph path
 
 `graph_tare_accounting_head` retains its name and old query. An additive snapshot
@@ -104,6 +131,9 @@ performed by this feature.
 2. Refresh the **Tare gateway** tools from
    `https://tare.visk404.dev/openapi-mcp-v3.json`. Confirm the additive
    `tare_report_context` and `tare_compare_indexed_accounting` tools.
+   Also preview and apply the serving-route resync described in the
+   [gateway maintenance guide](BAZANTIC_INTEGRATION.md#domain-and-gateway-maintenance).
+   A visible MCP tool with no serving route can still return 404.
 3. For the two-service path, refresh the **Graph gateway specification** from
    `https://tare.visk404.dev/openapi-graph.json`. Its upstream remains Graph Studio,
    not the Tare domain.
@@ -114,6 +144,10 @@ performed by this feature.
 5. Review tool bindings and model availability. The model ID reflects the
    previously used Haiku setting; confirm it is offered. Empty output examples
    intentionally avoid fabricated acceptance. Test and publish the drafts.
+   For the pinned Recipe, keep only `tare_report_context` and the exact JSON
+   output instructions in its specification. Do not paste the older public
+   explanation Recipe's prose-only instructions into this Recipe. Its input is
+   the string `question`; the runner adds the temporary reference and format rules.
 6. Set `TARE_RECIPE_ENABLED=true` and `TARE_INVESTIGATION_RECIPE` to the actual
    published pinned-report handle, including any generated suffix. Restart.
    This enables unsigned execution only, never payment.
@@ -124,6 +158,25 @@ performed by this feature.
 The pinned Recipe needs a fresh reference from the same publicly reachable Tare
 instance. It cannot retrieve a reference stored only on unreachable localhost.
 Do not expose a development server or change gateway routing without approval.
+
+## Troubleshooting without weakening evidence checks
+
+| Symptom | Check |
+| --- | --- |
+| Disabled | Read authenticated `/api/investigation/options`; review the enable flag and published handle. |
+| `recipe-not-published` | The configured handle must be present in Bazantic's public tool catalog, not merely a dashboard draft. |
+| `tool_failed` or gateway 404 | Confirm the Tare upstream domain, serving-route resync, tool binding and gateway identity. |
+| Missing context pages | The reference must be fresh and on the same reachable API process; the Recipe must read page 0 through `pages - 1`. |
+| Invalid JSON/schema/order | Use the pinned Recipe's seven-section JSON contract. A prose-only answer belongs to the separate public Recipe. |
+| Unknown citations | Cite exact returned fact IDs; do not invent or rewrite them. |
+| Sensitive output | Never return the reference or credentials. Diagnostics deliberately omit rejected text. |
+| Payment challenge | Execution stops with zero authorized spend. Do not add a payer or retry automatically. |
+| Timeout | Remote execution may still finish. A local timeout is not proof that nothing ran. Inspect the existing record before a new attempt. |
+
+The client has a 120-second overall upstream deadline and a 512,000-byte response
+limit. The browser polls every four seconds for up to 135 seconds. Same-key or
+same-snapshot/question requests reuse a retained run rather than retrying it.
+These limits do not promise upstream latency or completion.
 
 ## Acceptance and controlled comparison
 

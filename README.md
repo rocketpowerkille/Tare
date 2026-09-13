@@ -9,8 +9,8 @@ returns reports separating observations, calculations, reference prices, scoped
 checks, and unresolved claims. This is a technical MVP, not a universal safety
 verifier, proof-of-reserves system, or solvency oracle.
 
-[Open Tare](https://tare-api.onrender.com/) |
-[Explorer](https://tare-api.onrender.com/explore) |
+[Open Tare](https://tare.visk404.dev/) |
+[Explorer](https://tare.visk404.dev/explore) |
 [Evidence model](docs/EVIDENCE_MODEL.md) |
 [Bazantic Recipe](https://bazantic.com/recipes/explain-defi-vault-evidence-clearly)
 
@@ -69,8 +69,7 @@ quote must not simply be added to direct holdings without checking overlap. It
 does not establish custody, liquidity, solvency, backing, or redeemability.
 
 Reproduce it with `pnpm cli live replay fixtures/live/steakhouse-usdc.capture.json`.
-The proposed Gauntlet WETH quantities are omitted because they are not verified
-in this repository. See [capture provenance](fixtures/live/README.md).
+See [capture provenance](fixtures/live/README.md) for the recorded source and scope.
 
 ## Evidence model
 
@@ -167,7 +166,9 @@ Agent uses a published Bazantic Recipe
 Bazantic provides the gateway, hosted MCP exposure, reusable Recipes, and sandbox
 access flow. The current gateway schema defines `tare_status`,
 `tare_discover_vaults`, `tare_analyze_compact`, `tare_example_compact`, and
-`tare_start_bazantic_sandbox_session`. These differ from the local stdio tools.
+`tare_start_bazantic_sandbox_session`, plus `tare_report_context` and
+`tare_compare_indexed_accounting`. These seven Tare operations differ from the
+five local stdio tools; Bazantic may also show its own `info` tool.
 
 The published [plain-language Recipe](https://bazantic.com/recipes/explain-defi-vault-evidence-clearly)
 uses deterministic explanation context. A separate retained two-service Recipe
@@ -177,9 +178,15 @@ same-prompt experiment.
 
 Sandbox session issuance authorizes Explorer access for 15 minutes by default.
 It is separate from an actual settlement receipt and from vault evidence.
-Operator-credential Recipe tests make no payment. The UI's copy-context action
-does not call Bazantic or an LLM; direct API reports must not be described as
-Recipe executions. See [Bazantic integration](docs/BAZANTIC_INTEGRATION.md).
+The UI offers three separate explanation paths: copy context to an assistant,
+open the public Recipe, or explicitly consent to **Ask with Bazantic** when the
+in-page assistant is configured. Only the last path executes a Recipe from Tare.
+It stores a bounded report snapshot for ten minutes and checks all-page retrieval,
+seven answer sections and fact citations before displaying the answer. This is
+structural validation, not a guarantee of factual correctness or new verification.
+It never signs or pays and stops on payment challenges. See
+[Bazantic integration](docs/BAZANTIC_INTEGRATION.md) and the
+[investigation assistant](docs/BAZANTIC_INVESTIGATION.md).
 
 ## AI agent use case
 
@@ -196,9 +203,12 @@ should answer with:
 6. What remains unknown.
 7. Technical provenance.
 
-Tare does not configure or call an LLM provider. The
+Tare has no direct LLM provider SDK or model key. The optional in-page assistant
+delegates explanation to a Bazantic Recipe; deterministic context generation and
+copying do not call a model. The
 [Recipe specification](docs/BAZANTIC_PLAIN_LANGUAGE_RECIPE.md) defines the external
-agent's interpretation rules.
+agent's interpretation rules. The pinned-report Recipe uses a separate strict
+JSON answer contract, not the public plain-language Recipe's prose instructions.
 
 ## Example walkthrough
 
@@ -273,14 +283,17 @@ the [Graph guide](docs/GRAPH_INTEGRATION.md),
 | Public service metadata | `GET /healthz`, `/api/access-options`, `/openapi.json`, `/openapi-mcp.json`, `/openapi-mcp-v2.json`, `/openapi-mcp-v3.json`, `/openapi-graph.json`. |
 | HTTP evidence operations | Protected `GET /api/status`; JSON `POST /api/analyze`, `/api/discover`, `/api/example`, `/api/replay`, `/api/compose`. |
 | Compact agent operations | JSON `POST /api/agent-analyze`, `/api/agent-example`. |
+| Pinned context and supplied accounting | JSON `POST /api/agent-report-context`, `/api/agent-compare-accounting`. Context retrieval requires the configured gateway identity. |
+| Investigation | `GET /api/investigation/options`, `/api/investigation/run/{id}`; `POST /api/investigation/snapshot`, `/api/investigation/run`, `/api/investigation/wallet`. |
 | Sandbox authorization | `POST /api/bazantic/session`, subject to configured gateway authorization. |
 | CLI and local MCP | `pnpm cli --help` and `pnpm mcp`. |
 | Hosted agent gateway | [Tare Bazantic gateway](https://zvnss2njirhqjllnbfsv3sneca.bazgateway.com). |
 | Evidence exports | Browser report/capture downloads and bounded CLI exports. No hosted report-permalink store is implemented. |
 
 Request schemas are in [service requests](packages/service/src/requests.ts).
-Use the generated OpenAPI contracts rather than assuming all operations accept
-the same fields. Hosted authentication does not change evidence semantics.
+See the [API reference](docs/API_REFERENCE.md) for operation-specific fields and
+strict runtime-schema caveats. Hosted authentication does not change evidence
+semantics. Temporary investigation references are not public report permalinks.
 
 ## Repository map
 
@@ -299,11 +312,15 @@ These are logical modules under one root package, not separate pnpm workspaces.
 
 ## Testing and acceptance
 
-Local verification on 2026-09-13 passed 178 core tests, 11 web tests, 12 CRE tests,
-both Graph mapping builds, CRE WASM compilation, and Chrome regressions across
-all four routes at widths from 320px to 1440px. The runtime was Node 24.13.0 and
-Bun 1.4.2. Docker-based Graph Node and Foundry tests were not rerun in that pass.
-See [CI](.github/workflows/ci.yml) for the separate suite commands.
+Application verification for this documentation refresh
+(2026-09-13, Node 24.13.0) passed 211 core tests, 12 web tests and Chrome
+regressions across all four routes at widths from 320px to 1440px. These include
+Recipe response parsing, citation/page validation, session setup and terminal
+token extraction, documentation links/anchors, and the HTTP/tool inventories.
+Test counts describe that run, not a fixed product capability.
+An earlier same-day pass recorded 12 CRE tests, both Graph mapping builds and CRE
+WASM compilation. Those separate suites, Docker Graph Node and Foundry were not
+rerun by this documentation verification. See [CI](.github/workflows/ci.yml) for commands.
 
 Tests exercise malformed input, source
 disagreement, incomplete evidence, replay, authentication, exact unit display, and

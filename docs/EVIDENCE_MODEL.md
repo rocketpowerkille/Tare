@@ -85,6 +85,19 @@ establishes anything about the vault. A capture digest is not a payment receipt.
 
 ## Reading a report safely
 
+The in-page Bazantic assistant explains a bounded, browser-submitted snapshot.
+Tare checks that every context page was retrieved, that the seven-section answer
+has valid fact IDs and that known sensitive output is absent. These checks do not
+establish that the model's prose follows from those citations. Source claims in
+an uploaded report are not independently authenticated by storing or explaining
+them. Read the original report and omission notices alongside the answer.
+
+An assistant run marked `complete` is not a vault marked verified. A
+`review-required` answer is withheld without changing the evidence report.
+The run's execution metadata is not settlement evidence. Previous-report
+comparison identifies changes only for matching position identities and unique
+fact fields; it does not calculate investment returns or prove a transaction.
+
 1. Check the operation, network, address, source mode, and observed block.
 2. Read observed balances separately from conversions and attributed exposure.
 3. Inspect which comparisons ran and which were unavailable or ineligible.
