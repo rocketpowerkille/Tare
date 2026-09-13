@@ -34,22 +34,27 @@ try {
   await checkTheme({ page, origin, fits });
   for (const width of [1440, 1024, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 1000 });
-    for (const route of ['/', '/explore', '/investigate', '/docs', '/developers']) {
+    for (const route of ['/', '/explore', '/investigate', '/examples', '/docs', '/developers']) {
       await page.goto(origin + route);
       await page.locator('h1').waitFor();
-      if (route === '/explore') await page.locator('#example').waitFor();
+      if (route === '/explore') await page.locator('#owner').waitFor();
+      if (route === '/examples') await page.locator('#example').waitFor();
       await fits(`${route} at ${width}`);
       await page.screenshot({ path: new URL(`${route.slice(1) || 'home'}-${width}.png`, output).pathname.replace(/^\/(?=[A-Z]:)/, ''), fullPage: true });
     }
   }
-  console.log('All five application routes fit at 1440, 1024, 768, 390 and 320px.');
+  console.log('All six application routes fit at 1440, 1024, 768, 390 and 320px.');
   await checkDocs({ page, origin, fits });
   await page.goto(origin + '/');
   await page.getByRole('button', { name: 'Toggle navigation' }).click();
   await page.getByRole('navigation', { name: 'Mobile navigation' }).getByRole('link', { name: 'Examples' }).click();
   await page.locator('#example').waitFor();
   assert.equal(await page.locator('.explain-report').count(), 0);
-  assert.equal(new URL(page.url()).hash, '#examples');
+  assert.equal(new URL(page.url()).pathname, '/examples');
+  assert.equal(new URL(page.url()).hash, '');
+  assert.equal(await page.locator('#owner').count(), 0);
+  await page.reload();
+  await page.locator('#example').waitFor();
   await page.setViewportSize({ width: 1440, height: 1000 });
   const examples = await page.locator('#example option').evaluateAll(options => options.map(option => option.value));
   for (const id of examples) {
@@ -126,7 +131,14 @@ try {
   await page.setViewportSize({ width: 390, height: 844 });
   await fits('recorded report on mobile');
   await page.screenshot({ path: new URL('report-mobile.png', output).pathname.replace(/^\/(?=[A-Z]:)/, ''), fullPage: true });
-  console.log(`Recorded examples (${examples.length}), keyboard node selection, downloads, valid and invalid replay passed.`);
+  for (const [operation, capture] of [['resolve-v2', 'ov-usdc-v2'], ['verify-weth', 'weth-custody']]) {
+    await page.locator('#replay-operation').selectOption(operation);
+    const response = page.waitForResponse(response => response.url().endsWith('/api/replay'));
+    await page.locator('.replay-panel input').setInputFiles(new URL(`../fixtures/live/${capture}.capture.json`, import.meta.url).pathname.replace(/^\/(?=[A-Z]:)/, ''));
+    assert.equal((await response).status(), 200);
+    await page.locator('.activity-line').filter({ hasText: 'Your result is ready' }).waitFor();
+  }
+  console.log(`Recorded examples (${examples.length}), keyboard node selection, downloads, capture-type selection, valid and invalid replay passed.`);
 
   // Deterministic UI-only network fixtures exercise slow responses and failures.
   const capabilities = await (await fetch(origin + '/api/status')).json();
@@ -250,6 +262,7 @@ try {
   assert.match(await page.locator('.session-evidence').innerText(), /not included in this access token/);
   assert.ok(!(await page.locator('body').innerText()).includes(testToken));
   await page.route('**/api/example', route => route.fulfill({ json: { ...fixture, sourceMode: 'recorded-example' } }));
+  await page.goto(origin + '/examples');
   await page.getByRole('button', { name: 'Replay example', exact: true }).click();
   await page.locator('.report-view').waitFor();
   await page.getByRole('tab', { name: 'Ask about this report', exact: true }).click();

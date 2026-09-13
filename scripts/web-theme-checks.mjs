@@ -17,7 +17,7 @@ export async function checkTheme({ page, origin, fits }) {
 
   for (const width of [1440, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 1000 });
-    for (const route of ['/', '/explore', '/investigate', '/docs', '/developers']) {
+    for (const route of ['/', '/explore', '/investigate', '/examples', '/docs', '/developers']) {
       await page.goto(origin + route);
       await page.getByRole('button', { name: 'Switch to light mode' }).waitFor();
       assert.equal(await theme(), 'dark', 'Saved choice survives navigation');
@@ -27,7 +27,7 @@ export async function checkTheme({ page, origin, fits }) {
       assert.ok(toggle && toggle.x >= 0 && toggle.x + toggle.width <= width, 'Theme toggle fits the viewport');
     }
   }
-  await page.goto(origin + '/explore');
+  await page.goto(origin + '/examples');
   await page.locator('#example').waitFor();
   await page.getByRole('button', { name: 'Replay example', exact: true }).click();
   await page.locator('.report-view').waitFor();

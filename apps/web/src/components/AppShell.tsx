@@ -7,7 +7,7 @@ import { ThemeToggle } from './ThemeToggle';
 const items = [
   { href: '/explore', label: 'Explorer', icon: FileSearch },
   { href: '/investigate', label: 'Investigate', icon: FileSearch },
-  { href: '/explore#examples', label: 'Examples', icon: FileClock },
+  { href: '/examples', label: 'Examples', icon: FileClock },
   { href: '/docs', label: 'Documentation', icon: BookOpen },
   { href: '/developers', label: 'Developers', icon: Code2 },
 ];

@@ -16,7 +16,7 @@ import { investigateWallet } from '../../../packages/service/src/wallet-investig
 const specificationPaths = new Set([
   '/openapi.json', '/openapi-mcp.json', '/openapi-mcp-v2.json', '/openapi-mcp-v3.json', '/openapi-graph.json',
 ]);
-const appPaths = new Set(['/', '/explore', '/investigate', '/docs', '/developers']);
+const appPaths = new Set(['/', '/explore', '/investigate', '/examples', '/docs', '/developers']);
 const assetTypes: Record<string, string> = {
   '.css': 'text/css; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',

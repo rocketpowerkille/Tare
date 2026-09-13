@@ -1,7 +1,8 @@
 import { Upload } from '../Icons';
 import type { OperationId } from '../../lib/types';
+import { operations } from '../../lib/catalog';
 
-export function ReplayPanel({ operation, busy, onReplay, onError }: { operation: OperationId; busy: boolean; onReplay: (capture: unknown) => void; onError: (message: string) => void }) {
+export function ReplayPanel({ operation, onOperationChange, busy, onReplay, onError }: { operation: OperationId; onOperationChange: (operation: OperationId) => void; busy: boolean; onReplay: (capture: unknown) => void; onError: (message: string) => void }) {
   async function choose(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = '';
@@ -12,6 +13,10 @@ export function ReplayPanel({ operation, busy, onReplay, onError }: { operation:
   }
   return <section className="secondary-panel replay-panel">
     <div className="secondary-panel-heading"><Upload size={20} /><div><h2>Replay your own capture</h2><p>Select a compatible JSON capture for <code>{operation}</code>.</p></div></div>
+    <label htmlFor="replay-operation">Capture type</label>
+    <select id="replay-operation" value={operation} disabled={busy} onChange={event => onOperationChange(event.target.value as OperationId)}>
+      {operations.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
+    </select>
     <label className={busy ? 'file-button disabled' : 'file-button'}>
       <Upload size={16} />Choose capture
       <input type="file" accept="application/json,.json" disabled={busy} onChange={event => void choose(event)} />

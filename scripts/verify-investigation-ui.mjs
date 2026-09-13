@@ -30,7 +30,7 @@ try {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('request', request => assert.ok(!new URL(request.url()).hostname.endsWith('bazgateway.com'), 'Browser must never call Bazantic directly'));
-  await page.goto(origin + '/explore');
+  await page.goto(origin + '/examples');
   assert.equal(await page.getByRole('heading', { name: 'Ask about this report' }).count(), 0);
   await page.locator('#example').selectOption('steakhouse-usdc');
   await page.getByRole('button', { name: 'Replay example', exact: true }).click();

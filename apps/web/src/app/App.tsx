@@ -12,11 +12,15 @@ const routeMetadata: Record<string, { title: string; description: string }> = {
   },
   '/explore': {
     title: 'Explore | Tare',
-    description: 'Run a guided Tare evidence check or replay a recorded example.',
+    description: 'Run a guided Tare evidence check for a public position.',
   },
   '/investigate': {
     title: 'Investigate | Tare',
     description: 'Investigate wallet positions and compare evidence between two blocks.',
+  },
+  '/examples': {
+    title: 'Examples | Tare',
+    description: 'Explore saved evidence reports and replay your own captures.',
   },
   '/docs': {
     title: 'Learn | Tare',
@@ -43,7 +47,8 @@ export function App() {
     else requestAnimationFrame(() => document.getElementById(window.location.hash.slice(1))?.scrollIntoView());
   }, [path]);
 
-  const page = path === '/explore' || path === '/investigate' ? <ExplorerPage mode={path === '/investigate' ? 'investigate' : 'explore'} />
+  const page = path === '/explore' || path === '/investigate' || path === '/examples'
+    ? <ExplorerPage key={path} mode={path === '/investigate' ? 'investigate' : path === '/examples' ? 'examples' : 'explore'} />
     : path === '/docs' ? <DocsPage />
       : path === '/developers' ? <DevelopersPage />
         : <HomePage />;
