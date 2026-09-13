@@ -7,6 +7,7 @@ import { ReplayPanel } from '../components/explorer/ReplayPanel';
 import { ReportView } from '../components/explorer/ReportView';
 import { ComprehensiveReportView } from '../components/explorer/ComprehensiveReportView';
 import { api, ApiError } from '../lib/api';
+import { acceptedReportAccess, type ReportAccess } from '../lib/agent-handoff';
 import { runComprehensiveCheck } from '../lib/comprehensive';
 import { initialStages, type EvidenceStage, type ProgressObserver } from '../lib/progress';
 import { EvidenceTimeline } from '../components/explorer/EvidenceTimeline';
@@ -28,6 +29,7 @@ export function ExplorerPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [report, setReport] = useState<JsonRecord>();
+  const [reportAccess, setReportAccess] = useState<ReportAccess>();
   const [stages, setStages] = useState<EvidenceStage[]>([]);
   const [operation, setOperation] = useState<OperationId>('resolve-v1');
   const [activity, setActivity] = useState('Enter a wallet address to find supported vaults.');
@@ -72,11 +74,12 @@ export function ExplorerPage() {
     if (report && window.matchMedia('(max-width: 800px)').matches) document.getElementById('report-result')?.focus();
   }, [report]);
 
-  async function run(label: string, task: (notify: ProgressObserver) => Promise<JsonRecord>, composed = false, replay = false) {
+  async function run(label: string, task: (notify: ProgressObserver) => Promise<JsonRecord>, composed = false, replay = false, exampleId?: string) {
     if (busy) return;
     setBusy(true);
     setError('');
     setReport(undefined);
+    setReportAccess(undefined);
     setPartial(undefined);
     setActivity(label);
     setStages(initialStages(composed, replay));
@@ -91,6 +94,7 @@ export function ExplorerPage() {
       notify('request', 'complete', replay ? 'Saved evidence was recalculated. This is not a fresh blockchain observation.' : 'The requested evidence response arrived. Review its findings and limitations.');
       notify('report', 'complete', 'Report generated with source data and explicit limitations. This is not a full-verification claim.');
       setReport(result);
+      setReportAccess(acceptedReportAccess(token, exampleId, accessOptions?.privateBeta === true));
       setActivity('Your result is ready. Start with the plain-language answer.');
     } catch (failure) {
       if (failure instanceof ApiError && failure.status === 401) { setAuthRequired(true); setSessionState('waiting'); }
@@ -112,6 +116,7 @@ export function ExplorerPage() {
   function clearQueryResult() {
     setError('');
     setReport(undefined);
+    setReportAccess(undefined);
     setPartial(undefined);
     setStages([]);
     setActivity('Enter a wallet address to find supported vaults.');
@@ -142,14 +147,14 @@ export function ExplorerPage() {
       <div className="explorer-grid">
         <div className="control-stack">
           <OperationForm capabilities={capabilities} busy={busy || authRequired || connecting} operation={operation} onOperationChange={setOperation} onQueryChange={clearQueryResult} onDiscover={discover} onRun={analyze} />
-          <ExamplePanel examples={capabilities.examples} busy={busy || authRequired || connecting} onRun={id => void run('Replaying saved evidence, with no live blockchain query.', () => api.example(token, id), false, true)} />
+          <ExamplePanel examples={capabilities.examples} busy={busy || authRequired || connecting} onRun={id => void run('Replaying saved evidence, with no live blockchain query.', () => api.example(token, id), false, true, id)} />
           <ReplayPanel operation={operation} busy={busy || authRequired || connecting} onReplay={capture => void run('Recalculating the uploaded capture.', () => api.replay(token, operation, capture), false, true)} onError={setError} />
         </div>
         <section className="result-panel" id="report-result" tabIndex={-1} aria-label="Evidence result">
           <div className="activity-line" role="status" aria-live="polite">{busy ? <LoaderCircle className="spin" size={16} /> : <Radio size={16} />}<span>{activity}</span></div>
           <EvidenceTimeline stages={stages} busy={busy} />
           {busy && partial && <section className="partial-evidence"><p className="section-label">Position response received</p><p>Inspect the returned path while remaining evidence checks finish. This is not the final report.</p><PositionDiagram report={partial} /></section>}
-          {report ? (report.reportType === 'comprehensive-position-check' ? <ComprehensiveReportView report={report} /> : <ReportView report={report} />) : busy ? <div className="skeleton-stack" aria-hidden="true"><div className="skeleton" /><div className="skeleton short" /><div className="skeleton" /></div> : <div className="result-empty"><div className="empty-symbol"><FileSearch size={31} /></div><p className="section-label">Your evidence report</p><h2>An answer you can inspect.</h2><p>Run a check to see the position path, observed amounts and missing evidence. Or begin with a saved report.</p><button className="text-button" type="button" onClick={() => document.getElementById('example')?.focus()}>Try a saved example <ArrowRight size={16} /></button></div>}
+          {report ? (report.reportType === 'comprehensive-position-check' ? <ComprehensiveReportView report={report} access={reportAccess} /> : <ReportView report={report} access={reportAccess} />) : busy ? <div className="skeleton-stack" aria-hidden="true"><div className="skeleton" /><div className="skeleton short" /><div className="skeleton" /></div> : <div className="result-empty"><div className="empty-symbol"><FileSearch size={31} /></div><p className="section-label">Your evidence report</p><h2>An answer you can inspect.</h2><p>Run a check to see the position path, observed amounts and missing evidence. Or begin with a saved report.</p><button className="text-button" type="button" onClick={() => document.getElementById('example')?.focus()}>Try a saved example <ArrowRight size={16} /></button></div>}
         </section>
       </div>
     </>}

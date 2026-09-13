@@ -62,7 +62,11 @@ test('API examples and uploaded captures preserve the exact resolver reports and
       assert.equal(compact.sourceMode, 'recorded-rpc');
       assert.equal(compact.captureOmitted, true);
       assert.ok(!('capture' in compact));
-      if (example.id === 'steakhouse-usdc') assert.equal((compact.markets as { count: number }).count, 12);
+      if (example.id === 'steakhouse-usdc') {
+        assert.equal((compact.markets as { count: number }).count, 12);
+        assert.ok(compactText.includes('28,728,443.339809 USDC'));
+        assert.ok(compactText.includes('missing-or-invalid-decimals'));
+      }
     }
     const capture = await readJsonFile('fixtures/live/ov-usdc-v2.capture.json') as { rpc: { confirmed: boolean } };
     capture.rpc.confirmed = false;

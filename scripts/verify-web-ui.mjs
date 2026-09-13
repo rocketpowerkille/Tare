@@ -15,6 +15,11 @@ const context = await browser.newContext({ viewport: { width: 1440, height: 1000
 const page = await context.newPage();
 const errors = [];
 page.on('pageerror', error => errors.push(error.message));
+const bazanticRequests = [];
+page.on('request', request => {
+  const hostname = new URL(request.url()).hostname;
+  if (hostname === 'bazantic.com' || hostname.endsWith('.bazgateway.com')) bazanticRequests.push(request.url());
+});
 
 async function fits(label) {
   const dimensions = await page.evaluate(() => ({ page: document.documentElement.scrollWidth, viewport: innerWidth }));
@@ -56,19 +61,36 @@ try {
   await page.locator('.explain-report > summary').focus();
   await page.keyboard.press('Enter');
   assert.match(await page.locator('.explain-report').innerText(), /saved evidence, not a fresh blockchain check/);
+  assert.match(await page.locator('.explain-report').innerText(), /Direct Tare API/);
+  assert.match(await page.locator('.explain-report').innerText(), /Availability not checked/);
+  assert.match(await page.locator('.explain-report').innerText(), /Published Recipe/);
+  assert.equal(await page.getByRole('link', { name: 'Open Bazantic Recipe', exact: true }).isVisible(), true);
   await page.getByRole('button', { name: 'Copy explanation context', exact: true }).click();
   await page.getByRole('status').filter({ hasText: 'Copied explanation context' }).waitFor();
   const explanationText = await page.evaluate(() => navigator.clipboard.readText());
   assert.match(explanationText, /saved-evidence/);
   assert.match(explanationText, /notVerified/);
+  assert.match(explanationText, /28,728,443\.339809 USDC/);
+  assert.match(explanationText, /copy formattedAmount.display exactly/);
   assert.equal(await page.locator('.raw-report').count(), 1);
-  await page.locator('.explain-report details > summary').click();
-  await page.locator('.explain-report pre').focus();
-  assert.equal(await page.locator('.explain-report pre').evaluate(element => element === document.activeElement), true);
+  await page.locator('.context-inspector > summary').click();
+  await page.locator('.context-inspector pre').focus();
+  assert.equal(await page.locator('.context-inspector pre').evaluate(element => element === document.activeElement), true);
+  await page.locator('.bazantic-demo > summary').focus();
+  await page.keyboard.press('Enter');
+  await page.getByRole('button', { name: 'Copy Bazantic task', exact: true }).click();
+  await page.getByRole('status').filter({ hasText: 'Copied Bazantic task' }).waitFor();
+  assert.match(await page.evaluate(() => navigator.clipboard.readText()), /tare_example_compact with id steakhouse-usdc/);
+  await page.getByRole('button', { name: 'Copy gateway command', exact: true }).click();
+  await page.getByRole('status').filter({ hasText: 'Copied gateway command' }).waitFor();
+  assert.match(await page.evaluate(() => navigator.clipboard.readText()), /\/api\/agent-example.*steakhouse-usdc/);
+  assert.equal(await page.getByRole('link', { name: 'Open Bazantic Recipe', exact: true }).getAttribute('href'), 'https://bazantic.com/recipes/explain-defi-vault-evidence-clearly');
+  assert.equal(await page.getByRole('link', { name: 'View MCP/API details', exact: true }).getAttribute('href'), '/developers');
+  assert.deepEqual(bazanticRequests, [], 'Opening or copying the handoff must not trigger external calls');
   for (const width of [1440, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 1000 });
     await fits(`expanded explanation context at ${width}`);
-    if (width === 390) await page.locator('.explain-report').screenshot({ path: new URL('explanation-mobile.png', output).pathname.replace(/^\/(?=[A-Z]:)/, '') });
+    await page.locator('.explain-report').screenshot({ path: new URL(`agent-handoff-${width}.png`, output).pathname.replace(/^\/(?=[A-Z]:)/, '') });
   }
   await page.setViewportSize({ width: 1440, height: 1000 });
   if (await node.count()) {
@@ -88,6 +110,10 @@ try {
   await page.locator('.error-banner').waitFor();
   await page.locator('input[type=file]').setInputFiles(new URL('../fixtures/live/steakhouse-usdc.capture.json', import.meta.url).pathname.replace(/^\/(?=[A-Z]:)/, ''));
   await page.locator('.activity-line').filter({ hasText: 'Your result is ready' }).waitFor();
+  await page.locator('.explain-report > summary').click();
+  await page.locator('.bazantic-demo > summary').click();
+  assert.match(await page.getByLabel('Bazantic gateway command', { exact: true }).innerText(), /\/api\/status/);
+  assert.match(await page.getByLabel('Bazantic task text', { exact: true }).innerText(), /cannot rerun an arbitrary uploaded capture/);
   await page.setViewportSize({ width: 390, height: 844 });
   await fits('recorded report on mobile');
   await page.screenshot({ path: new URL('report-mobile.png', output).pathname.replace(/^\/(?=[A-Z]:)/, ''), fullPage: true });
@@ -194,6 +220,15 @@ try {
   await page.locator('.session-evidence summary').click();
   assert.match(await page.locator('.session-evidence').innerText(), /not included in this access token/);
   assert.ok(!(await page.locator('body').innerText()).includes(testToken));
+  await page.route('**/api/example', route => route.fulfill({ json: { ...fixture, sourceMode: 'recorded-example' } }));
+  await page.getByRole('button', { name: 'Replay example', exact: true }).click();
+  await page.locator('.report-view').waitFor();
+  await page.locator('.explain-report > summary').click();
+  assert.match(await page.locator('.explanation-status-grid').innerText(), /Bazantic session authorized this request/);
+  assert.match(await page.locator('.explanation-status-grid').innerText(), /ui-test-only/);
+  assert.match(await page.locator('.explanation-status-grid').innerText(), /direct API, not a Bazantic Recipe run/);
+  assert.ok(!(await page.locator('.explain-report').innerText()).includes(testToken));
+  await page.unroute('**/api/example');
   await fits('accepted session UI fixture at 320px');
   console.log('Sandbox guide and session evidence rendering passed using an isolated authorization fixture. No payment made.');
   await checkWorkspace({ page, origin, fixture, capabilities, fits });

@@ -1,7 +1,7 @@
 import { array, object, raw, address, code, timestamp } from './explanation-data.js';
 import type { Category, EvidenceRecord, ExplanationFact } from './explanation-data.js';
 
-export type AddFact = (category: Category, field: string, value: ExplanationFact['value'] | undefined, source: string) => void;
+export type AddFact = (category: Category, field: string, value: ExplanationFact['value'] | undefined, source: string, formattedAmount?: ExplanationFact['formattedAmount']) => void;
 
 export function classifyPosition(report: EvidenceRecord, source: string, add: AddFact) {
   const vault = object(report.protocol === 'erc4626' ? report.position : report.vault);

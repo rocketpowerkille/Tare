@@ -2,6 +2,7 @@ import { Download } from '../Icons';
 import { StatusBadge } from '../StatusBadge';
 import { isRecord, list, record, text, type JsonRecord } from '../../lib/types';
 import { ReportView } from './ReportView';
+import type { ReportAccess } from '../../lib/agent-handoff';
 
 function download(value: unknown) {
   const url = URL.createObjectURL(new Blob([JSON.stringify(value, null, 2)], { type: 'application/json' }));
@@ -12,7 +13,7 @@ function download(value: unknown) {
   URL.revokeObjectURL(url);
 }
 
-export function ComprehensiveReportView({ report }: { report: JsonRecord }) {
+export function ComprehensiveReportView({ report, access }: { report: JsonRecord; access?: ReportAccess }) {
   const status = text(report.status) ?? 'incomplete';
   const modules = list(report.modules).filter(isRecord);
   return <div className="composed-report">
@@ -22,7 +23,7 @@ export function ComprehensiveReportView({ report }: { report: JsonRecord }) {
       </StatusBadge>
       <span>Combined position and source report. Completion is not proof of backing.</span>
     </div>
-    <ReportView report={record(report.primary)} modules={modules} />
+    <ReportView report={record(report.primary)} modules={modules} access={access} />
     <div className="combined-download"><button className="button secondary" type="button" onClick={() => download(report)}><Download size={16} />Download combined report</button><p>Includes the primary position, source responses, statuses and limitations.</p></div>
   </div>;
 }

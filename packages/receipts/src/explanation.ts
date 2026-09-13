@@ -3,6 +3,7 @@ import type { Categories, EvidenceRecord, SourceSummary } from './explanation-da
 import { classifyChecks, classifyPosition, classifyPrice } from './explanation-facts.js';
 import type { AddFact } from './explanation-facts.js';
 import { explanationPath } from './explanation-path.js';
+import { explanationAmount } from './explanation-amounts.js';
 
 const operations: Record<string, string> = {
   'metamorpho-v1-blue-v1': 'resolve-v1', erc4626: 'resolve-erc4626',
@@ -17,7 +18,7 @@ function status(report: EvidenceRecord) {
   return value && statuses.has(value) ? value : 'unavailable';
 }
 
-/** Additive presentation only: no acquisition, arithmetic, clock, credentials or new verification. */
+/** Additive presentation only: exact unit formatting, no acquisition, clock, credentials or new verification. */
 export function explanationContext(value: unknown) {
   const report = object(value);
   const primary = object(report.primary ?? report.resolution ?? report);
@@ -27,11 +28,14 @@ export function explanationContext(value: unknown) {
   const provenance = metadata(primary);
   const evidenceCategories: Categories = { observed: [], derived: [], marketPriced: [], checked: [], inferred: [], notVerified: [] };
   let omittedFacts = 0;
-  const add: AddFact = (category, field, factValue, source) => {
+  const add: AddFact = (category, field, factValue, source, formattedAmount) => {
     if (factValue === undefined) return;
     if (evidenceCategories[category].length >= 20) { omittedFacts++; return; }
-    evidenceCategories[category].push({ field, value: factValue, source });
+    evidenceCategories[category].push({ field, value: factValue, source, ...(formattedAmount ? { formattedAmount } : {}) });
   };
+  function amountFacts(input: EvidenceRecord): AddFact {
+    return (category, field, factValue, source) => add(category, field, factValue, source, explanationAmount(input, field, factValue));
+  }
   const sourceSummary: SourceSummary[] = [];
   const findings: { source: string; code?: string; text?: string }[] = [];
   const limitations: typeof findings = [];
@@ -47,8 +51,8 @@ export function explanationContext(value: unknown) {
   }
   function collect(input: EvidenceRecord, id: string, scope: string, currentStatus = status(input)) {
     sourceSummary.push({ id, status: currentStatus, scope, provenance: metadata(input) });
-    classifyPosition(input, id, add);
-    classifyChecks(input, id, add);
+    classifyPosition(input, id, amountFacts(input));
+    classifyChecks(input, id, amountFacts(input));
     notes(input.findings, id, findings);
     notes(input.limitations, id, limitations);
     notes(object(input.backing).limitations, id, limitations);
@@ -71,12 +75,12 @@ export function explanationContext(value: unknown) {
       const evidence = object(module.report);
       const evidenceStatus = evidence.status !== undefined || evidence.kind !== undefined ? status(evidence) : status(module);
       collect(evidence, id, id === 'chainlink' ? 'Asset reference pricing only; not custody or backing.' : 'Eligible indexed accounting comparisons only.', evidenceStatus);
-      if (id === 'chainlink') classifyPrice(evidence, id, add);
+      if (id === 'chainlink') classifyPrice(evidence, id, amountFacts(evidence));
     } else if (Object.keys(embedded).length) {
       // Preserve parent provenance for an inline valuation that has no separate capture.
       const evidence = { ...embedded, capture: primary.capture, sourceMode: primary.sourceMode };
       if (id === 'chainlink') {
-        const pricePresent = classifyPrice(evidence, id, add);
+        const pricePresent = classifyPrice(evidence, id, amountFacts(evidence));
         sourceSummary.push({ id, status: pricePresent ? 'price-returned' : 'unavailable', scope: 'Reference pricing only.', provenance: metadata(evidence) });
       } else collect(embedded, id, 'Recorded share-ledger comparison only.');
     } else if (!(id === 'the-graph' && graphTypes.includes(type))) {

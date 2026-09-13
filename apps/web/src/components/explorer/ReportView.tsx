@@ -9,6 +9,7 @@ import { EvidenceSources } from './EvidenceSources';
 import { displayBlock } from '../../lib/report-display';
 import { useId } from 'react';
 import { ExplainReport } from './ExplainReport';
+import type { ReportAccess } from '../../lib/agent-handoff';
 
 function readable(value: string) {
   return value.replaceAll('-', ' ').replaceAll('_', ' ');
@@ -81,7 +82,7 @@ function download(value: unknown, filename: string) {
   URL.revokeObjectURL(url);
 }
 
-export function ReportView({ report, modules = [] }: { report: JsonRecord; modules?: JsonRecord[] }) {
+export function ReportView({ report, modules = [], access }: { report: JsonRecord; modules?: JsonRecord[]; access?: ReportAccess }) {
   const sectionId = useId();
   const capture = record(report.capture);
   const metric = record(report.metric);
@@ -128,7 +129,7 @@ export function ReportView({ report, modules = [] }: { report: JsonRecord; modul
     </section>
     <dl className="fact-grid">{facts.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{['Wallet', 'Vault', 'Observed at block', 'Evidence ID'].includes(label) && value !== 'Not included in this report' ? <CopyValue value={value} label={label} /> : value}</dd></div>)}</dl>
     <ValueConversion report={report} modules={modules} />
-    <ExplainReport report={report} modules={modules} />
+    <ExplainReport report={report} modules={modules} access={access} />
     <PositionOverview report={report} />
     <div id={`${sectionId}-Evidence-path`}><PositionDiagram report={report} /></div>
     {modules.length > 0 && <div id={`${sectionId}-Source-checks`}><EvidenceSources report={report} modules={modules} /></div>}

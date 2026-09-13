@@ -1,6 +1,6 @@
 # Explain DeFi Vault Evidence Clearly
 
-Status: repository specification, not yet published or tested as a new Bazantic Recipe. Existing published Recipes and acceptance records are unchanged.
+Status: the user confirmed publication and testing on 2026-09-13 and supplied the direct customer entry point: [Explain DeFi Vault Evidence Clearly](https://bazantic.com/recipes/explain-defi-vault-evidence-clearly). This confirmation does not establish a controlled comparison, independently reviewed corrected output, or a separate-customer payment run. Earlier test failures and other Recipe acceptance records are retained below.
 
 ## Purpose
 
@@ -102,6 +102,17 @@ Return these sections:
 6. What remains unknown
 7. Technical details and provenance
 
+Write plain-language prose under these headings, normally under 350 words total.
+Do not return JSON, a code block or the full allocation list unless the user asks.
+For each amount, copy the fact's formattedAmount.display exactly when its status
+is formatted. This text already has the correct decimal point and units. Never
+divide it again, rescale it, abbreviate it, round it or recompute it from raw data.
+The amount keeps its parent category: observed, derived or market-priced.
+If formattedAmount is absent or unavailable, say the human-readable amount is
+unavailable from the returned evidence. Raw values may be quoted only as raw units.
+Never use underlying asset decimals for vault shares. Do not invent percentages
+or calculate additional monetary values. This formatting is not new verification.
+
 Keep the first six sections concise and understandable. Include network, block,
 source mode and timestamp where available. Put long addresses, raw amounts,
 capture digests and detailed source records in section 7, expanding them when
@@ -142,6 +153,13 @@ version 1. The shared helper lives in `packages/receipts/src/explanation.ts`.
 Existing compact fields are unchanged. Full reports, captures, API request schemas,
 stdio MCP responses, gateway tool names and payment/session behavior are unchanged.
 
+Amount facts additionally carry `formattedAmount`, with status, exact decimal text,
+display text with units, decimals and the precision source. Missing precision is
+explicitly unavailable. Share precision never falls back to asset precision.
+Formatting reuses the existing string-based unit formatter without rounding or
+floating-point conversion. USD labels appear only on existing price/value facts;
+no missing USD estimate is calculated. Old fact fields and full reports are unchanged.
+
 Facts preserve raw strings and source IDs. Source summaries retain public identity,
 block/hash, timestamp, source mode and evidence digest where present. The helper
 does not read raw RPC calls to manufacture missing facts. It limits each category
@@ -160,7 +178,7 @@ selection, report persistence or AI-generated explanation was added.
 
 ## Controlled demonstration protocol
 
-This new comparison has NOT been run. Do not reuse earlier Recipe metrics as
+This controlled baseline comparison has NOT been run. Do not reuse earlier Recipe metrics as
 measurements of this feature. Preserve `BAZANTIC_COMPARISON.md` and the accepted
 two-service Recipe record unchanged.
 
@@ -222,7 +240,7 @@ Changed files:
 - `scripts/verify-web-ui.mjs`: explanation, clipboard and download regressions.
 - `docs/BAZANTIC_PLAIN_LANGUAGE_RECIPE.md`: this Recipe and demonstration protocol.
 
-Local verification on 2026-09-13: type checks, 7 web display tests, 169 repository
+Original implementation verification on 2026-09-13: type checks, 7 web display tests, 169 repository
 tests plus CLI demonstrations/replay, and Chrome browser regressions pass.
 Browser coverage includes all four routes at 1440, 1024, 768, 390 and 320 pixels,
 keyboard interaction, reduced motion, clipboard contents and report/capture downloads.
@@ -230,11 +248,102 @@ Access, expiry, Bazantic authorization, live-analysis-shaped responses, unavaila
 sources and mismatches use isolated test fixtures. This is not new live provider,
 on-chain settlement or hosted deployment acceptance.
 
-Intentional boundaries: no external AI explanation or controlled comparison has
-been executed; no Recipe published; no changes committed or deployed by this task.
+At the original implementation handoff, no external AI explanation or controlled
+comparison had been executed; no Recipe was published by that task.
 The backend does not include a settlement receipt in normal report responses, so
 the context says `settlementReceipt: not-included` even when authorization exists.
 Missing report identifiers, times, source blocks and values remain absent. Unknown
 report types are left uninterpreted. Full report retrieval remains necessary when
 the bounded context reports omissions. Explanations use the report supplied to the
 helper, not a new read or a claim that saved evidence is current.
+
+## Follow-up: decimal-conversion regression
+
+The user subsequently created a Recipe draft and supplied a screenshot of a
+dashboard test using `tare_status` and `tare_example_compact`. This was an operator
+test, not payment acceptance or a controlled baseline comparison. The generated
+answer incorrectly rendered `28728443339809` at six decimals as about 28.73 USDC,
+instead of the fixture's exact **28,728,443.339809 USDC**, and returned excessive JSON.
+This run is a known failure, not successful explanation acceptance.
+
+The follow-up adds display-ready amounts and the prose rules above. The dashboard
+Recipe does not update automatically from this file. After deploying, replace its
+prompt with the updated Recipe instructions and rerun the SAME saved-example test.
+Confirm the exact quote, saved-evidence label, missing Graph/Chainlink evidence and
+backing limitations. Do not publish based solely on local formatter tests: the
+external agent still needs a fresh acceptance run. A stricter Bazantic output schema,
+if configured, also needs reviewing if it continues to force JSON.
+
+Follow-up files: `packages/domain/src/units.ts` extracts the existing formatter,
+with its public re-export retained in `packages/domain/src/index.ts`.
+`packages/receipts/src/explanation-amounts.ts` maps known fields to exact units;
+`explanation-data.ts`, `explanation-facts.ts` and `explanation.ts` add formatting
+metadata and agent guidance without changing existing fact values.
+`tests/explanation-amounts.test.ts` covers the reported conversion error, allocation
+amounts, zero/tiny/large values, separate share precision, unknown decimals and
+missing USD evidence. API and browser regressions check the exact displayed quote
+in compact responses and copied UI context. This document contains the revised
+dashboard prompt. No new API route, environment variable or dependency is needed.
+
+Follow-up local verification: `pnpm check`, `pnpm test:web` (7 tests),
+`node --run verify` (178 tests plus CLI demos/replay), Chrome
+`pnpm test:web:browser`, and `git diff --check` passed. Nine new amount tests
+exercise the regression and boundaries. The saved Steakhouse compact response is
+17,108 bytes, within the existing 20 KiB enriched-example test budget. The failed
+agent output had not yet been rerun against this revision on Bazantic at that
+handoff. The user subsequently reported publishing and testing the Recipe, but
+did not provide the new raw output or deployed revision for independent review.
+
+## Web handoff: two separate explanation paths
+
+The report's **Explain this report** panel keeps **Copy explanation context** and
+adds **Use Tare through Bazantic**. Copying is a convenience for an external AI
+assistant. The Bazantic path describes the gateway, this Recipe, the four bound
+tools, the expected answer structure, and a report-specific task. Opening the
+panel or copying text makes no gateway request, model call or payment.
+
+The Recipe is labeled **Published Recipe**, following the user's publication
+confirmation. **Open Bazantic Recipe** links directly to
+`https://bazantic.com/recipes/explain-defi-vault-evidence-clearly`, not the generic
+Recipes dashboard. The button is visible before expanding the task and CLI
+instructions. Publication is distinct from gateway health or payment acceptance:
+gateway availability remains unchecked, not connected or healthy. The page does
+not execute the Recipe or authorize payment automatically.
+
+All Explorer reports still come from Tare's direct HTTP API. A successful request
+to an API advertised as protected, with a Bazantic session supplied, is labeled
+separately as session-authorized. The UI retains only safe session metadata after
+the response succeeds, not the credential. Without protected-mode confirmation,
+it does not infer session verification. Session expiry is copied from the claims;
+no payment amount or settlement receipt is invented. Authorization is never vault
+evidence, and a session-authorized direct API request is not a Recipe run.
+
+Known saved examples produce an `agent-example` gateway command. Supported live
+position reports produce an `agent-analyze` command with the original reference
+block when present. V2 requests preserve the existing schema without a `chainId`
+field. These commands fetch compact evidence, not AI explanations, and do not
+automatically reproduce the UI's separate Graph/Chainlink checks. Unknown saved
+captures and unsupported operations instead show a status-only command and direct
+the agent to the copied context. They never silently substitute another report.
+The user must configure their own grant and review the quote before executing.
+
+UI implementation: `apps/web/src/lib/agent-handoff.ts`,
+`components/explorer/BazanticHandoff.tsx`, `ExplainReport.tsx`, `ReportView.tsx`,
+`ComprehensiveReportView.tsx`, `pages/ExplorerPage.tsx`, and
+`styles/agent-handoff.css` (imported by `styles/global.css`). Component, page and
+style paths in this paragraph are under `apps/web/src/`. No API route, request
+body, MCP name, report download, dependency or environment variable was changed.
+
+Unit regressions cover safe access metadata, known examples versus arbitrary
+captures, operation-specific request schemas, and untrusted input. Browser
+regressions cover both copy paths, truthful provenance, keyboard expansion,
+responsive layouts and the absence of automatic Bazantic calls. These are local
+and fixture-backed checks, not new live Bazantic acceptance or a controlled model
+comparison.
+
+Web handoff verification on 2026-09-13: `pnpm check`, `pnpm test:web`
+(11 tests), `node --run verify` (178 repository tests plus CLI demos/replay),
+and `pnpm test:web:browser` passed. Chrome covered all four routes at 1440,
+1024, 768, 390 and 320px, both clipboard paths, accepted-session metadata,
+raw report/capture downloads, unavailable sources, keyboard controls and
+reduced motion. Opening and copying the handoff made zero Bazantic requests.

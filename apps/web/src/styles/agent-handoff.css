@@ -1,0 +1,24 @@
+.explanation-path-label { display: block; margin: 4px 0 0 16px; color: var(--muted); font-size: .76rem; font-weight: 400; }
+.explanation-status-grid, .explanation-modes { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; margin-top: 16px; }
+.explanation-status-grid > section, .explanation-mode { min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); overflow-wrap: anywhere; }
+.explanation-status-grid p { font-size: .76rem; line-height: 1.6; }
+.explanation-status-grid strong { font-size: .82rem; }
+.explanation-status-grid p:last-child { margin-bottom: 0; }
+.explanation-mode h3 { font-size: 1rem; margin: 8px 0 12px; }
+.explanation-mode h4 { font-size: .85rem; margin: 24px 0 8px; }
+.explanation-mode p, .handoff-facts { font-size: .8rem; line-height: 1.65; }
+.explanation-mode .button { white-space: normal; max-width: 100%; font-size: .8rem; }
+.explanation-mode details { margin-top: 16px; }
+.explanation-mode summary { font-size: .84rem; line-height: 1.6; }
+.explain-report .explanation-mode pre { padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-subtle); color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; font-size: .74rem; line-height: 1.65; max-height: 320px; }
+.recipe-state { display: inline-block; color: var(--green); background: var(--green-soft); padding: 2px 8px; border-radius: 6px; font-size: .73rem; margin-top: 8px; }
+.handoff-links { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .8rem; }
+.handoff-links a, .handoff-facts a { color: var(--green); text-decoration: underline; text-underline-offset: 3px; }
+.handoff-facts > div { border-bottom: 1px solid var(--line); padding-block: 12px; }
+.handoff-facts dt { color: var(--muted); margin-bottom: 4px; }
+.handoff-facts dd { margin: 0; }
+.handoff-facts code, .handoff-facts a { display: block; overflow-wrap: anywhere; }
+@media (min-width: 1200px) {
+  .explanation-status-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .explanation-modes { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+}
