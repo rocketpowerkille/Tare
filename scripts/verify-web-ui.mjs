@@ -3,7 +3,7 @@
 import { createRequire } from 'node:module';
 import { mkdir, readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
-import { checkWorkspace } from './web-workspace-checks.mjs';
+import { checkWorkspace, checkEulerDiscovery } from './web-workspace-checks.mjs';
 import { checkTheme } from './web-theme-checks.mjs';
 import { checkSession } from './web-session-checks.mjs';
 import { checkDocs } from './web-docs-checks.mjs';
@@ -277,6 +277,7 @@ try {
   await checkWorkspace({ page, origin, fixture, capabilities, fits });
   await checkChanges({ page, origin, fixture, capabilities, fits });
   await checkSession({ browser, origin, capabilities });
+  await checkEulerDiscovery({ page, origin, fixture, capabilities, fits });
   assert.deepEqual(errors, [], 'Uncaught browser exceptions');
   console.log('Web UI regression checks passed. Screenshots: tmp/ui-review');
 } finally {

@@ -1,5 +1,37 @@
 import assert from 'node:assert/strict';
 
+export async function checkEulerDiscovery({ page, origin, fixture, capabilities, fits }) {
+  const eulerCapabilities = { ...capabilities, discoveryProtocols: ['morpho', 'euler'],
+    networks: capabilities.networks.map(network => ({ ...network, erc4626: true })) };
+  await page.unroute('**/api/status');
+  await page.route('**/api/status', route => route.fulfill({ json: eulerCapabilities }));
+  await page.unroute('**/api/discover');
+  await page.route('**/api/discover', route => route.fulfill({ json: {
+    source: 'multi-protocol', complete: false, issues: ['euler-limit'], positions: [8453, 42161].map(chainId => ({
+      owner: fixture.owner, vault: fixture.vault.address, chainId, name: `Euler fixture ${chainId}`, protocol: 'euler', version: 'erc4626',
+      network: chainId === 8453 ? 'Base' : 'Arbitrum', asset: { symbol: 'USDC' },
+      support: { status: 'supported', operation: 'resolve-erc4626', checkType: 'Supply accounting only' },
+    })),
+  } }));
+  await page.unroute('**/api/analyze');
+  await page.route('**/api/analyze', route => route.fulfill({ status: 503, json: { error: { message: 'Fixture RPC unavailable.' } } }));
+  await page.goto(origin + '/explore');
+  await page.locator('#owner').fill(fixture.owner);
+  await page.getByRole('button', { name: 'Find my vaults', exact: true }).click();
+  for (const chainId of [8453, 42161]) {
+    await page.getByRole('button', { name: new RegExp(`Euler fixture ${chainId}`) }).click();
+    const request = page.waitForRequest(request => request.url().endsWith('/api/analyze'));
+    await page.getByRole('button', { name: 'Run evidence check' }).click();
+    const input = (await request).postDataJSON();
+    assert.equal(input.operation, 'resolve-erc4626');
+    assert.equal(input.chainId, chainId);
+    await page.locator('.activity-line').filter({ hasText: 'No result was produced' }).waitFor();
+  }
+  await page.setViewportSize({ width: 320, height: 900 });
+  await fits('Euler multichain discovery');
+  console.log('Euler candidates select Base/Arbitrum ERC-4626 requests; incomplete coverage and provider failures remain visible (fixtures only).');
+}
+
 // Isolated browser fixtures only. These are not live partner acceptance tests.
 export async function checkWorkspace({ page, origin, fixture, capabilities, fits }) {
   await page.unroute('**/api/status');

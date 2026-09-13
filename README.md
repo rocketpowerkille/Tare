@@ -65,6 +65,17 @@ position-specific interpretation and comparison layer, not a replacement.
 Not every report performs every check. Coverage depends on the operation,
 configured providers, supported adapter, and available evidence.
 
+Wallet discovery combines Morpho with Euler EVK/EulerEarn supply candidates on
+Ethereum, Base and Arbitrum. Euler candidates use the generic ERC-4626 reader for
+fresh share/conversion accounting; Euler borrowing, subaccounts, collateral risk
+and downstream strategy tracing are not implemented. Yearn discovery is not yet
+integrated; compatible vaults can still be checked by address or local registry.
+Configure `TARE_RPC_URL`, `TARE_BASE_MAINNET_RPC_URL` and `TARE_ARBITRUM_RPC_URL`
+locally for analysis on the corresponding networks. Euler discovery defaults to
+its public API; `TARE_EULER_DISCOVERY=false` disables it. No wallet secrets are needed.
+The first 100 indexed Euler positions are considered; metadata gaps, omitted
+subaccounts and result limits remain explicit. Discovery is not a full inventory.
+
 ## A reproducible example
 
 The saved [Steakhouse USDC capture](fixtures/live/steakhouse-usdc.capture.json)

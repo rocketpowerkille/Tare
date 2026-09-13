@@ -15,6 +15,7 @@ export interface Capabilities {
   live: Record<OperationId, boolean>;
   limits: { maxInputBytes: number; concurrentOperations: number };
   limitations: string[];
+  discoveryProtocols?: string[];
   networks: Array<{ chainId: number; name: string; resolveV1: boolean; erc4626: boolean }>;
 }
 
@@ -34,12 +35,12 @@ export interface DiscoveredPosition {
 }
 
 export interface DiscoveryResult {
-  source: 'morpho-graphql' | 'morpho-graphql+erc4626-registry';
-  scope: 'indexed-morpho-v1-and-v2' | 'indexed-morpho-and-configured-erc4626';
+  source: 'morpho-graphql' | 'morpho-graphql+erc4626-registry' | 'multi-protocol';
+  scope: 'indexed-morpho-v1-and-v2' | 'indexed-morpho-and-configured-erc4626' | 'indexed-morpho-euler-and-configured-erc4626';
   observedAt: string;
   blockAligned: false;
   complete: boolean;
-  issues: Array<'limit' | 'chain-unavailable' | 'missing-state' | 'registry-read-failed'>;
+  issues: string[];
   positions: DiscoveredPosition[];
 }
 

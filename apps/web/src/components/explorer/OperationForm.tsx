@@ -99,23 +99,24 @@ export function OperationForm({ capabilities, busy, operation, onOperationChange
     <div className="panel-heading"><div><p className="section-label">Live public data</p><h2>Check a wallet and vault</h2></div><StatusBadge tone={configured ? 'success' : 'neutral'}>{configured ? 'Ready' : 'Unavailable'}</StatusBadge></div>
     <form onSubmit={submit}>
       <fieldset disabled={busy || discovering} className="query-fields">
-      <p className="form-intro">Find indexed <Term name="Morpho" /> positions, or enter a vault directly for an eligible <Term name="ERC-4626" /> check.</p>
+      <p className="form-intro">Find vault positions across supported protocols, or enter a vault directly for an eligible <Term name="ERC-4626" /> check.</p>
       {definition.owner && <><label htmlFor="owner">Wallet address</label><input id="owner" value={owner} onChange={event => updateOwner(event.target.value)} placeholder="0x0000..." pattern={ADDRESS.source} required autoComplete="off" spellCheck={false} /><p className="field-help">The public address that owns the vault shares.</p></>}
       {['resolve-v1', 'resolve-v2', 'resolve-erc4626'].includes(operation) && <div className="vault-discovery">
         <button className="button secondary full-button" type="button" disabled={busy || discovering} onClick={() => void discoverVaults()}>{discovering ? <><LoaderCircle className="spin" size={16} />Finding supported vaults</> : <><ScanSearch size={16} />Find my vaults</>}</button>
         <p className="field-help">Discovery searches supported networks automatically. Selecting a result sets the network and check type.</p>
+        <p className="field-help">Sources: {(capabilities.discoveryProtocols ?? ['morpho']).join(', ')} · Ethereum, Base and Arbitrum.</p>
         {discoveryError && <div className="discovery-error" role="alert"><p>Vault discovery could not complete.</p><details><summary>Details and next step</summary><p>{discoveryError}</p></details></div>}
         {discovery && <div className="discovery-results" aria-live="polite">
           <div className="discovery-heading"><strong>{discovery.positions.length ? `${discovery.positions.length} position candidate${discovery.positions.length === 1 ? '' : 's'} found` : 'No indexed or registered positions found'}</strong><span>Discovery is not verification. Tare confirms a supported candidate with direct blockchain reads.</span></div>
           {discovery.positions.map(position => <button
             className={`${vault === position.vault && chainId === position.chainId ? 'vault-option selected' : 'vault-option'} ${position.support.status === 'unsupported' ? 'unsupported' : ''}`}
             type="button" key={`${position.chainId}:${position.vault}`} disabled={position.support.status === 'unsupported'} onClick={() => selectPosition(position)}>
-            <span className="vault-option-main"><strong>{position.name || 'Unnamed vault'}</strong><small>{position.network} · {position.asset.symbol} · {position.version.toUpperCase()}</small></span>
+            <span className="vault-option-main"><strong>{position.name || 'Unnamed vault'}</strong><small>{position.network} · {position.protocol} · {position.asset.symbol} · {position.version.toUpperCase()}</small></span>
             <span className={`support-label ${position.support.status}`}><strong>{position.support.status === 'supported' ? 'Supported now' : 'Position found, analysis not supported yet'}</strong><small>{position.support.status === 'supported' ? position.support.checkType : position.support.reason}</small></span>
             <code>{position.vault.slice(0, 8)}...{position.vault.slice(-6)}</code>
           </button>)}
           <p>{discovery.positions.length ? 'Choose a supported result to fill the network, vault, and check type automatically.' : 'This does not prove the wallet has no positions. You can still paste a vault address below.'}</p>
-          {!discovery.complete && <p>The index reported incomplete coverage, so some supported positions may be missing.</p>}
+          {!discovery.complete && <p>Discovery coverage is incomplete; some positions may be missing. {discovery.issues.includes('euler-unavailable') ? 'Euler discovery was unavailable. Other returned results remain usable.' : ''}</p>}
         </div>}
       </div>}
       {definition.vault && <><label htmlFor="vault">Vault address</label><input id="vault" value={vault} onChange={event => updateVault(event.target.value)} placeholder="0x0000..." pattern={ADDRESS.source} required autoComplete="off" spellCheck={false} /><p className="field-help">The contract address shown by the vault app or block explorer. It starts with 0x.</p></>}
@@ -138,7 +139,7 @@ export function OperationForm({ capabilities, busy, operation, onOperationChange
       </details>
 
       <div className="privacy-note"><strong>Safe to check</strong><span>Tare reads public data only. It cannot move funds or ask your wallet to sign.</span></div>
-      <p className="form-note">Morpho discovery covers indexed V1 and V2 positions on Ethereum, Base, and Arbitrum. Other ERC-4626 protocols are discovered from the deployment registry or checked by a manually entered vault address.</p>
+      <p className="form-note">Morpho supports market tracing. Euler supply positions use ERC-4626 accounting checks; borrowing, subaccounts and underlying lending risks are not assessed. Other compatible vaults can be checked by address or added to the deployment registry.</p>
       <button className="button primary full-button" type="submit" disabled={busy || discovering || !canSubmit}>{busy ? <><LoaderCircle className="spin" size={17} />Checking this position</> : <>Run evidence check <ArrowRight size={17} /></>}</button>
       </fieldset>
     </form>

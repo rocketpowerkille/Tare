@@ -9,11 +9,12 @@ import { verifyBaseSepoliaCustody, replayBaseSepoliaCustody } from '../../verifi
 import { BaseSepoliaCustodyDeploymentSchema } from '../../verification/src/base-sepolia-custody-capture.js';
 import type { BaseSepoliaCustodyDeployment } from '../../verification/src/base-sepolia-custody-capture.js';
 import { readJsonFile } from '../../sources/src/snapshot.js';
-import { MorphoDiscovery } from '../../sources/src/morpho.js';
+import { EULER_API } from '../../sources/src/euler.js';
+import { discoverPositions } from './discovery.js';
 import { resolveErc4626Position, replayErc4626Capture } from '../../resolver/src/erc4626.js';
 import { z } from 'zod/v4';
 import { AddressSchema, SupportedEvmChainSchema } from '../../domain/src/index.js';
-import { AnalyzeSchema, DiscoverSchema, ReplaySchema, ExampleSchema, MAX_INPUT_BYTES, ServiceError } from './requests.js';
+import { AnalyzeSchema, ReplaySchema, ExampleSchema, MAX_INPUT_BYTES, ServiceError } from './requests.js';
 import { composePosition } from './composition.js';
 import { valuePositionWithChainlink } from '../../verification/src/valuation.js';
 import { verifySuppliedAccounting } from '../../verification/src/supplied-accounting.js';
@@ -27,6 +28,8 @@ export interface ServiceConfig {
   graphMarketToken?: string;
   tokenApiUrl?: string;
   morphoUrl?: string;
+  eulerUrl?: string;
+  eulerMetadataUrl?: string;
   baseRpcUrl?: string;
   baseSecondaryRpcUrl?: string;
   baseCustodyDeployment?: BaseSepoliaCustodyDeployment;
@@ -42,6 +45,9 @@ const VaultRegistryEntrySchema = z.strictObject({
 });
 type VaultRegistryEntry = z.infer<typeof VaultRegistryEntrySchema>;
 export function configFromEnv(env: NodeJS.ProcessEnv = process.env): ServiceConfig {
+  if (env.TARE_EULER_DISCOVERY && !['true', 'false'].includes(env.TARE_EULER_DISCOVERY)) {
+    throw new Error('TARE_EULER_DISCOVERY must be true or false.');
+  }
   const config: ServiceConfig = Object.fromEntries(Object.entries({
     rpcUrl: env.TARE_RPC_URL, secondaryRpcUrl: env.TARE_SECONDARY_RPC_URL,
     graphUrl: env.TARE_GRAPH_URL, expectedDeployment: env.TARE_GRAPH_DEPLOYMENT,
@@ -49,6 +55,7 @@ export function configFromEnv(env: NodeJS.ProcessEnv = process.env): ServiceConf
     graphMarketToken: env.GRAPH_MARKET_API_TOKEN,
     tokenApiUrl: env.TARE_GRAPH_TOKEN_API_URL,
     morphoUrl: env.TARE_MORPHO_URL,
+    eulerUrl: env.TARE_EULER_DISCOVERY === 'false' ? undefined : env.TARE_EULER_API_URL || EULER_API,
     baseRpcUrl: env.TARE_BASE_RPC_URL, baseSecondaryRpcUrl: env.TARE_BASE_SECONDARY_RPC_URL,
     baseMainnetRpcUrl: env.TARE_BASE_MAINNET_RPC_URL, arbitrumRpcUrl: env.TARE_ARBITRUM_RPC_URL,
   }).filter((entry): entry is [string, string] => Boolean(entry[1])));
@@ -84,6 +91,7 @@ export class TareService {
     const graph = rpc && Boolean(this.config.graphUrl);
     return {
       name: 'tare', apiVersion: 1, chainId: 1, readOnly: true, examples,
+      discoveryProtocols: ['morpho', ...(this.config.eulerUrl ? ['euler'] : []), ...(this.config.erc4626Registry?.length ? ['erc4626-registry'] : [])],
       live: { 'resolve-v1': rpc || Boolean(this.config.baseMainnetRpcUrl || this.config.arbitrumRpcUrl), 'resolve-v2': rpc,
         'resolve-erc4626': rpc || Boolean(this.config.baseMainnetRpcUrl || this.config.arbitrumRpcUrl || this.config.baseRpcUrl), 'verify-shares': graph,
         'verify-accounting': graph, 'verify-graph-composition': graph && Boolean(this.config.graphMarketToken),
@@ -113,7 +121,7 @@ export class TareService {
     this.active++;
     try {
       if (action === 'analyze') return await this.analyze(input);
-      if (action === 'discover') return await this.discover(input);
+      if (action === 'discover') return await discoverPositions(input, this.config, this.capabilities().networks, chainId => this.rpcForChain(chainId));
       if (action === 'replay') return await this.replay(input);
       if (action === 'compose') return await composePosition(input);
       const { id } = ExampleSchema.parse(input);
@@ -121,49 +129,6 @@ export class TareService {
       const path = fileURLToPath(new URL(`../../../../fixtures/live/${id}.capture.json`, import.meta.url));
       return await this.replay({ operation: example.operation, capture: await readJsonFile(path) });
     } finally { this.active--; }
-  }
-
-  private async discover(input: unknown) {
-    const request = DiscoverSchema.parse(input);
-    const discovery = await new MorphoDiscovery(this.config.morphoUrl).positions({ owner: request.owner, maxPositions: request.maxPositions });
-    const networks = new Map(this.capabilities().networks.map(network => [network.chainId, network]));
-    const morphoPositions = discovery.positions.map(position => {
-      const network = networks.get(position.chainId)!;
-      const v1Ready = position.version === 'v1' && network.resolveV1;
-      const v2Ready = position.version === 'v2' && position.chainId === 1
-        && position.asset.address === '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' && Boolean(this.config.rpcUrl);
-      return { ...position, network: network.name, support: v1Ready
-        ? { status: 'supported' as const, operation: 'resolve-v1' as const, checkType: 'Vault shares and Morpho market exposure' }
-        : v2Ready
-          ? { status: 'supported' as const, operation: 'resolve-v2' as const, checkType: 'Nested V2 to V1 market exposure' }
-          : { status: 'unsupported' as const, reason: position.version === 'v2'
-            ? 'Position found, but this V2 asset or network does not have a safe nested adapter yet.'
-            : `${network.name} discovery works, but its RPC is not configured on this deployment.` },
-      };
-    });
-    const registryChecks = await Promise.allSettled((this.config.erc4626Registry ?? []).map(async entry => {
-      const rpcUrl = this.rpcForChain(entry.chainId);
-      if (!rpcUrl) return null;
-      const report = await resolveErc4626Position({ owner: request.owner, vault: entry.vault, chainId: entry.chainId, rpcUrl });
-      if (!report.position || BigInt(report.position.sharesRaw) === 0n) return null;
-      const network = networks.get(entry.chainId)!;
-      return { owner: request.owner, vault: entry.vault, name: entry.name, protocol: entry.protocol,
-        version: 'erc4626' as const, chainId: entry.chainId, network: network.name,
-        asset: { address: report.position.asset, symbol: report.position.assetSymbol, decimals: report.position.decimals },
-        reportedSharesRaw: report.position.sharesRaw, reportedAssetsRaw: report.position.assetsRaw,
-        support: { status: 'supported' as const, operation: 'resolve-erc4626' as const,
-          checkType: 'ERC-4626 share balance and conversion quote' } };
-    }));
-    const registryPositions = registryChecks.flatMap(result => result.status === 'fulfilled' && result.value ? [result.value] : []);
-    const registryFailed = registryChecks.some(result => result.status === 'rejected');
-    return {
-      ...discovery,
-      source: registryChecks.length ? 'morpho-graphql+erc4626-registry' : discovery.source,
-      scope: registryChecks.length ? 'indexed-morpho-and-configured-erc4626' : discovery.scope,
-      complete: discovery.complete && !registryFailed,
-      issues: [...discovery.issues, ...(registryFailed ? ['registry-read-failed'] : [])],
-      positions: [...morphoPositions, ...registryPositions].slice(0, request.maxPositions),
-    };
   }
 
   private async replay(input: unknown) {

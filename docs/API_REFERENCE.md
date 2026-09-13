@@ -57,6 +57,19 @@ these checks to resolve a domain migration; see the
 | POST | `/api/investigation/wallet` | `owner`; discover up to 10 candidates and analyze at most 3 supported positions. |
 
 Web routes are `/`, `/explore`, `/investigate`, `/examples`, `/docs`, `/developers`.
+Discovery adds `source: "multi-protocol"` and scope
+`"indexed-morpho-euler-and-configured-erc4626"` when Euler is configured.
+`/api/status.discoveryProtocols` lists enabled sources. Candidates retain their
+chain and protocol; Euler supply candidates select `resolve-erc4626`, with RPC
+configuration checked per chain. The indexed debt field may be null (unknown)
+and is not assessed by this supply-only operation. Provider outages, pagination,
+metadata gaps and omitted subaccounts appear in `issues`; `complete` refers only
+to the bounded discovery coverage, never wallet completeness or backing.
+The [official Euler API](https://docs.euler.finance/build/data-querying/euler-v3-api/)
+and [metadata reference](https://docs.euler.finance/build/data-querying/perspectives/)
+define the source contracts. Tare reads one account page (100 rows) and at most
+three chain metadata batches, without requesting a paid or forced refresh.
+
 Explorer checks one selected position; Investigate performs bounded wallet or
 two-block comparisons; Examples replays saved evidence and uploaded captures.
 All three workspaces share tab-scoped credentials, revalidated on reload.
