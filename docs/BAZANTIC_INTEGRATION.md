@@ -57,8 +57,8 @@ available. The copy action alone demonstrates neither a gateway call nor payment
 | Recipe | Evidence and boundary |
 | --- | --- |
 | [Explain DeFi Vault Evidence Clearly](https://bazantic.com/recipes/explain-defi-vault-evidence-clearly) | The maintainer confirmed publication and testing. The public URL is also configured in the UI. A new controlled raw-versus-guided artifact pair is not retained. |
-| `DeFi Vault Backing Evidence Evaluator` | Historical operator test and timing notes are retained in [the comparison record](BAZANTIC_COMPARISON.md). |
-| `tare-graph-accounting-assurance` | The [two-service record](BAZANTIC_MULTI_SERVICE.md) reports a completed Graph-plus-Tare run at block `25961875`. Raw test output still needs collecting. |
+| `DeFi Vault Backing Evidence Evaluator` | Historical operator testing was reported. It does not establish current gateway health or a controlled performance improvement. |
+| `tare-graph-accounting-assurance` | A completed Graph-plus-Tare run at block `25961875` was reported on 2026-09-12. Raw test output is not included in this repository. |
 
 The two-service Recipe uses the separate
 [Graph gateway](https://hgtvwubvqvci5fddvkmksjtkdu.bazgateway.com), generated from
@@ -113,29 +113,20 @@ redacted raw paid response should still be retained for submission. Operator
 Recipe tests use the operator credential and make no payment. Neither path proves
 custody or solvency. No paid request was repeated for this documentation task.
 
-## Comparison methodology
-
-The older note records one baseline at 28,419 ms / 8,107 tokens and one guided run
-at 19,513 ms / 6,685 tokens. It reports the same task, model, owner, and tools, but
-the inputs shown are a prose prompt versus structured fields. Complete model
-settings and raw run artifacts are not retained. Do not claim an identical-prompt
-controlled experiment, causal performance improvement, or results for the newer
-plain-language Recipe from that pair.
+## Evaluating Recipe output
 
 For a new controlled product demonstration, hold the user prompt, model, settings,
 API/MCP access, and input evidence constant. Change only Recipe guidance. Preserve
 both raw answers, tool calls, latency, token usage when available, and factual
 review. Use saved evidence in both runs if reproducibility is the priority; use
 live evidence in both if demonstrating live access, and disclose block changes.
-One pair is not a general benchmark. Existing setup is in
-[the comparison record](BAZANTIC_COMPARISON.md).
+One pair is not a general benchmark. A controlled comparison of the current
+plain-language Recipe is not included in this repository.
 
-## Limitations and submission
+## Limitations
 
 Gateway configuration, Recipe execution, Tare evidence acquisition, and settlement
-are separate acceptance checks. Hosted availability was not retested here.
-The additional service condition for Agentify eligibility is not established by
-the Graph gateway. Use [the current prize review](PRIZE_TRACKS.md), not old
-"complete" labels. Credentials, session tokens, and payment authorizations must
+are separate acceptance checks. Hosted availability was not retested in the
+documentation verification. Credentials, session tokens, and payment authorizations must
 never enter published evidence. No API or payment-contract changes are required
 for the copy-context UI.

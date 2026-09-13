@@ -11,7 +11,7 @@ verifier, proof-of-reserves system, or solvency oracle.
 
 [Open Tare](https://tare-api.onrender.com/) |
 [Explorer](https://tare-api.onrender.com/explore) |
-[Submission guide](docs/SUBMISSION_GUIDE.md) |
+[Evidence model](docs/EVIDENCE_MODEL.md) |
 [Bazantic Recipe](https://bazantic.com/recipes/explain-defi-vault-evidence-clearly)
 
 ## Why Tare exists
@@ -200,31 +200,13 @@ Tare does not configure or call an LLM provider. The
 [Recipe specification](docs/BAZANTIC_PLAIN_LANGUAGE_RECIPE.md) defines the external
 agent's interpretation rules.
 
-## Demo flow
+## Example walkthrough
 
 Start with the saved Steakhouse position and its concrete accounting quote. Show
 the market path, block, and unknown backing. Then show a separately labeled live
 Graph comparison when available, the Bazantic Recipe explanation, and the retained
 CRE testnet result. Do not combine different blocks into one apparent observation.
-Follow the [three-minute script](docs/DEMO_SCRIPT.md).
-
-## Sponsor submission matrix
-
-| Official category | Technical fit | Remaining evidence or eligibility question |
-| --- | --- | --- |
-| The Graph: Best Use of Composable or Standardized Graph Products | Strong candidate through Token API plus Studio. | Record both live products and their material comparison; confirm sponsor interpretation. |
-| The Graph: Best AI Tooling or AI Use Case with The Graph (From Scratch) | Candidate through evidence-guided agent use. | Demonstrate live Graph-dependent reasoning and confirm project track. |
-| Chainlink: Best Confidential Workflow | Strong technical fit with retained hosted execution. | Show private-handler code and public execution evidence. |
-| Bazantic: Best Recipe that uses EthGlobal Hackathon Sponsor APIs | Strong candidate through the two-service Recipe. | Preserve raw calls, result, recording, and account attribution. |
-| Bazantic: Agentify a new API | Eligibility not established. | The additional non-sponsor service requirement is not established by adding Graph. |
-| Continuity-only categories | Not recommended without track confirmation. | Do not infer eligibility from working integrations. |
-| Chainlink: Automated Liquidation Protection Challenge | Not pursued. | Tare's Base Sepolia exit is not the official challenge integration. |
-
-Names and rules were checked on the official
-[Graph](https://ethglobal.com/events/ethonline2026/prizes/the-graph),
-[Chainlink](https://ethglobal.com/events/ethonline2026/prizes/chainlink), and
-[event prize page containing Bazantic](https://ethglobal.com/events/ethonline2026/prizes).
-The [prize review](docs/PRIZE_TRACKS.md) separates fit from eligibility.
+The public integration guides describe each path and its evidence boundaries.
 
 ## Limitations
 
@@ -281,7 +263,7 @@ The browser suite requires Playwright, an installed browser, and the running loc
 server. Graph builds, CRE compilation, and container test prerequisites are in
 the [Graph guide](docs/GRAPH_INTEGRATION.md),
 [CRE guide](docs/CHAINLINK_CONFIDENTIAL_WORKFLOW.md), and
-[verification record](docs/TEAM_HANDOFF.md).
+[CI configuration](.github/workflows/ci.yml).
 
 ## Routes and interfaces
 
@@ -317,8 +299,13 @@ These are logical modules under one root package, not separate pnpm workspaces.
 
 ## Testing and acceptance
 
-The [dated verification record](docs/TEAM_HANDOFF.md) distinguishes current local
-tests from historical hosted acceptance. Tests exercise malformed input, source
+Local verification on 2026-09-13 passed 178 core tests, 11 web tests, 12 CRE tests,
+both Graph mapping builds, CRE WASM compilation, and Chrome regressions across
+all four routes at widths from 320px to 1440px. The runtime was Node 24.13.0 and
+Bun 1.4.2. Docker-based Graph Node and Foundry tests were not rerun in that pass.
+See [CI](.github/workflows/ci.yml) for the separate suite commands.
+
+Tests exercise malformed input, source
 disagreement, incomplete evidence, replay, authentication, exact unit display, and
 agent claim boundaries. Browser fixtures are not live-provider acceptance.
 

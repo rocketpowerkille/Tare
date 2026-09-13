@@ -119,9 +119,11 @@ Compilation produces ignored WASM under `.tare/cre/`; it is not hosted acceptanc
 The 12 workflow unit tests use controlled evidence and capability stubs. They test
 private-threshold changes, missing/stale/recorded evidence, API failure, malformed
 configuration, and unsuccessful delivery. They are not an actual TEE simulation.
-The retained authenticated simulator and deployment procedure is in
-[phase seven](PHASE_7.md); it requires separately configured local secrets and CRE
-access. No simulation with private credentials was rerun for this documentation.
+For authenticated simulation, review the
+[workflow targets](../workflows/cre/workflow.yaml) and
+[example configuration](../workflows/cre/config.example.json). Simulation requires
+separately configured local secrets and CRE access. No simulation with private
+credentials was rerun for the 2026-09-13 documentation verification.
 
 With a running Docker Linux engine, the repository's Foundry command is:
 
@@ -130,14 +132,12 @@ docker run --rm --user 0:0 --entrypoint forge -v "${PWD}:/work" -w /work/contrac
 ```
 
 Receiver tests cover unauthorized callers, altered payloads, stale evidence,
-wrong-share terms, replay, and post-state invariants. The previous 23-test result
-is historical; Docker was unavailable for this review. Do not re-arm, deploy, or
+wrong-share terms, replay, and post-state invariants. A previous 23-test result was
+reported; Docker was unavailable for the documentation verification. Do not re-arm, deploy, or
 resume a workflow merely to reproduce a read-only report.
 
-## Submission boundary
+## Scope boundary
 
-The official [Confidential Workflow category](https://ethglobal.com/events/ethonline2026/prizes/chainlink)
-accepts meaningful confidential execution with private input and simulation or
-deployment evidence. Tare supplies a concrete handler and retained hosted result.
-Sponsor acceptance remains their decision. This is not the separate Ethereum
-Sepolia liquidation challenge, a security audit, or production-readiness evidence.
+Tare supplies a concrete confidential handler and retained hosted testnet result.
+This is not the separate Ethereum Sepolia liquidation challenge, a security audit,
+or production-readiness evidence.

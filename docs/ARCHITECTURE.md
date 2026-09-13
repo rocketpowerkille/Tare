@@ -1,201 +1,113 @@
 # Architecture
 
-For the current submission overview, start with [the README](../README.md).
-This document retains the module and development-phase rationale. Current
-acceptance boundaries are in [the verification record](TEAM_HANDOFF.md).
+Tare separates evidence acquisition, supported protocol calculations, comparison,
+and presentation. The same pure calculations are reused for live acquisition and
+saved-capture replay. The system has no general solvency or safety oracle.
 
-Phase seven keeps private policy rules and V1 report projection in `packages/policy`.
-The isolated `workflows/cre` package owns enclave secret access, API acquisition,
-redacted signing and guarded Base Sepolia report submission. Its V1 projection trusts the
-configured Tare service and cannot upgrade Ethereum lending backing to verified evidence.
-The separate Base producer pins two differently hosted RPCs, checks allowlisted contract
-bytecode and reconciles both custody layers at one block before creating eligible evidence.
-`contracts` owns the one-use ERC-4626 exit receiver; its ABI has a shared test vector
-with the workflow. A test-forwarder delivery first exercised deterministic success and
-rejection cases. A separate private-registry CRE workflow then acquired authenticated
-two-provider evidence, produced a confidential consensus report and delivered a bounded
-exit through Chainlink's production Base Sepolia Keystone Forwarder. The one-use permit
-was consumed and the workflow was paused after acceptance.
-See [phase seven](PHASE_7.md).
-
-Phase-five interfaces add `packages/service` for request validation, provider
-configuration, bounded operation dispatch and named example replay. `apps/api`
-owns HTTP and the generated OpenAPI contract; `apps/mcp` owns MCP stdio transport;
-`apps/web` is the static explorer served by that API. Both transports return the
-existing reports without recalculating or relabeling their evidence. Neither
-accepts a provider URL, credential or arbitrary filesystem path in a request.
-`apps/api/src/access.ts` owns optional hosted authentication, origin validation
-and bounded per-client quotas. Local serving defaults to loopback; an external
-bind requires configured hosted access.
-`packages/service/src/composition.ts` recomputes and joins the resolution, share
-capture and direct Graph response; it reuses the existing verifiers. The web
-controller owns requests and temporary access tokens. React report components
-under `apps/web/src/components/explorer/` own rendering and downloadable evidence.
-`packages/receipts/src/explanation.ts` creates deterministic explanation context;
-the browser copy action does not call an LLM or Bazantic. The CLI remains usable
-independently.
-See [phase five](PHASE_5.md).
-
-The CLI entry point parses and dispatches commands; wallet, snapshot, demo, live
-and verification workflows have separate handlers. Argument utilities are shared,
-and live receipt formatting belongs to `packages/receipts`.
-
-Share verification separates `capture.ts` (evidence schemas), `shares.ts` (source
-acquisition), `comparison.ts` (pure checks) and `report.ts` (validation and replay).
-The existing `shares.ts` exports remain available to callers. Live tests are split
-into accounting, source-client and CLI cases, using shared HTTP/process fixtures
-under `tests/helpers/`.
-
-Phase two extends this layout with `packages/domain/src/v2.ts`,
-`packages/adapters/src/index.ts`, and the version-two resolver/receipt modules.
-The schema-one path remains supported independently.
+## Interfaces and shared service
 
 ```text
-synthetic response recording -> adapter registry -> validated schema 2 snapshot
-schema 2 snapshot ---------------------------------------> deterministic resolver
-                                                           -> evidence receipt
+Web UI / HTTP client / CLI / MCP client
+  -> operation validation and configured provider selection
+  -> acquisition and supported protocol traversal
+  -> eligible comparisons and value calculations
+  -> full report or compact agent projection
 ```
 
-`snapshot normalize` exports the intermediate format. `replay` performs both steps;
-`resolve` accepts either normalized schema version. Adapter response validation is
-separate from envelope/reference validation. Unsupported adapters and invalid source
-response shapes produce opaque nodes; programmer exceptions fail visibly.
+| Component | Responsibility |
+| --- | --- |
+| `apps/web` | React investigation workspace, report views, source details, and downloads. |
+| `apps/api` | HTTP routes, generated OpenAPI, hosted authentication, origins, and quotas. |
+| `apps/cli` | Input/output coordination, bounded file operations, live commands, and replay. |
+| `apps/mcp` | Local stdio MCP transport over shared service operations. |
+| `packages/service` | Request schemas, configuration, dispatch, and named examples. |
 
-Version two adds a global edge budget alongside depth and visit limits. Dependencies
-are recorded separately from traversed holdings. Observations, root balances and
-holding/debt edges are checked against the common block and declared source health.
-See [phase two](PHASE_2.md) and [accounting](ACCOUNTING.md) for exact semantics.
+Provider URLs, credentials, and arbitrary filesystem paths are not accepted as
+evidence-operation request parameters. Local HTTP serving defaults to loopback;
+external binding requires configured hosted access. The CLI retains separate,
+explicit local provider configuration.
 
-Offline CLI inputs pass through strict schemas before reaching the deterministic resolver.
-The local snapshot is normalized evidence for a synthetic model. The resolver has
-no filesystem, provider, wallet, or transport dependency.
+## Acquisition and protocol calculations
 
-```text
-CLI arguments -> local snapshot reader -> domain validation -> resolver -> receipt
-      |                                                    -> text / JSON / file
-      +-------> watch-only profile store -> owner/network match
-      +-------> explicit EVM RPC URL -> chain check -> block-pinned native balance
-```
+`packages/sources` acquires public discovery metadata, RPC reads, Graph data, and
+eligible Chainlink price rounds. Requests have identity, size, and time bounds.
+Morpho's GraphQL API provides discovery; it is not The Graph and discovery does
+not verify a position.
 
-The native-balance path is separate from exposure resolution. It validates the RPC
-chain against the selected watch-only profile and records the observed block number
-and hash. It does not feed RPC data into the synthetic snapshot schema.
+`packages/adapters` implements supported protocol rules.
+`packages/resolver` traverses positions and attributes amounts using integer
+arithmetic. Per-path flooring, unsupported branches, cycles, missing observations,
+and budgets remain explicit. Collateral and oracle references are dependencies,
+not additional assets owned by the wallet.
 
-`domain` defines a versioned snapshot and a discriminated complete/partial receipt.
-Partial receipts contain at least one finding; complete receipts contain none.
-Verification is fixed to `unverified` for this phase, and the metric type only
-permits `unavailable`. This prevents downstream code from presenting a numerical
-headline that the offline evidence cannot support.
+V1 lending traversal and bounded Ethereum USDC V2-to-V1 traversal have different
+eligibility rules. Generic ERC-4626 reads describe the contract's accounting
+without claiming arbitrary downstream composition. The synthetic fixture model
+is separate from live protocol accounting.
 
-Snapshots include chain and block context, sources with declared health, a root
-owner/position, and uniquely identified vault/token/opaque nodes. Each observation
-carries a source and block reference. Duplicate node IDs and allocation targets
-are rejected; missing node references remain resolvable as explicit gaps.
+## Verification and provenance
 
-The resolver indexes nodes once and traverses each attributed path. It uses the
-active ancestor path to detect cycles, so converging paths remain valid. There is
-no amount-dependent result cache: the same node can receive different amounts,
-and integer floors must be preserved on each path. Independent terminal exposures
-are aggregated by node ID. Snapshot authors must assign one canonical ID per asset.
+`packages/verification` separates capture validation, acquisition, and pure
+comparisons. Indexed accounting checks validate chain, deployment identity,
+block/hash, and the declared read set. Missing observations or source disagreement
+cannot be converted into a matched result.
 
-Depth is capped at 128 vault layers. The global visit budget caps path expansion,
-including repeated visits to shared nodes. Once exhausted, traversal stops globally
-and emits an explicit gap. File size, number of nodes, number of allocations per
-node, and numeric input lengths are bounded before traversal. A block mismatch or
-unavailable source stops only the affected branch.
+Captures preserve source mode and observation context. Replay recomputes from
+saved evidence without claiming a fresh provider query. Digests identify
+normalized evidence bytes, not cryptographic proof of provider truth.
+[The evidence model](EVIDENCE_MODEL.md) defines classifications and status scope.
 
-## Phase-three live path
+## The Graph
 
-```text
-public Morpho GraphQL -> indexed owner/vault discovery and metadata
-explicit RPC URL -> chain check -> pinned block hash -> static contract calls
-                               -> MetaMorpho/Blue accounting -> block confirmation
-                               -> schema 3 receipt + raw capture
-saved raw capture -> same protocol accounting -> recorded-rpc receipt
-```
+`graph/subgraph` contains custom AssemblyScript share-ledger and accounting
+mappings. A separate accounting-only manifest avoids requiring full historical
+share reconstruction for a current-state comparison. Product composition adds
+the Token API wallet-share observation and checks eligible data against RPC.
 
-`apps/cli/src/live.ts` exposes discovery, resolution, public-example selection and
-replay. `packages/sources/src/http.ts` bounds streamed response bytes and time;
-`evm.ts` enforces RPC identity, request/deadline budgets and block-hash calls;
-`morpho.ts` validates paginated public GraphQL discovery. Provider URLs and error
-bodies are excluded from captured evidence to avoid retaining endpoint tokens.
+[The Graph guide](GRAPH_INTEGRATION.md) documents block alignment, deployment
+references, failure modes, and historical acceptance limits.
+[The local integration harness](../graph/integration/README.md) runs actual Graph
+Node mappings and reorg tests.
 
-`packages/adapters/src/morpho-blue.ts` implements the supported protocol's static
-ABI reads, interest, fee and virtual-share rules. `packages/resolver/src/live.ts`
-acquires/replays evidence and reconciles allocations against vault contract views.
-It distinguishes transport errors, unsupported/malformed evidence, bounded partial
-coverage, conversion inconsistencies and reorgs. Concurrent read groups settle
-before evidence is frozen. Schema-three receipts live in `domain/src/live.ts` and
-do not change either synthetic schema or its accounting model.
+## Chainlink policy and execution
 
-GraphQL is discovery-only and unpinned. RPC accounting uses one block hash plus a
-final confirmation; it is not an independent source consensus. Successful and
-failed contract reads are retained for deterministic replay. Collateral/oracle/IRM
-references are risk dependencies, not holdings to multiply into exposure.
-Complete V1 resolution receipts cover vault-to-Blue loan receivables only. They do
-not independently verify lending backing. Separate eligible comparison operations
-are described below; they do not upgrade loan recoverability. See [phase three](PHASE_3.md).
+`packages/policy` owns private-policy evaluation and evidence projection.
+`workflows/cre` acquires secrets and authenticated Tare evidence inside
+`handlerInTee`, evaluates the policy, and publishes bounded outputs for DON
+reporting. Eligible testnet delivery goes through the forwarder to
+`contracts/src/BoundedVaultExit.sol`.
 
-## Phase-four share-ledger comparison (live accounting accepted, history pending)
+The workflow trusts the configured Tare service for economic evidence. It does not
+independently prove lending backing. The receiver restricts chain, caller,
+workflow identity, owner consent, exact terms, freshness, and nonce. Its testnet
+execution is separate from Explorer's read-only price-feed checks.
+See [the Chainlink guide](CHAINLINK_CONFIDENTIAL_WORKFLOW.md).
 
-```text
-vault Transfer events -> AssemblyScript mapping -> Tare share-ledger subgraph
-                                                -> historical Graph query --+
-fresh Ethereum RPC -> chain check -> same-block contract reads --------------+-> share comparison
-                                                                            -> report and replay
-```
+## Agent projection and Bazantic
 
-`graph/subgraph/` maintains supply and account balances from events, with identity
-metadata read once when first observed. `sources/src/the-graph.ts` targets this
-specific schema. `verification/src/shares.ts` checks Graph metadata, optional
-deployment identity and block alignment before comparing asset, decimals, supply
-and owner shares. `apps/cli/src/verify.ts` exposes comparison and offline replay.
-The receipt schema recomputes its checks from captured evidence during validation.
+`packages/receipts` formats full and compact results.
+`explanation.ts` builds a deterministic, bounded explanation context with exact
+values, provenance, limitations, and omission counts. It does not call a model.
 
-Retained records describe local Graph Node/Anvil indexing and rollback acceptance
-and a hosted 56-read accounting match. These are historical results, not fresh
-provider checks in this documentation review. The separate creation-block ledger
-still lacks hosted historical acceptance in the repository. Share
-agreement is not backing verification. Remaining gates are in [phase four](PHASE_4.md).
-
-The accounting mapping runs separately at end of block. `accounting-reads.ts`
-defines the bounded RPC read set; `verification/accounting-capture.ts` validates
-captured data and `verification/accounting.ts` acquires/replays exact comparisons.
-Graph queries use hashes because number-pinned `_meta` may return null hashes.
-
-`adapters/morpho-v2.ts` reconstructs V2 interest and fee dilution. The bounded
-`resolver/nested.ts` expands V1 share-owning adapters through the existing V1/Blue
-analysis, preserving per-path rounding. `sources/recorded.ts` supplies validated
-offline RPC reads. New CLI handlers export captures for deterministic replay.
-
-`sources/chainlink.ts` handles price rounds and precision. `verification/backing.ts`
-consolidates loan claims without treating borrower collateral as owned cash.
-`verification/custody.ts` implements the separate canonical WETH/native ETH
-control using two RPC witnesses, with separate capture schema and CLI handler.
-Generic methodology controls in `metric.ts` cannot authorize live metrics; the
-WETH path requires raw block-aligned evidence and reports its narrow scope.
+Bazantic exposes gateway tools and Recipe-guided external agent use. The local
+stdio tool names and gateway tool names are different surfaces. The browser can
+copy explanation context or link to the public Recipe; copying does not execute
+a Recipe. Sandbox authorization metadata is distinct from settlement and vault
+evidence. See [Bazantic integration](BAZANTIC_INTEGRATION.md).
 
 ## Monitoring
 
-The phase-six CLI delegates stream decoding to the source module, pure block/undo
-transitions to the monitor engine, and capture evaluation to existing resolution
-and composition. A dedicated store commits evidence before atomic progress updates.
-The worker coordinates reconnection and bounded runs; it does not perform accounting.
-See [phase six](PHASE_6.md) for protocol scope, persistence and operational limits.
+The TypeScript monitoring consumer separates stream decoding, block/undo
+transitions, persistent checkpoints, reconnection, and evidence evaluation.
+Hosted continuous Substreams acceptance remains incomplete. A local rollback
+test or saved event stream must not be presented as a running hosted monitor.
+No custom Rust extraction module is required by the implemented consumer.
 
-## Monitoring language boundary
+## Code and test boundaries
 
-The resolver, provider clients, protocol adapters, verification, API, MCP server,
-web application, and monitoring consumer remain TypeScript. Tare's custom
-subgraph mappings use AssemblyScript and do not require Rust. Hosted continuous
-Substreams acceptance remains pending.
-
-Rust may appear only in `graph/substreams/` if Tare must author a custom
-Substreams block-extraction module. That module compiles to WebAssembly and emits
-validated, versioned change messages to the TypeScript monitoring service. Using
-an existing Substreams package does not add a Rust requirement to Tare.
-
-The custom module is gated on successful live Graph-to-resolver-to-RPC
-verification and proof that existing packages cannot supply the required events.
-See [Language strategy and Rust boundary](LANGUAGE_STRATEGY.md) for the complete
-decision and component matrix.
+Schemas belong in `packages/domain`; sources acquire evidence; adapters implement
+protocol semantics; resolvers calculate; verifiers compare; receipt code presents.
+Interface code coordinates those modules without redefining their accounting.
+Original captures and failure cases remain under `fixtures` and `tests`.
+[CI configuration](../.github/workflows/ci.yml) lists the separate application,
+Graph, CRE, and contract checks.

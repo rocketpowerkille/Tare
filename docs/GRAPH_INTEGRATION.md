@@ -71,8 +71,8 @@ creation-block ledger.
 
 | Evidence | What it supports |
 | --- | --- |
-| [Phase-four note](PHASE_4.md) | Reports 56/56 matches, no indexing errors, and zero mismatches at block `25953771` with the accounting CID pinned. |
-| [Two-service Recipe note](BAZANTIC_MULTI_SERVICE.md) | Reports a healthy Graph head at `25961875` and a 56-read matched Tare result. |
+| [Subgraph acceptance note](../graph/subgraph/README.md) | Reports 56/56 matches, no indexing errors, and zero mismatches at block `25953771` with the accounting CID pinned. |
+| Two-service Recipe test, reported on 2026-09-12 | Reported a healthy Graph head at `25961875` and a 56-read matched Tare result. Raw output is not included in this repository. |
 | [Local Graph Node record](../fixtures/integration/graph-node-reorg.json) | Retains actual local indexing and reorg rollback evidence, not mainnet acceptance. |
 
 The hosted notes are historical prose records. Raw hosted Graph/Token API responses
