@@ -48,9 +48,6 @@
 .partial-evidence { padding: 24px; background: var(--surface-subtle); border-bottom: 1px solid var(--line); }
 .partial-evidence > p { font-size: .84rem; }
 .path-node small { overflow-wrap: anywhere; }
-.report-sections { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 24px; border-bottom: 1px solid var(--line); padding-bottom: 16px; }
-.report-sections a { color: var(--green); font-size: .78rem; text-decoration: none; }
-.report-sections a:hover { text-decoration: underline; }
 .explain-report { border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-block: 24px; background: var(--surface-subtle); }
 .explain-report summary { cursor: pointer; font-size: .84rem; font-weight: 600; }
 .explain-report h3 { font-size: .95rem; margin-top: 16px; }

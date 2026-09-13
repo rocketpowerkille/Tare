@@ -34,6 +34,7 @@ try {
   assert.equal(await page.getByRole('heading', { name: 'Ask about this report' }).count(), 0);
   await page.locator('#example').selectOption('steakhouse-usdc');
   await page.getByRole('button', { name: 'Replay example', exact: true }).click();
+  await page.getByRole('tab', { name: 'Ask about this report', exact: true }).click();
   await page.getByRole('heading', { name: 'Ask about this report' }).waitFor();
   const button = page.getByRole('button', { name: 'Ask with Bazantic', exact: true });
   assert.equal(await button.isDisabled(), true);
@@ -48,10 +49,13 @@ try {
   assert.equal(calls, 1, 'Same question/snapshot must not execute twice');
   await page.locator('.assistant-citations a').first().click();
   assert.equal(await page.locator('.assistant-facts').getAttribute('open'), '');
-  await page.getByText('Full JSON report', { exact: true }).click();
+  await page.getByRole('tab', { name: 'Raw JSON', exact: true }).click();
+  assert.equal(await page.locator('.raw-report pre').isVisible(), true);
   assert.ok(await page.getByRole('button', { name: 'Download report', exact: true }).isVisible());
   const download = page.waitForEvent('download'); await page.getByRole('button', { name: 'Download capture', exact: true }).click();
   assert.equal((await download).suggestedFilename(), 'tare-capture.json');
+  await page.getByRole('tab', { name: 'Ask about this report', exact: true }).click();
+  assert.equal(await page.locator('.assistant-answer h4').count(), 7, 'Switching tabs preserves the completed answer');
   await page.locator('.explain-report > summary').click();
   await page.getByRole('button', { name: 'Copy explanation context', exact: true }).click();
   assert.match(await page.evaluate(() => navigator.clipboard.readText()), /saved-evidence/);

@@ -63,6 +63,7 @@ try {
   await page.getByRole('button', { name: 'Replay example', exact: true }).click();
   await page.locator('.report-view').waitFor();
   const node = page.locator('.path-node').nth(1);
+  await page.getByRole('tab', { name: 'Ask about this report', exact: true }).click();
   await page.locator('.explain-report > summary').focus();
   await page.keyboard.press('Enter');
   assert.match(await page.locator('.explain-report').innerText(), /saved evidence, not a fresh blockchain check/);
@@ -99,6 +100,7 @@ try {
   }
   await page.setViewportSize({ width: 1440, height: 1000 });
   if (await node.count()) {
+    await page.getByRole('tab', { name: 'Evidence path', exact: true }).click();
     await node.focus();
     await page.keyboard.press('Enter');
     assert.equal(await node.getAttribute('aria-pressed'), 'true');
@@ -115,6 +117,7 @@ try {
   await page.locator('.error-banner').waitFor();
   await page.locator('input[type=file]').setInputFiles(new URL('../fixtures/live/steakhouse-usdc.capture.json', import.meta.url).pathname.replace(/^\/(?=[A-Z]:)/, ''));
   await page.locator('.activity-line').filter({ hasText: 'Your result is ready' }).waitFor();
+  await page.getByRole('tab', { name: 'Ask about this report', exact: true }).click();
   await page.locator('.explain-report > summary').click();
   await page.locator('.bazantic-demo > summary').click();
   assert.match(await page.getByLabel('Bazantic gateway command', { exact: true }).innerText(), /\/api\/status/);
@@ -187,6 +190,7 @@ try {
     await fits(`fixture-backed priced report at ${width}`);
     await page.screenshot({ path: new URL(`priced-report-${width}.png`, output).pathname.replace(/^\/(?=[A-Z]:)/, ''), fullPage: true });
   }
+  await page.getByRole('tab', { name: 'Evidence path', exact: true }).click();
   await page.locator('.text-path > summary').click();
   await fits('expanded text outline at 320px');
   console.log('Fixture-backed pricing, block mismatch notice, copying and text outline passed.');
@@ -245,6 +249,7 @@ try {
   await page.route('**/api/example', route => route.fulfill({ json: { ...fixture, sourceMode: 'recorded-example' } }));
   await page.getByRole('button', { name: 'Replay example', exact: true }).click();
   await page.locator('.report-view').waitFor();
+  await page.getByRole('tab', { name: 'Ask about this report', exact: true }).click();
   await page.locator('.explain-report > summary').click();
   assert.match(await page.locator('.explanation-status-grid').innerText(), /Bazantic session authorized this request/);
   assert.match(await page.locator('.explanation-status-grid').innerText(), /ui-test-only/);

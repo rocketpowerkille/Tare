@@ -51,15 +51,28 @@ export async function checkWorkspace({ page, origin, fixture, capabilities, fits
   await fits('partial position at mobile width');
   releaseGraph();
   await page.locator('.composed-report').waitFor();
+  await page.getByRole('tab', { name: 'Source checks', exact: true }).click();
   assert.match(await page.locator('.source-cards').innerText(), /Technical error/);
   assert.match(await page.locator('.source-cards').innerText(), /Source unavailable/);
   await page.locator('.evidence-timeline > summary').click();
   assert.equal(await page.locator('.stage-error').count(), 1);
-  await page.locator('.raw-report > summary').click();
+  await page.getByRole('tab', { name: 'Raw JSON', exact: true }).click();
   assert.equal(JSON.parse(await page.locator('.raw-report pre').innerText()).protocol, fixture.protocol);
+  await page.getByRole('tab', { name: 'Summary', exact: true }).click();
   assert.match(await page.locator('.plain-summary').innerText(), /What this report does not establish/i);
-  await page.locator('.report-sections').getByRole('link', { name: 'Limitations' }).click();
-  assert.ok(new URL(page.url()).hash.endsWith('Limitations'));
+  const url = page.url();
+  for (const name of ['Summary', 'Evidence path', 'Source checks', 'Ask about this report', 'Limitations', 'Raw JSON']) {
+    await page.getByRole('tab', { name, exact: true }).click();
+    assert.equal(await page.getByRole('tabpanel').count(), 1, 'Only the selected section is exposed');
+    assert.equal(await page.getByRole('tabpanel', { name, exact: true }).isVisible(), true);
+    assert.equal(page.url(), url, 'Tab changes do not navigate or change the URL');
+    await fits(`report tab ${name}`);
+  }
+  await page.getByRole('tab', { name: 'Raw JSON', exact: true }).focus();
+  await page.keyboard.press('Home');
+  assert.equal(await page.getByRole('tab', { name: 'Summary', exact: true }).getAttribute('aria-selected'), 'true');
+  await page.keyboard.press('ArrowDown');
+  assert.equal(await page.getByRole('tab', { name: 'Evidence path', exact: true }).getAttribute('aria-selected'), 'true');
   await fits('expanded report and raw JSON on mobile');
   console.log('Delayed connection, retry, blank credential, automatic network, partial path, source errors, raw JSON and reduced motion passed.');
 }
