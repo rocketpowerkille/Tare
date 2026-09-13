@@ -1,5 +1,15 @@
 # Bazantic integration
 
+## Why this integration exists
+
+An HTTP endpoint gives an agent data, but does not by itself teach it how to read
+vault shares, accounting, source gaps or recorded evidence. Bazantic supplies the
+hosted tool-access layer and reusable Recipes; Tare supplies exact facts and
+interpretation boundaries. A Recipe answer is useful only if it preserves those
+boundaries. The gateway is not a vault verifier, and payment is not evidence.
+The [product guide](PRODUCT_GUIDE.md#bazantic-reusable-agent-access-and-evidence-grounded-explanation)
+explains how this differs from simply copying a prompt.
+
 Bazantic makes Tare callable by an agent through a gateway and hosted MCP tools,
 then supplies reusable Recipe guidance for choosing tools and interpreting results.
 The frontend's copy-context convenience is not this execution path.

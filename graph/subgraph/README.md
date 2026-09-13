@@ -39,7 +39,7 @@ TypeScript/pnpm application. Neither installation nor build deploys anything.
 - An account has no entity until a transfer touches it. The verifier treats a
   missing entity as unknown, even when it could mean an unused zero-balance account.
 - Graph Node owns canonical-chain indexing and rollback. The Docker integration
-  test exercises actual rollback; hosted mainnet acceptance is still pending.
+  test exercises actual local rollback; it is not a hosted-mainnet reorg test.
 
 ## Query contract
 
@@ -82,9 +82,12 @@ note, not a claim that a later query reproduces the same block or current health
 
 Graph Studio version `0.1.0` is deployed at
 `tare-steakhouse-usdc-ethereum` with manifest CID
-`QmZrGd5mh9V5x57J4ETN9sWVP2P3VMVpRgQ7p5XK9CW1hw`. Full historical share
-acceptance is not established in this repository. A current sync percentage alone
-does not establish historical acceptance. The separate
+`QmZrGd5mh9V5x57J4ETN9sWVP2P3VMVpRgQ7p5XK9CW1hw`. A maintainer-supplied
+hosted capture at `25941070` replayed on 2026-09-13 with four share and 56 accounting
+matches. The [acceptance record](../../docs/GRAPH_INTEGRATION.md#historical-acceptance-record)
+retains its digest and limitations; the supplied files are not bundled. This does
+not establish complete synchronization or all historical accounts. A sync
+percentage alone is not verification. The separate
 `tare-live-accounting` endpoint and its historical 56/56 comparison cover bounded current
 accounting agreement, not historical share reconstruction. `GRAPH_API_KEY` is
 optional when the endpoint does not require one. Keep any key local. See the

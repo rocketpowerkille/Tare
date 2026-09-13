@@ -33,6 +33,7 @@ setup. Never put actual provider credentials, API tokens or wallet keys in Git.
 | --- | --- |
 | Ethereum reads | `TARE_RPC_URL`; a second distinct `TARE_SECONDARY_RPC_URL` is needed for WETH custody. |
 | Base / Arbitrum reads | `TARE_BASE_MAINNET_RPC_URL` / `TARE_ARBITRUM_RPC_URL`; selecting a chain never falls back to Ethereum's RPC. |
+| Chainlink reference prices | Uses those same network RPCs and the exact [feed allowlist](CHAINLINK_COVERAGE.md). No Chainlink API key; provider plans may have usage limits or costs. Unsupported assets remain unpriced. |
 | Morpho discovery | Web/API `TARE_MORPHO_URL`, default `https://api.morpho.org/graphql`. CLI uses `--graphql-url`. |
 | Euler discovery | Web/API enabled by default through `TARE_EULER_API_URL`, default `https://v3.euler.finance/v3`; disable with `TARE_EULER_DISCOVERY=false`. No payer or API key is added. |
 | Additional ERC-4626 vaults | `TARE_ERC4626_REGISTRY`: JSON array of at most 25 `{chainId,vault,name,protocol}` entries. Reads require that chain's RPC. Missing or incomplete registry reads make discovery incomplete. |
@@ -78,6 +79,7 @@ see the [HTTP/MCP reference](API_REFERENCE.md).
 | `live nested`, `live nested-replay` | Supported Ethereum USDC V2-to-V1 traversal or capture replay. |
 | `verify shares`, `verify replay` | Share-ledger/RPC comparison or replay of its verification report. |
 | `verify accounting`, `verify accounting-replay` | Vault/market accounting comparison or capture replay. |
+| `verify historical`, `verify historical-replay` | Steakhouse USDC Ethereum shares plus accounting at one covered historical block, or replay of its combined capture. Requires the historical Graph configuration and archive RPC for acquisition, not for replay. |
 | `verify graph-products`, `verify graph-replay` | Token API + Studio + RPC composition or replay. Use `TARE_GRAPH_TOKEN_API_URL` for an endpoint override; the root CLI parser does not accept `--token-api-url`. |
 | `verify custody`, `verify custody-replay` | Ethereum WETH wrapper custody control or replay. |
 | `verify base-custody`, `verify base-custody-replay` | Allowlisted Base Sepolia custody control or replay; no exit transaction. |

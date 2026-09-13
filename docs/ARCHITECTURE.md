@@ -3,6 +3,8 @@
 Tare separates evidence acquisition, supported protocol calculations, comparison,
 and presentation. The same pure calculations are reused for live acquisition and
 saved-capture replay. The system has no general solvency or safety oracle.
+For user problems and the rationale behind each integration, start with the
+[product guide](PRODUCT_GUIDE.md). This document describes implementation boundaries.
 
 ## Interfaces and shared service
 
@@ -48,6 +50,9 @@ V1 lending traversal and bounded Ethereum USDC V2-to-V1 traversal have different
 eligibility rules. Generic ERC-4626 reads describe the contract's accounting
 without claiming arbitrary downstream composition. The synthetic fixture model
 is separate from live protocol accounting.
+Discovered V2 positions outside the Ethereum USDC nested path use that generic
+reader when their network RPC is configured. The UI labels them Accounting only;
+this fallback does not broaden the nested adapter's accepted strategies.
 
 Morpho V1 and generic ERC-4626 acquisition support Ethereum, Base and Arbitrum;
 generic ERC-4626 also supports Base Sepolia. Euler EVK/EulerEarn direct supply
@@ -59,10 +64,12 @@ networks can be analyzed. See [configuration and interfaces](OPERATIONS.md).
 
 Explorer, Investigate and Examples are separate routes. Report sidebar tabs and
 Investigation tool tabs retain their mounted state while switching within a page.
-Navigating to another workspace or refreshing clears current reports and inputs;
-download evidence before leaving. Only accepted access credentials are restored
-from tab-scoped session storage and revalidated on reload. Disconnect removes
-that credential locally; it does not revoke an API key or gateway grant.
+The public wallet address is shared in memory between Explorer and Investigate;
+editing it clears results for the previous wallet. Navigation clears reports and
+other workspace inputs, but retains that public wallet. Refreshing or disconnecting
+clears it too; download evidence before leaving. Accepted access credentials are
+restored separately from tab-scoped session storage and revalidated on reload.
+Disconnect removes that credential locally; it does not revoke an API key or grant.
 Dark mode is the default; the selected theme is retained in local storage.
 Storage-disabled browsers can still use the page without persistence.
 
@@ -84,13 +91,24 @@ normalized evidence bytes, not cryptographic proof of provider truth.
 mappings. A separate accounting-only manifest avoids requiring full historical
 share reconstruction for a current-state comparison. Product composition adds
 the Token API wallet-share observation and checks eligible data against RPC.
+The separate historical operation joins the historical deployment's share and
+accounting comparisons at one indexed block. It requires matching position,
+deployment, block/hash/time and declared coverage, and always returns
+non-executable historical scope. It is not a second Token API composition.
 
 [The Graph guide](GRAPH_INTEGRATION.md) documents block alignment, deployment
 references, failure modes, and historical acceptance limits.
 [The local integration harness](../graph/integration/README.md) runs actual Graph
 Node mappings and reorg tests.
 
-## Chainlink policy and execution
+## Chainlink valuation, policy and execution
+
+The shared chain/address feed allowlist prices eligible native-USDC and
+canonical-WETH accounting quotes on Ethereum, Base and Arbitrum. Browser
+orchestration sends the confirmed position block/hash; the source validates feed
+rounds and age and performs L2 sequencer checks. Saved captures are not repriced
+with fresh data. This is a read-only valuation path, separate from the policy
+workflow below. See [valuation coverage](CHAINLINK_COVERAGE.md).
 
 `packages/policy` owns private-policy evaluation and evidence projection.
 `workflows/cre` acquires secrets and authenticated Tare evidence inside

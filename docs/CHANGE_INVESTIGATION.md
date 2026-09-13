@@ -4,6 +4,17 @@ These features extend the existing explorer and report context. They do not
 start a continuous monitor, deploy a subgraph or Substreams service, or authorize
 payments. Their implementation and fixture tests are not live-provider acceptance.
 
+## Why keep a separate investigation workspace?
+
+Explorer explains one selected position. Investigation answers relationships that
+one report cannot: whether returned vaults share a market, or whether the same
+position's values differ across two blocks. A balance can stay unchanged while
+its attributed exposure changes. Reusing the evidence engine preserves common
+rules instead of inventing a stronger verification label for comparisons.
+The third tool, [Historical verification](GRAPH_INTEGRATION.md#historical-verification-without-waiting-for-sync),
+asks a different question: whether indexed shares and accounting agree with RPC
+at one covered historical block. See [the product rationale](PRODUCT_GUIDE.md).
+
 ## Compare two blocks
 
 In `/investigate`, select **Changes over time**. Supply one
@@ -68,8 +79,9 @@ pure calculation over returned reports, not a new provider query. The view shows
 each vault's attributed raw amount, asset/decimals, source block and dependencies.
 Discovery can also return Euler or registered ERC-4626 supply positions; their
 generic accounting reports do not receive invented Morpho market overlap.
-The two tool tabs retain forms and results while switching. Reloading or leaving
-the workspace clears that work; use report downloads before doing so.
+The three investigation tool tabs retain forms and results while switching.
+Reloading or leaving the workspace clears that work; the shared public wallet
+persists across workspace navigation, not refresh. Use report downloads to keep results.
 
 A sum is available only for the same chain, market parameters, asset units and
 block hash, with every amount present. Different-block relationships remain
@@ -91,13 +103,12 @@ aggregation boundaries, acquisition cancellation, access/payment stops and
 citeable snapshots. Browser fixtures cover input validation, pinned requests,
 source states, downloads, uploads, mobile layout and keyboard operation.
 
-Historical local verification of the initial implementation on 2026-09-13 passed `node --run check`,
-`node --run verify` (225 core tests, build and CLI demonstrations),
-`node --run test:web` (12 tests), and `node --run test:web:browser` using Chrome.
-The browser suite covered all four routes at 320, 390, 768, 1024 and 1440px;
-new-feature cases used isolated fixtures. Desktop comparison and mobile overlap
-screenshots were also reviewed. No live provider or paid Recipe acceptance was
-performed, and no deployment or gateway configuration was changed.
+Run `node --run check`, `node --run verify`, `node --run test:web` and
+`node --run test:web:browser` against the current checkout. The browser suite
+covers all six routes at 320, 390, 768, 1024 and 1440px; investigation, historical
+verification and source-failure scenarios use isolated fixtures. Passing these
+tests does not establish hosted two-block acquisition, provider availability or
+paid Recipe acceptance. See [verification setup](OPERATIONS.md#verification).
 
 For a controlled live demonstration, use a supported position and two blocks
 within both archive-RPC and Graph coverage. Retain both downloaded reports and

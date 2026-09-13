@@ -1,8 +1,11 @@
 import { AlertTriangle, ArrowRight, BookOpen, CheckCircle2, CircleHelp, Database, Eye, LockKeyhole, Network } from '../components/Icons';
 import { AppLink } from '../components/AppLink';
+import { DocumentationRationale } from '../components/DocumentationRationale';
 
 const sections = [
   ['overview', 'Overview'],
+  ['why-tare', 'Why Tare exists'],
+  ['integration-roles', 'Integration roles'],
   ['workspaces', 'Choose a workspace'],
   ['coverage', 'Vault and network coverage'],
   ['how-it-works', 'How it works'],
@@ -38,15 +41,17 @@ export function DocsPage() {
         </div>
       </section>
 
+      <DocumentationRationale />
+
       <section className="doc-section" id="workspaces">
         <p className="section-label">Choose a workspace</p><h2>Explorer, Investigate or Examples?</h2>
         <div className="doc-cards">
           <article><h3><AppLink href="/explore">Explorer</AppLink></h3><p>What does this one position rest on? Select one wallet–vault pair for a detailed trace, observed values, eligible source checks and limitations.</p></article>
-          <article><h3><AppLink href="/investigate">Investigate</AppLink></h3><p>What do my positions share, or what changed? Check at most 3 supported positions for shared market dependencies, or compare one position at two explicit blocks.</p></article>
+          <article><h3><AppLink href="/investigate">Investigate</AppLink></h3><p>What do positions share, what changed, or did historical records agree? Compare at most 3 supported positions, one position at two blocks, or Steakhouse USDC's indexed shares and accounting at one historical block.</p></article>
           <article><h3><AppLink href="/examples">Examples</AppLink></h3><p>How do I read or reproduce a report? Replay saved examples or upload a compatible capture. This does not acquire fresh blockchain evidence.</p></article>
         </div>
         <p>Explorer and Investigate reuse the same evidence engine. Investigate adds comparisons, not stronger verification: it is neither a complete wallet inventory nor continuous monitoring. Shared markets do not predict losses; changed values do not establish their cause. Bazantic can explain the returned facts after consent, but does not add verification.</p>
-        <p>Investigate opens Wallet overview immediately; select Changes over time for comparisons. Your public wallet address carries between Explorer and all Investigate tools. Editing it updates those fields and clears investigation results for the previous wallet. Switching tool tabs otherwise preserves inputs and results. Report sidebar tabs show one section at a time and support arrow keys, Home and End. Navigating to another workspace clears reports and other inputs; refreshing also clears the wallet address, so download reports you want to keep. An accepted access code is restored separately.</p>
+        <p>Investigate has three tools: Wallet overview, Changes over time and Historical verification. Your public wallet address carries between Explorer and all Investigate tools. Editing it updates those fields and clears investigation results for the previous wallet. Switching tool tabs otherwise preserves inputs and results. Report sidebar tabs show one section at a time and support arrow keys, Home and End. Navigating to another workspace clears reports and other inputs; refreshing also clears the wallet address, so download reports you want to keep. An accepted access code is restored separately.</p>
         <p>Use the theme button in the header to switch between dark and light. Dark is the default; your preference is remembered when browser storage is available.</p>
       </section>
 
@@ -87,7 +92,7 @@ export function DocsPage() {
           <div><strong>Live</strong><p>The report acquired provider data during the check. Its selected block may be historical or the latest indexed block, not necessarily the chain head.</p></div>
           <div><strong>Recorded</strong><p>The report replayed a saved capture. It is useful for reproducibility but does not describe current state.</p></div>
           <div><strong>Matched</strong><p>The compared observations agreed within the narrow check shown in the report.</p></div>
-          <div><strong>Incomplete</strong><p>Required evidence was missing, unavailable, inconsistent, or outside the supported scope.</p></div>
+          <div><strong>Incomplete</strong><p>Required evidence or coverage was missing. A mismatch separately reports disagreement; inspect the original status and findings instead of treating every unsuccessful check as the same error.</p></div>
           <div><strong>Unavailable metric</strong><p>Tare did not have enough verified evidence to calculate the metric safely.</p></div>
         </div>
         <h3>Keep evidence categories separate</h3>
@@ -105,13 +110,16 @@ export function DocsPage() {
         <div className="plain-example"><strong>Just want to learn first?</strong><p>Open the <AppLink href="/examples">Examples page</AppLink> to replay saved evidence or upload a capture. Saved examples explain the report format, but they are not a fresh check of your position.</p></div>
         <p>Discovery searches supported networks automatically. Selecting a supported candidate fills the network and check type; manual configuration remains under Advanced options. A discovered position can be unsupported for analysis if its adapter or RPC is missing.</p>
         <p>The evidence timeline follows real requests. Position, layer and allocation results arrive together in the primary response, not as a live blockchain event stream. A source is not marked complete merely because time has passed.</p>
-        <p>To check several positions, open <AppLink href="/investigate">Investigate</AppLink> and expand <strong>Investigate a wallet across supported vaults</strong>. It discovers up to 10 candidates and analyzes at most 3 supported positions with eligible source checks. This makes new read-only requests and is not a complete wallet inventory.</p>
+        <p>To check several positions, open <AppLink href="/investigate">Investigate</AppLink> and select <strong>Wallet overview</strong>. It discovers up to 10 candidates and analyzes at most 3 supported positions with eligible source checks. This makes new read-only requests and is not a complete wallet inventory.</p>
         <AppLink href="/explore" className="button primary">Open the explorer <ArrowRight size={17} /></AppLink>
       </section>
 
       <section className="doc-section" id="graph-verification">
-        <p className="section-label">Graph verification</p><h2>One check, two Graph products, one blockchain reference</h2>
-        <p>For a historical cross-check, open <AppLink href="/investigate">Investigate</AppLink> and select <strong>Historical verification</strong>. This separately compares Steakhouse USDC’s transfer-derived shares and accounting with RPC at one indexed Ethereum block. Full sync is not required. The report shows block time and coverage; it does not represent current wallet state or executable evidence. Missing archive RPC or historical Graph configuration keeps the check unavailable or incomplete.</p>
+        <p className="section-label">Graph verification</p><h2>Indexed evidence, with explicit comparison scope</h2>
+        <h3>Historical shares and accounting</h3>
+        <p>Open <AppLink href="/investigate">Investigate</AppLink> and select <strong>Historical verification</strong>. This compares Steakhouse USDC’s transfer-derived shares and accounting with RPC at one indexed Ethereum block. Leave the block blank to select the historical index's head, or enter a covered block. Combined coverage begins at 25,937,756; full sync is not required. The report shows block time and coverage, not current wallet state or executable evidence. Missing archive RPC or historical Graph configuration keeps the check unavailable or incomplete.</p>
+        <p>A maintainer-supplied hosted capture at block 25,941,070 reproduced four matched share comparisons and 56 matched accounting comparisons in local replay on 13 September 2026. This is a bounded historical result, not a fresh provider query during documentation review or proof of full synchronization. See the <a href="https://github.com/rocketpowerkille/Tare/blob/main/docs/GRAPH_INTEGRATION.md#historical-acceptance-record" target="_blank" rel="noreferrer">acceptance record and reproduction limits</a>.</p>
+        <h3>Token API plus Studio product composition</h3>
         <p>When configured, The Graph composition runs alongside supported Ethereum MetaMorpho V1 analysis. It can also run from Advanced options. The Token API and Studio provide distinct observations; Studio accounting coverage is specific to the configured vault, not every discovered vault.</p>
         <ol className="numbered-steps">
           <li><span>1</span><div><strong>Token API reads the position</strong><p>The Graph Token API reports the wallet's current balance of vault-share tokens.</p></div></li>
@@ -170,7 +178,7 @@ export function DocsPage() {
           <details><summary>What does Chainlink price per unit mean?</summary><p>It is the USD reference price for one whole unit of the named underlying asset, not one raw integer unit or necessarily one vault share. Check the asset, source and timestamp. A price does not establish custody or backing.</p></details>
           <details><summary>Does Explorer run the scheduled Chainlink workflow?</summary><p>No. Eligible Explorer price checks are separate from the scheduled CRE policy workflow. The latest retained workflow record is paused with execution disabled; opening this page does not resume it.</p></details>
           <details><summary>Can Tare find all of my vaults from my wallet?</summary><p>No. Discovery combines indexed Morpho positions, enabled Euler supply discovery and configured ERC-4626 vaults. Euler reads at most 100 indexed entries and omits subaccounts, deprecated vaults and unsupported types. Euler analysis checks supply shares and conversion quotes, not borrowing or lending risks. Yearn discovery is not yet integrated. Compatible vaults can still be checked by address. Empty results never prove a wallet has no other positions.</p></details>
-          <details><summary>What does Supported now mean?</summary><p>It means this deployment has both a compatible adapter and a configured RPC for that network. Position found, analysis not supported yet means the index saw shares, but Tare will not imply that its current adapters can safely explain the position.</p></details>
+          <details><summary>What does Supported now mean?</summary><p>It means this deployment has an eligible analysis path and a configured RPC for that network, not that the provider was just tested or that backing is verified. Accounting only means the check reads shares and an asset conversion quote without tracing strategy allocations. An unsupported candidate remains visible without implying that its full position can be analyzed.</p></details>
           <details><summary>What amount does Tare show?</summary><p>For supported vault traces, Your position shows how much of the underlying asset the wallet's vault shares converted to at the checked block. Tare separately shows where the vault allocates assets and whether the available evidence verifies backing. A position amount does not by itself prove liquidity, safety, or redeemability.</p></details>
           <details><summary>Is there an SDK?</summary><p>There is no published Tare SDK yet. Developers can use the HTTP API, OpenAPI contract, MCP server, or command line interface.</p></details>
         </div>

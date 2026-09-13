@@ -153,6 +153,17 @@ fields directly. The local server does not expose the new HTTP investigation
 routes. No SDK package is published, and Tare's HTTP server is not a hosted `/mcp`
 transport: use the Bazantic gateway's `/mcp` or local stdio as appropriate.
 
+## Selecting the right scope
+
+Use Explorer for one position, wallet investigation for bounded shared
+dependencies, two-block comparison for endpoint differences and historical
+verification for the named vault's indexed shares plus accounting. These reuse
+service operations but answer different questions; see the
+[product guide](PRODUCT_GUIDE.md#choose-the-question-then-the-feature).
+The configured capability list is not a live provider-health check. A returned
+accounting-only position can be complete while nested allocations or independent
+backing remain unverified. Preserve the operation and source modules in clients.
+
 ## Investigation lifecycle and errors
 
 Two-block investigation reuses `/api/analyze` with explicit `blockNumber` values;

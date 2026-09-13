@@ -5,6 +5,13 @@ Recipe and shows its cited answer inside Explorer. Existing reports, source
 details, limitations, downloads, copy-context and external Recipe paths remain.
 No LLM SDK, model key or payment signer is added.
 
+The feature answers questions about a specific report, rather than making an
+agent silently analyze another position or newer block. Its value is cited
+interpretation of the same facts the user can inspect. It deliberately does not
+upgrade the report's verification status. Historical share/accounting reports
+are not yet accepted by this explanation flow; their technical report remains
+available independently. See [feature rationale](PRODUCT_GUIDE.md).
+
 ## Execution and payment
 
 Each run discovers the execution URL from Bazantic's public MCP initialization,

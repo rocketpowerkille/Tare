@@ -43,7 +43,7 @@ export function DevelopersPage() {
       <CodeBlock code={curlExample} label="Git Bash / macOS / Linux" />
       <p className="developer-note">Run GET /api/status with the same bearer token before choosing a live operation. A single /api/analyze call does not run the browser's whole Graph and Chainlink pipeline. Local setup uses Node 24 or later and pnpm 11.19.0: install dependencies, run pnpm build, then pnpm serve. Default URL: http://127.0.0.1:4318. The server does not load .env automatically.</p>
       <p>Web/API discovery combines Morpho, enabled Euler and configured ERC-4626 vaults. Inspect discoveryProtocols and networks in /api/status. Euler supply analysis uses resolve-erc4626 with the returned chainId; its debt and subaccounts remain outside this check. CLI live discover is Morpho-only.</p>
-      <a className="text-link" href="https://github.com/rocketpowerkille/ETHOnline/blob/main/docs/OPERATIONS.md">Local configuration, CLI commands and verification <ExternalLink size={15} /></a>
+      <a className="text-link" href="https://github.com/rocketpowerkille/Tare/blob/main/docs/OPERATIONS.md">Local configuration, CLI commands and verification <ExternalLink size={15} /></a>
     </section>
 
     <section className="developer-section" id="bazantic-sandbox">
@@ -55,13 +55,21 @@ export function DevelopersPage() {
     <section className="developer-section">
       <div className="section-heading"><p className="kicker">The Graph</p><h2>Compose Token API and Studio accounting</h2><p>This operation compares the wallet's vault-share balance and the subgraph accounting checkpoint with direct Ethereum RPC reads. The Graph Market token remains server-side.</p></div>
       <CodeBlock code={graphExample} label="Git Bash / macOS / Linux" />
-      <p className="developer-note">Requires configured Ethereum RPC, Graph Token API access and eligible Studio coverage. Accounting uses its indexed head; source blocks may differ from the position trace. Accounting agreement is not backing. A completed historical subgraph sync still needs separate ledger/RPC acceptance.</p>
+      <p className="developer-note">Requires configured Ethereum RPC, Graph Token API access and eligible Studio coverage. Accounting uses its indexed head; source blocks may differ from the position trace. Accounting agreement is not backing. Historical ledger/accounting verification is a separate operation using Studio and RPC, not the Token API composition.</p>
     </section>
 
     <section className="developer-section" id="workspaces">
       <div className="section-heading"><p className="kicker">Web workspaces</p><h2>One evidence engine, different scopes</h2></div>
-      <p><a href="/explore">Explorer</a> orchestrates one selected position's analysis and eligible Graph/Chainlink checks. <a href="/investigate">Investigate</a> uses /api/investigation/wallet for bounded multi-position reports and shared-market comparisons, or existing /api/analyze operations for two-block changes. <a href="/examples">Examples</a> uses /api/example and /api/replay for saved evidence. These are distinct web routes, not new evidence methodologies.</p>
+      <p><a href="/explore">Explorer</a> orchestrates one selected position's analysis and eligible Graph/Chainlink checks. <a href="/investigate">Investigate</a> uses /api/investigation/wallet for bounded multi-position reports and shared-market comparisons, or existing /api/analyze operations for two-block changes and historical share/accounting verification. <a href="/examples">Examples</a> uses /api/example and /api/replay for saved evidence. These are distinct web routes, not new evidence methodologies.</p>
       <p>All three share tab-scoped access. “Disconnect session” clears the saved credential and reloads the workspace without revoking the key or grant. Comparing reports does not create synchronized observations, prove backing or explain causation; source blocks, coverage and limitations remain attached.</p>
+    </section>
+
+    <section className="developer-section" id="design-rationale">
+      <div className="section-heading"><p className="kicker">Design rationale</p><h2>Keep acquisition, calculations and explanation separate.</h2></div>
+      <p>Sources acquire observations; adapters implement protocol semantics; resolvers calculate exact exposure; verifiers compare scoped evidence; receipts project it for people and agents. Live and replay paths reuse pure calculations. Interface code coordinates those modules instead of redefining accounting.</p>
+      <p>The Graph changes the comparison inputs and verdict: missing reads, wrong deployments and disagreements cannot produce a matched result. Chainlink changes only eligible reference valuation. Bazantic supplies agent access and Recipe execution; its authorization and answer are not vault evidence. These roles are complementary, not interchangeable verification badges.</p>
+      <p>Bounded multi-position and two-block analysis add relationships that a single report cannot answer. Explicit limits, missing values and source blocks prevent a partial inventory from being displayed as a complete portfolio. Generic ERC-4626 fallback retains useful accounting while keeping unsupported strategies out of the trace.</p>
+      <p>Follow the <a href="https://github.com/rocketpowerkille/Tare/blob/main/docs/ARCHITECTURE.md">implementation architecture</a> and <a href="https://github.com/rocketpowerkille/Tare/blob/main/docs/PRODUCT_GUIDE.md">product rationale</a>. Continuous hosted Substreams monitoring, withdrawal-limit tracking and broad independent backing verification are not implemented product claims. The separate CRE testnet workflow is paused, not an Explorer execution feature.</p>
     </section>
 
     <DeveloperEndpoints />
@@ -95,6 +103,12 @@ export function DevelopersPage() {
       <p>The separate Graph Studio gateway exposes <code>graph_tare_accounting_head</code>. Forward its unchanged Graph data object to <code>tare_compare_indexed_accounting</code> for a scoped RPC comparison. Caller-supplied Graph bytes remain labeled as such; this is not independent authentication or proof of backing.</p>
     </section>
 
+    <section className="developer-section" id="historical-verification">
+      <div className="section-heading"><p className="kicker">Historical verification</p><h2>Check indexed shares and accounting at one covered block.</h2></div>
+      <p>The additive verify-historical-graph operation uses /api/analyze and /api/replay, or tare_analyze and tare_replay over stdio MCP. It requires owner, the Steakhouse USDC vault and an optional blockNumber. Configure TARE_GRAPH_HISTORICAL_URL and TARE_GRAPH_HISTORICAL_DEPLOYMENT alongside an archive-capable TARE_RPC_URL. It returns separate share/accounting results at one historical block with executable: false. Refresh external gateway schemas before exposing the new operation there; historical reports are not yet accepted by the Recipe explanation flow.</p>
+      <p>For historical acquisition from the CLI use <code>pnpm cli verify historical --address &lt;public-wallet&gt; --out historical.capture.json</code>; replay with <code>pnpm cli verify historical-replay historical.capture.json --json</code>. A maintainer-supplied capture at block 25941070 reproduced 4 share and 56 accounting matches in local replay. That bounded artifact is not a current endpoint-health check; see the <a href="https://github.com/rocketpowerkille/Tare/blob/main/docs/GRAPH_INTEGRATION.md#historical-acceptance-record">acceptance record</a>.</p>
+    </section>
+
     <section className="developer-section" id="investigation">
       <div className="section-heading"><p className="kicker">In-page Bazantic assistant</p><h2>Explain a pinned report, not a substituted analysis</h2></div>
       <ol className="numbered-steps">
@@ -104,7 +118,6 @@ export function DevelopersPage() {
       </ol>
       <p>The pinned Recipe calls only tare_report_context. It returns JSON sections with title, text and citations, unlike the public plain-language Recipe's prose answer. Tare's runner supplies the reference and required titles in the question. Do not interchange these Recipe definitions.</p>
       <p>Two-block change investigation reuses resolve-v1 and verify-accounting through /api/analyze with explicit blockNumber values. Snapshot comparisons add positionChanges and citeable comparison.scope / comparison.change.N facts. Wallet snapshots include current.overlap.scope / current.overlap.N facts. These derived differences and relationships preserve source blocks and raw units; they do not authenticate uploaded reports or establish causation.</p>
-      <p>The additive verify-historical-graph operation uses /api/analyze and /api/replay, or tare_analyze and tare_replay over stdio MCP. It requires owner, the Steakhouse USDC vault and an optional blockNumber. Configure TARE_GRAPH_HISTORICAL_URL and TARE_GRAPH_HISTORICAL_DEPLOYMENT alongside an archive-capable TARE_RPC_URL. It returns separate share/accounting results at one historical block with executable: false. Refresh external gateway schemas before exposing the new operation there; historical reports are not yet accepted by the Recipe explanation flow.</p>
       <p>Execution is disabled by default. Operators set TARE_RECIPE_ENABLED=true and TARE_INVESTIGATION_RECIPE to their published pinned-report handle. The gateway must reach the same API instance and use the configured TARE_BAZANTIC_CLIENT_ID identity. Both the tool specification and its serving routes must be synced.</p>
       <p>Snapshots are browser-submitted claims, not authenticated source proofs. State is process-local, with 10-minute retention, at most 512 facts and 512,000 bytes of context. Use one instance; restarts lose references. Bazantic may retain execution data. No LLM provider SDK, model key or payer is added. Maximum authorized spend is 0 USDC; HTTP 402 stops execution with no automatic retry.</p>
       <p>A run's receipt field is execution metadata, not a payment receipt. Settlement is not confirmed and cost remains null. An Explorer session does not authorize Recipe spending. Copying explanation context and opening the external Recipe remain separate alternatives.</p>

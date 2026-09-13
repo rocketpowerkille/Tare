@@ -16,6 +16,13 @@ verifier, proof-of-reserves system, or solvency oracle.
 [Evidence model](docs/EVIDENCE_MODEL.md) |
 [Bazantic Recipe](https://bazantic.com/recipes/explain-defi-vault-evidence-clearly)
 
+Start with the [product guide](docs/PRODUCT_GUIDE.md) for the problem, feature
+rationale, integration roles and a defensible walkthrough. For implementation and
+setup, read [architecture](docs/ARCHITECTURE.md),
+[operations](docs/OPERATIONS.md) and [API/MCP reference](docs/API_REFERENCE.md).
+The website [user guide](https://tare.visk404.dev/docs) and
+[developer guide](https://tare.visk404.dev/developers) cover the same boundaries.
+
 ## Choose a workspace
 
 | Page | Question | Scope |
@@ -152,13 +159,17 @@ disagreement within those checks, not verified loan backing. These are historica
 notes, not a claim of current endpoint health; raw hosted outputs remain a
 submission-evidence gap.
 
-The separate creation-block share ledger has no completed historical acceptance
-in this repository. The accounting-only deployment does not substitute for it.
-The implemented **Historical verification** tab, `verify-historical-graph` API
+The separate creation-block share ledger is not replaced by accounting-only
+coverage. The implemented **Historical verification** tab, `verify-historical-graph` API
 operation and `verify historical` CLI command compare both shares and accounting
 at one already indexed block. They do not require full sync or replace the recent
-endpoint. Live acceptance awaits an archive-capable RPC; historical reports retain
-their checked block/time and cannot become executable evidence.
+endpoint. On 2026-09-13, a maintainer-supplied hosted capture at block `25941070`
+replayed successfully: four share comparisons and 56 accounting comparisons
+matched. This is a bounded, unsigned historical artifact, not an independent
+re-query of the providers or proof of full sync. Historical reports retain their
+checked block/time and cannot become executable evidence. The
+[acceptance record](docs/GRAPH_INTEGRATION.md#historical-acceptance-record) gives
+the digest, coverage and reproduction steps; the supplied files are not bundled.
 See [Graph integration and reproduction](docs/GRAPH_INTEGRATION.md).
 
 ## Chainlink integration
@@ -276,8 +287,9 @@ The public integration guides describe each path and its evidence boundaries.
 - Generic ERC-4626 analysis reports contract accounting, not arbitrary downstream
   composition. Discovery is not verification or an exhaustive vault registry.
 - Graph composition is Ethereum-only. The custom accounting subgraph covers one
-  vault; historical share acceptance and hosted continuous Substreams monitoring
-  remain incomplete.
+  vault. The bounded historical acceptance does not establish full synchronization
+  or all historical positions; hosted continuous Substreams monitoring remains
+  unaccepted.
 - Missing indexed data, RPC history, provider disagreement, or unavailable prices
   can prevent a check. Different RPC hostnames do not prove operator independence.
 - Lending custody, full backing, solvency, liquidity, loan recoverability, and
@@ -370,15 +382,14 @@ market-identity matching and shared Morpho V1 dependencies. Bazantic can cite th
 derived facts after consent. This is not continuous monitoring; live acceptance
 of the new flow must be retained separately from fixture tests.
 
-Historical application verification before the separate workspaces and disconnect feature
-(2026-09-13, Node 24.13.0) passed 211 core tests, 12 web tests and Chrome
-regressions across all four routes at widths from 320px to 1440px. These include
-Recipe response parsing, citation/page validation, session setup and terminal
-token extraction, documentation links/anchors, and the HTTP/tool inventories.
-Test counts describe that run, not a fixed product capability.
-An earlier same-day pass recorded 12 CRE tests, both Graph mapping builds and CRE
-WASM compilation. CRE, Docker Graph Node and Foundry remain separate from
-application verification. See [CI](.github/workflows/ci.yml) for commands.
+Application verification builds the code and runs core tests and saved CLI
+examples. Web tests cover display logic; the separate Chrome suite covers all six
+routes from 320px to 1440px, workspace navigation, access/key switching, pricing,
+accounting-only V2 selection, historical checks and investigation fixtures.
+Documentation checks compare the endpoint inventory with generated OpenAPI and
+exercise links, anchors and copy commands. CRE, Docker Graph Node and Foundry
+remain separate from application verification. Run the commands above for this
+checkout rather than relying on an older test count; see [CI](.github/workflows/ci.yml).
 
 Tests exercise malformed input, source
 disagreement, incomplete evidence, replay, authentication, exact unit display, and

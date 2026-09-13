@@ -7,6 +7,13 @@ export async function checkDocs({ page, origin, fits }) {
   assert.equal(await page.locator('#workspaces a[href="/investigate"]').count(), 1);
   assert.equal(await page.locator('#workspaces a[href="/examples"]').count(), 1);
   assert.match(await page.locator('#access').innerText(), /not a ten-analysis limit/);
+  assert.match(await page.locator('#why-tare').innerText(), /A balance is not the whole position/);
+  assert.match(await page.locator('#integration-roles').innerText(), /Token API and Studio/);
+  assert.match(await page.locator('#integration-roles').innerText(), /paused with execution disabled/);
+  assert.match(await page.locator('#workspaces').innerText(), /three tools: Wallet overview, Changes over time and Historical verification/);
+  assert.match(await page.locator('#coverage').innerText(), /Accounting only/);
+  assert.match(await page.locator('#graph-verification').innerText(), /four matched share comparisons and 56 matched accounting comparisons/);
+  assert.match(await page.locator('#graph-verification').innerText(), /not a fresh provider query/);
   for (const link of await page.locator('.docs-nav a').all()) {
     const href = await link.getAttribute('href');
     assert.equal(await page.locator(href).count(), 1, `Missing documentation section ${href}`);
@@ -19,6 +26,9 @@ export async function checkDocs({ page, origin, fits }) {
   assert.equal(await page.locator('#faq details[open]').count(), 1);
 
   await page.goto(origin + '/developers');
+  assert.match(await page.locator('#design-rationale').innerText(), /acquisition, calculations and explanation separate/);
+  assert.match(await page.locator('#historical-verification').innerText(), /historical reports are not yet accepted by the Recipe explanation flow/);
+  assert.equal(await page.locator('a[href*="rocketpowerkille/ETHOnline"]').count(), 0);
   const spec = await (await page.request.get(origin + '/openapi.json')).json();
   const expected = Object.entries(spec.paths).flatMap(([path, methods]) => Object.keys(methods)
     .filter(method => ['get', 'post'].includes(method)).map(method => `${method.toUpperCase()} ${path}`)).sort();

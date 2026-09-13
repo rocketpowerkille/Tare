@@ -6,10 +6,13 @@ bounded testnet action. Opening Explorer does not run or resume that workflow.
 
 ## Reference valuation
 
-[The source adapter](../packages/sources/src/chainlink.ts) reads Ethereum USDC/USD
-or ETH/USD feeds at a selected block hash. It validates feed decimals, round IDs,
+[The source adapter](../packages/sources/src/chainlink.ts) reads allowlisted USDC/USD
+or ETH/USD feeds on Ethereum, Base and Arbitrum at a selected block hash. It validates feed decimals, round IDs,
 positive answers, answered-in-round consistency, timestamp ordering, future times,
 and maximum age relative to the block. Amount conversion uses integer arithmetic.
+Base and Arbitrum also require same-block sequencer uptime and recovery-grace
+checks. Only exact native-USDC and canonical-WETH addresses are supported; this
+does not value arbitrary vault tokens. See [all six mappings and failure rules](CHAINLINK_COVERAGE.md).
 
 An available USD estimate is market-priced, not proof of custody, liquidity,
 solvency, or backing. Missing or stale pricing stays unavailable. The saved nested

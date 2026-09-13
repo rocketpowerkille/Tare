@@ -3,6 +3,9 @@
 Tare reports what a bounded operation establishes. It does not infer economic
 safety from successful execution of an API request. The same interpretation rules
 apply to the browser, CLI, full JSON, compact agent output, and policy projection.
+For the user problem and why these distinctions motivate separate features, read
+the [product guide](PRODUCT_GUIDE.md). Interface setup is in the
+[API reference](API_REFERENCE.md) and [operations guide](OPERATIONS.md).
 
 ## Categories and exact values
 
@@ -45,6 +48,13 @@ The browser can combine operations acquired at different blocks. Inspect each
 module's provenance. Same-block agreement requires the comparison's own identity
 and block checks, not merely similar timestamps or equal numbers on two cards.
 Token API last-update metadata is not proof of a historical query snapshot.
+
+`verify-historical-graph` separately joins indexed shares and accounting at one
+covered historical Ethereum block. Its returned block timestamp is not the time
+the user requested the report. Even a matched result explicitly has
+`currentStateVerified: false` and `executable: false`; it must not authorize an
+action or be described as current wallet verification. See the
+[historical scope and acceptance](GRAPH_INTEGRATION.md#historical-acceptance-record).
 
 ## Status is scoped to the report family
 
