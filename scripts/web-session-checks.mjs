@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 export async function checkSession({ browser, origin, capabilities }) {
   const context = await browser.newContext();
   const page = await context.newPage();
-  const token = 'fixture-access-code-not-a-real-credential';
+  let token = 'fixture-access-code-not-a-real-credential';
   let status = 200;
   let received = '';
   await context.route('**/api/status', route => {
@@ -36,6 +36,22 @@ export async function checkSession({ browser, origin, capabilities }) {
     await page.locator('.change-investigator').waitFor();
     assert.equal(received, `Bearer ${token}`, 'Investigate restores the same accepted session');
     assert.equal(await page.locator('#access-token').count(), 0);
+    const disconnect = page.getByRole('button', { name: 'Disconnect session', exact: true });
+    await disconnect.focus();
+    await page.keyboard.press('Enter');
+    await page.locator('#access-token').waitFor();
+    assert.equal(await page.evaluate(() => sessionStorage.getItem('tare-access-session')), null);
+    assert.equal(received, '', 'Disconnect reloads without sending the old permanent key');
+    assert.equal(await page.locator('.change-investigator').count(), 0, 'Old authenticated workspace is removed');
+    assert.equal(await disconnect.count(), 0);
+    await page.reload();
+    await page.locator('#access-token').waitFor();
+    assert.equal(received, '', 'Refreshing after disconnect does not restore the credential');
+    token = 'tare_sandbox_v1.Zml4dHVyZQ.fixture-signature';
+    await page.locator('#access-token').fill(token);
+    await page.getByRole('button', { name: 'Connect', exact: true }).click();
+    await page.locator('.change-investigator').waitFor();
+    assert.equal(received, `Bearer ${token}`, 'A different session can connect after disconnect');
     await page.setViewportSize({ width: 390, height: 844 });
     await page.getByRole('button', { name: 'Toggle navigation' }).click();
     await page.getByRole('navigation', { name: 'Mobile navigation' }).getByRole('link', { name: 'Explorer', exact: true }).click();
@@ -48,6 +64,14 @@ export async function checkSession({ browser, origin, capabilities }) {
     await page.getByRole('button', { name: 'Retry connection' }).click();
     await page.locator('#example').waitFor();
     assert.equal(received, `Bearer ${token}`, 'Temporary outages retain the accepted session');
+
+    await page.getByRole('button', { name: 'Disconnect session', exact: true }).click();
+    await page.locator('#access-token').waitFor();
+    assert.equal(received, '', 'Explorer also disconnects a sandbox session');
+    assert.equal(await page.evaluate(() => sessionStorage.getItem('tare-access-session')), null);
+    await page.locator('#access-token').fill(token);
+    await page.getByRole('button', { name: 'Connect', exact: true }).click();
+    await page.locator('#example').waitFor();
 
     status = 401;
     await page.reload();
@@ -65,6 +89,9 @@ export async function checkSession({ browser, origin, capabilities }) {
     await page.locator('#access-token').fill(token);
     await page.getByRole('button', { name: 'Connect', exact: true }).click();
     await page.locator('#example').waitFor();
-    console.log('Session persistence: refresh, revalidation, outage retry, rejection cleanup and disabled storage passed. Fixtures only.');
+    await page.getByRole('button', { name: 'Disconnect session', exact: true }).click();
+    await page.locator('#access-token').waitFor();
+    assert.equal(received, '', 'In-memory credentials are dropped when storage is disabled');
+    console.log('Session persistence: refresh, revalidation, outage retry, rejection cleanup, keyboard disconnect, key switching and disabled storage passed. Fixtures only.');
   } finally { await context.close(); }
 }

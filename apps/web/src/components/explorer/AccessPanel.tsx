@@ -20,7 +20,7 @@ export function AccessPanel({ options, onConnect, error, connecting = false }: {
         <div className="access-form-row"><div className="input-with-icon"><KeyRound size={17} /><input id="access-token" type="password" value={token} onChange={event => setToken(event.target.value)} autoComplete="off" spellCheck={false} disabled={connecting} aria-invalid={Boolean(error)} aria-describedby="access-help" required placeholder="Paste code or session token" /></div><button className="button primary" type="submit" disabled={connecting || !token.trim()}>{connecting ? 'Validating session…' : 'Connect'}</button></div>
         {error && <div className="field-error" role="alert"><p>Access could not be confirmed. Check your code or obtain a new session.</p><details><summary>Technical details</summary><p>{error}</p></details></div>}
         <p id="access-help" className="access-privacy">Paste only the access code, not the full JSON response. Never paste a wallet key or seed phrase.</p>
-        <p className="access-privacy">Your accepted code is remembered for this tab across refreshes. Tare checks it again on reload; refreshing does not extend its expiry.</p>
+        <p className="access-privacy">Your accepted code is remembered for this tab across refreshes. Tare checks it again on reload; refreshing does not extend its expiry. Use “Disconnect session” beneath the service status to clear this tab’s code and workspace, then connect with a different key. This does not revoke the key or grant.</p>
       </form>
       {options?.bazanticSandbox && <details className="sandbox-access developer-access">
         <summary>Developer / testnet access <span>Set up Bazantic</span></summary>

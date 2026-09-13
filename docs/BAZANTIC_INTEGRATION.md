@@ -133,6 +133,12 @@ paste the error as a code.
 The default lifetime is 900 seconds; configuration can change it. An authorization
 card cannot reconstruct a transaction receipt from that token.
 
+Explorer and Investigate remember an accepted credential in tab-scoped session
+storage and revalidate it on reload. Use **Disconnect session** beneath the service
+status to clear that tab's credential and reload its workspace before entering a
+different key. This removes in-memory reports from the screen, not downloaded
+files, and does not revoke the API key, sandbox token or Bazantic grant.
+
 The Explorer and developer setup guides use this token-only command as the primary
 access path. It pipes the single session response
 through Node.js and prints only a valid-shaped successful token, without using a

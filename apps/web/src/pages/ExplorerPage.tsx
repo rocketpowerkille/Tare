@@ -37,6 +37,13 @@ export function ExplorerPage({ mode = 'explore' }: { mode?: 'explore' | 'investi
   const [operation, setOperation] = useState<OperationId>('resolve-v1');
   const [activity, setActivity] = useState('Enter a wallet address to find supported vaults.');
 
+  function disconnectSession() {
+    saveAccessSession('');
+    // Reload drops in-memory reports and pending callbacks that hold the old key.
+    // This is a local disconnect, not revocation of a key or Bazantic grant.
+    window.location.reload();
+  }
+
   async function connect(nextToken: string) {
     setConnecting(true);
     setSessionState('active');
@@ -139,7 +146,16 @@ export function ExplorerPage({ mode = 'explore' }: { mode?: 'explore' | 'investi
   return <div className="explorer-page page-width">
     <header className="page-intro explorer-intro">
       <div><p className="kicker">{mode === 'investigate' ? 'Investigation workspace' : 'Position explorer'}</p><h1>{mode === 'investigate' ? 'Follow the evidence.' : 'Start with a position.'}</h1><p className="lead">{mode === 'investigate' ? 'Explore a wallet’s positions or compare what changed between two blocks.' : 'Trace its path. Inspect the evidence. Keep the unknowns in view.'}</p></div>
-      <div className="service-state"><span className={capabilities ? 'network-dot' : 'network-dot offline'} /><div><strong>{capabilities ? 'Service ready' : 'Connection needed'}</strong><span>{capabilities ? `${Object.values(capabilities.live).filter(Boolean).length} live checks configured` : 'Connect to continue'}</span></div></div>
+      <div className="service-state">
+        <span className={capabilities ? 'network-dot' : 'network-dot offline'} />
+        <div>
+          <strong>{capabilities ? 'Service ready' : 'Connection needed'}</strong>
+          <span>{capabilities ? `${Object.values(capabilities.live).filter(Boolean).length} live checks configured` : 'Connect to continue'}</span>
+          {token && <button type="button" className="text-button session-disconnect" onClick={disconnectSession}
+            title="Clear this tab’s saved access code and current workspace to switch keys. This does not revoke your API key or Bazantic grant."
+          >Disconnect session</button>}
+        </div>
+      </div>
     </header>
 
     {(!capabilities || authRequired || connecting) && <ConnectionTimeline optionsState={optionsState} sessionState={sessionState} ready={Boolean(capabilities)} />}

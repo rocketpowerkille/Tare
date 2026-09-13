@@ -61,3 +61,5 @@
   .connection-timeline, .partial-evidence { padding: 16px; }
   .developer-access > summary span { display: block; margin: 8px 0 0; }
 }
+.service-state .session-disconnect { margin-top: 8px; padding: 4px 0; font-size: .75rem; font-weight: 500; color: var(--muted); }
+.service-state .session-disconnect:hover { color: var(--ink); }
