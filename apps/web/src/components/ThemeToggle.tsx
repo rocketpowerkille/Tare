@@ -2,40 +2,27 @@ import { useEffect, useState } from 'react';
 import { Moon, Sun } from './Icons';
 
 type Theme = 'light' | 'dark';
-type Preference = Theme | 'system';
 
-function preferenceFrom(value: string | null | undefined): Preference {
-  return value === 'light' || value === 'dark' ? value : 'system';
+function themeFrom(value: string | null | undefined): Theme {
+  return value === 'light' ? 'light' : 'dark';
 }
 
 export function ThemeToggle() {
-  const [preference, setPreference] = useState(() => preferenceFrom(document.documentElement.dataset.themePreference));
-  const [theme, setTheme] = useState<Theme>(() => document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light');
+  const [theme, setTheme] = useState(() => themeFrom(document.documentElement.dataset.theme));
 
   useEffect(() => {
-    const device = window.matchMedia('(prefers-color-scheme: dark)');
-    function apply() {
-      const next = preference === 'system' ? (device.matches ? 'dark' : 'light') : preference;
-      document.documentElement.dataset.theme = next;
-      document.documentElement.dataset.themePreference = preference;
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', next === 'dark' ? '#111915' : '#f8f9f7');
-      setTheme(next);
-    }
+    document.documentElement.dataset.theme = theme;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#111915' : '#f8f9f7');
     function sync(event: StorageEvent) {
-      if (event.key === 'tare-theme' || event.key === null) setPreference(preferenceFrom(event.newValue));
+      if (event.key === 'tare-theme' || event.key === null) setTheme(themeFrom(event.newValue));
     }
-    apply();
-    device.addEventListener('change', apply);
     window.addEventListener('storage', sync);
-    return () => {
-      device.removeEventListener('change', apply);
-      window.removeEventListener('storage', sync);
-    };
-  }, [preference]);
+    return () => window.removeEventListener('storage', sync);
+  }, [theme]);
 
   function toggle() {
     const next = theme === 'dark' ? 'light' : 'dark';
-    setPreference(next);
+    setTheme(next);
     try { localStorage.setItem('tare-theme', next); }
     catch { /* The toggle still works for this visit when storage is unavailable. */ }
   }

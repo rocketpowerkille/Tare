@@ -4,12 +4,12 @@ export async function checkTheme({ page, origin, fits }) {
   const theme = () => page.locator('html').getAttribute('data-theme');
   await page.goto(origin);
   await page.evaluate(() => localStorage.removeItem('tare-theme'));
-  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.emulateMedia({ colorScheme: 'light' });
   await page.reload();
   await page.getByRole('button', { name: 'Switch to light mode' }).waitFor();
-  assert.equal(await theme(), 'dark', 'Default follows the device');
+  assert.equal(await theme(), 'dark', 'New visitors get dark mode even on a light device');
 
-  await page.emulateMedia({ colorScheme: 'light' });
+  await page.getByRole('button', { name: 'Switch to light mode' }).click();
   await page.getByRole('button', { name: 'Switch to dark mode' }).waitFor();
   await page.getByRole('button', { name: 'Switch to dark mode' }).click();
   await page.getByRole('button', { name: 'Switch to light mode' }).waitFor();
@@ -43,7 +43,7 @@ export async function checkTheme({ page, origin, fits }) {
   await page.getByRole('button', { name: 'Switch to dark mode' }).waitFor();
   assert.equal(await theme(), 'light', 'Explicit light choice overrides a dark device');
 
-  const isolated = await page.context().browser().newContext({ colorScheme: 'dark' });
+  const isolated = await page.context().browser().newContext({ colorScheme: 'light' });
   try {
     await isolated.addInitScript(() => {
       Storage.prototype.getItem = () => { throw new DOMException('Disabled', 'SecurityError'); };
@@ -57,5 +57,5 @@ export async function checkTheme({ page, origin, fits }) {
   } finally {
     await isolated.close();
   }
-  console.log('Theme checks passed: device preference, persistence, all routes, mobile reports and disabled storage.');
+  console.log('Theme checks passed: dark default, saved light preference, all routes, mobile reports and disabled storage.');
 }
