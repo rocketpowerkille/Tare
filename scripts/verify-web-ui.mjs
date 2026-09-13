@@ -37,6 +37,7 @@ try {
   await page.getByRole('button', { name: 'Toggle navigation' }).click();
   await page.getByRole('navigation', { name: 'Mobile navigation' }).getByRole('link', { name: 'Examples' }).click();
   await page.locator('#example').waitFor();
+  assert.equal(await page.locator('.explain-report').count(), 0);
   assert.equal(new URL(page.url()).hash, '#examples');
   await page.setViewportSize({ width: 1440, height: 1000 });
   const examples = await page.locator('#example option').evaluateAll(options => options.map(option => option.value));
@@ -52,6 +53,24 @@ try {
   await page.getByRole('button', { name: 'Replay example', exact: true }).click();
   await page.locator('.report-view').waitFor();
   const node = page.locator('.path-node').nth(1);
+  await page.locator('.explain-report > summary').focus();
+  await page.keyboard.press('Enter');
+  assert.match(await page.locator('.explain-report').innerText(), /saved evidence, not a fresh blockchain check/);
+  await page.getByRole('button', { name: 'Copy explanation context', exact: true }).click();
+  await page.getByRole('status').filter({ hasText: 'Copied explanation context' }).waitFor();
+  const explanationText = await page.evaluate(() => navigator.clipboard.readText());
+  assert.match(explanationText, /saved-evidence/);
+  assert.match(explanationText, /notVerified/);
+  assert.equal(await page.locator('.raw-report').count(), 1);
+  await page.locator('.explain-report details > summary').click();
+  await page.locator('.explain-report pre').focus();
+  assert.equal(await page.locator('.explain-report pre').evaluate(element => element === document.activeElement), true);
+  for (const width of [1440, 768, 390, 320]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await fits(`expanded explanation context at ${width}`);
+    if (width === 390) await page.locator('.explain-report').screenshot({ path: new URL('explanation-mobile.png', output).pathname.replace(/^\/(?=[A-Z]:)/, '') });
+  }
+  await page.setViewportSize({ width: 1440, height: 1000 });
   if (await node.count()) {
     await node.focus();
     await page.keyboard.press('Enter');
@@ -62,6 +81,9 @@ try {
   const downloadEvent = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download report', exact: true }).click();
   assert.equal((await downloadEvent).suggestedFilename(), 'tare-report.json');
+  const captureDownload = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download capture', exact: true }).click();
+  assert.equal((await captureDownload).suggestedFilename(), 'tare-capture.json');
   await page.locator('input[type=file]').setInputFiles({ name: 'invalid.json', mimeType: 'application/json', buffer: Buffer.from('{bad') });
   await page.locator('.error-banner').waitFor();
   await page.locator('input[type=file]').setInputFiles(new URL('../fixtures/live/steakhouse-usdc.capture.json', import.meta.url).pathname.replace(/^\/(?=[A-Z]:)/, ''));

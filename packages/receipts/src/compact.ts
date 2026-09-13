@@ -1,3 +1,5 @@
+import { explanationContext } from './explanation.js';
+
 type JsonRecord = Record<string, unknown>;
 
 function record(value: unknown): JsonRecord {
@@ -88,5 +90,6 @@ export function compactEvidenceReport(value: unknown): Record<string, unknown> {
       : { checks }),
     captureOmitted: true,
     captureNote: 'Raw evidence and verbose traversal details are available from the full API; this agent view preserves verdicts, exposure summaries, metrics, findings, limitations and the evidence digest.',
+    explanationContext: explanationContext(value),
   };
 }

@@ -121,10 +121,10 @@ export const openapi = {
     ) },
     '/api/discover': { post: postOperation('tare_discover', 'Find multi-chain Morpho and registered ERC-4626 positions for a wallet.', discoverSchema) },
     '/api/analyze': { post: postOperation('tare_analyze', 'Acquire fresh read-only Ethereum, Base, Arbitrum or Base Sepolia evidence.', analyzeSchema) },
-    '/api/agent-analyze': { post: postOperation('tare_analyze_compact', 'Acquire a compact agent report from fresh read-only evidence.', analyzeSchema) },
+    '/api/agent-analyze': { post: postOperation('tare_analyze_compact', 'Acquire a compact agent report with additive deterministic explanationContext. No AI call is made.', analyzeSchema) },
     '/api/replay': { post: postOperation('tare_replay', 'Recalculate an unsigned evidence capture without making network requests.', replaySchema) },
     '/api/example': { post: postOperation('tare_example', 'Replay one retained public evidence example without network requests.', exampleSchema) },
-    '/api/agent-example': { post: postOperation('tare_example_compact', 'Replay a retained example as a compact agent report.', exampleSchema) },
+    '/api/agent-example': { post: postOperation('tare_example_compact', 'Replay a retained example as a compact report with explanationContext. This is saved evidence, not a fresh check.', exampleSchema) },
     '/api/compose': { post: postOperation('tare_compose', 'Recompute and join V1 exposure and Graph share evidence.', composeSchema) },
   },
 };

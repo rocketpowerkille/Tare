@@ -1,5 +1,9 @@
 # Tare
 
+Compact agent responses include a deterministic explanation context for plain-language
+interpretation without adding an AI provider or new verification claims. See the
+[plain-language Bazantic Recipe specification](docs/BAZANTIC_PLAIN_LANGUAGE_RECIPE.md).
+
 **Phases two and three are implemented within their documented scope:** evidence
 snapshots and offline adapters, plus multi-chain Morpho V1 and V2 discovery,
 allocation accounting and reproducible RPC receipts. See [phase two](docs/PHASE_2.md)

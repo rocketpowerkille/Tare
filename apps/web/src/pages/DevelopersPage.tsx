@@ -90,6 +90,7 @@ export function DevelopersPage() {
     <section className="developer-section">
       <div className="section-heading"><p className="kicker">Response rules</p><h2>Build around evidence state, not optimistic assumptions</h2></div>
       <ul className="developer-rules">
+        <li><Check size={18} /><span>Compact agent responses add <code>explanationContext</code>: deterministic facts, source provenance and explanation boundaries. No model is called. Full report routes remain unchanged.</span></li>
         <li><Check size={18} /><span>Inspect <code>sourceMode</code> before describing evidence as live.</span></li>
         <li><Check size={18} /><span>Treat <code>incomplete</code> and <code>mismatch</code> as valid analytical results.</span></li>
         <li><Check size={18} /><span>Use decimal strings for raw integer values. Do not coerce them to floating point.</span></li>

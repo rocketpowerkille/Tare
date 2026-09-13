@@ -54,6 +54,12 @@
 .report-sections { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 24px; border-bottom: 1px solid var(--line); padding-bottom: 16px; }
 .report-sections a { color: var(--green); font-size: .78rem; text-decoration: none; }
 .report-sections a:hover { text-decoration: underline; }
+.explain-report { border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-block: 24px; background: var(--surface-subtle); }
+.explain-report summary { cursor: pointer; font-size: .84rem; font-weight: 600; }
+.explain-report h3 { font-size: .95rem; margin-top: 16px; }
+.explain-report p { font-size: .82rem; line-height: 1.6; }
+.explain-report details { margin-top: 16px; min-width: 0; }
+.explain-report pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: .73rem; max-height: 420px; overflow: auto; }
 @media (max-width: 800px) {
   .connection-timeline ol { grid-template-columns: 1fr; }
   .access-tracker { grid-template-columns: repeat(2, minmax(0, 1fr)); }

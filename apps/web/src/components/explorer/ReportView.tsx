@@ -8,6 +8,7 @@ import { ValueConversion } from './ValueConversion';
 import { EvidenceSources } from './EvidenceSources';
 import { displayBlock } from '../../lib/report-display';
 import { useId } from 'react';
+import { ExplainReport } from './ExplainReport';
 
 function readable(value: string) {
   return value.replaceAll('-', ' ').replaceAll('_', ' ');
@@ -127,6 +128,7 @@ export function ReportView({ report, modules = [] }: { report: JsonRecord; modul
     </section>
     <dl className="fact-grid">{facts.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{['Wallet', 'Vault', 'Observed at block', 'Evidence ID'].includes(label) && value !== 'Not included in this report' ? <CopyValue value={value} label={label} /> : value}</dd></div>)}</dl>
     <ValueConversion report={report} modules={modules} />
+    <ExplainReport report={report} modules={modules} />
     <PositionOverview report={report} />
     <div id={`${sectionId}-Evidence-path`}><PositionDiagram report={report} /></div>
     {modules.length > 0 && <div id={`${sectionId}-Source-checks`}><EvidenceSources report={report} modules={modules} /></div>}

@@ -32,7 +32,10 @@ test('compact agent reports summarize large verification check sets', () => {
   });
   assert.ok(!('checks' in compact));
   assert.ok(!('capture' in compact));
-  assert.ok(Buffer.byteLength(JSON.stringify(compact)) < 4 * 1024);
+  const { explanationContext: context, ...legacy } = compact;
+  assert.ok(context);
+  assert.ok(Buffer.byteLength(JSON.stringify(legacy)) < 4 * 1024);
+  assert.ok(Buffer.byteLength(JSON.stringify(compact)) < 20 * 1024);
 });
 
 test('API examples and uploaded captures preserve the exact resolver reports and scoped metrics', async () => {
@@ -52,7 +55,10 @@ test('API examples and uploaded captures preserve the exact resolver reports and
       const compactText = await compactResponse.text();
       const compact = JSON.parse(compactText) as Record<string, unknown>;
       assert.equal(compactResponse.status, 200);
-      assert.ok(Buffer.byteLength(compactText) < 4 * 1024);
+      const { explanationContext: context, ...legacy } = compact;
+      assert.ok(context);
+      assert.ok(Buffer.byteLength(JSON.stringify(legacy)) < 4 * 1024);
+      assert.ok(Buffer.byteLength(compactText) < 20 * 1024);
       assert.equal(compact.sourceMode, 'recorded-rpc');
       assert.equal(compact.captureOmitted, true);
       assert.ok(!('capture' in compact));

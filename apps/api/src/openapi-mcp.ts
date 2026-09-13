@@ -67,6 +67,7 @@ export const mcpOpenapi = {
       post: {
         operationId: 'tare_analyze_compact',
         summary: 'Acquire a compact, read-only multi-chain evidence report for an agent.',
+        description: 'Adds deterministic explanationContext with evidence categories, source provenance and interpretation boundaries. No AI model is called. Full reports remain available through the canonical API.',
         requestBody: {
           required: true,
           content: {
@@ -96,6 +97,7 @@ export const mcpOpenapi = {
       post: {
         operationId: 'tare_example_compact',
         summary: 'Replay a retained public evidence example and return a compact agent report.',
+        description: 'Includes explanationContext. Saved evidence must not be described as a fresh blockchain observation.',
         requestBody: {
           required: true,
           content: {
