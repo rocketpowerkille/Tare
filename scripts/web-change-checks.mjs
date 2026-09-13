@@ -18,7 +18,7 @@ export async function checkChanges({ page, origin, fixture, capabilities, fits }
     if (input.operation === 'verify-accounting') return route.fulfill({ status: 503, json: { error: { message: 'Fixture indexed history unavailable.' } } });
     return route.fulfill({ json: input.blockNumber === '20' ? previous : current });
   });
-  await page.goto(origin + '/explore');
+  await page.goto(origin + '/investigate');
   const panel = page.locator('.change-investigator');
   await panel.locator(':scope > summary').focus(); await page.keyboard.press('Enter');
   await page.getByLabel('Change investigation wallet', { exact: true }).fill(previous.owner);

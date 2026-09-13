@@ -14,6 +14,10 @@ const routeMetadata: Record<string, { title: string; description: string }> = {
     title: 'Explore | Tare',
     description: 'Run a guided Tare evidence check or replay a recorded example.',
   },
+  '/investigate': {
+    title: 'Investigate | Tare',
+    description: 'Investigate wallet positions and compare evidence between two blocks.',
+  },
   '/docs': {
     title: 'Learn | Tare',
     description: 'A beginner-friendly guide to Tare, vault evidence, and report labels.',
@@ -39,7 +43,7 @@ export function App() {
     else requestAnimationFrame(() => document.getElementById(window.location.hash.slice(1))?.scrollIntoView());
   }, [path]);
 
-  const page = path === '/explore' ? <ExplorerPage />
+  const page = path === '/explore' || path === '/investigate' ? <ExplorerPage mode={path === '/investigate' ? 'investigate' : 'explore'} />
     : path === '/docs' ? <DocsPage />
       : path === '/developers' ? <DevelopersPage />
         : <HomePage />;

@@ -34,7 +34,7 @@ try {
   await checkTheme({ page, origin, fits });
   for (const width of [1440, 1024, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 1000 });
-    for (const route of ['/', '/explore', '/docs', '/developers']) {
+    for (const route of ['/', '/explore', '/investigate', '/docs', '/developers']) {
       await page.goto(origin + route);
       await page.locator('h1').waitFor();
       if (route === '/explore') await page.locator('#example').waitFor();
@@ -42,7 +42,7 @@ try {
       await page.screenshot({ path: new URL(`${route.slice(1) || 'home'}-${width}.png`, output).pathname.replace(/^\/(?=[A-Z]:)/, ''), fullPage: true });
     }
   }
-  console.log('All four application routes fit at 1440, 1024, 768, 390 and 320px.');
+  console.log('All five application routes fit at 1440, 1024, 768, 390 and 320px.');
   await checkDocs({ page, origin, fits });
   await page.goto(origin + '/');
   await page.getByRole('button', { name: 'Toggle navigation' }).click();

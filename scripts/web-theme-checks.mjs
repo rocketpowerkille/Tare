@@ -17,7 +17,7 @@ export async function checkTheme({ page, origin, fits }) {
 
   for (const width of [1440, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 1000 });
-    for (const route of ['/', '/explore', '/docs', '/developers']) {
+    for (const route of ['/', '/explore', '/investigate', '/docs', '/developers']) {
       await page.goto(origin + route);
       await page.getByRole('button', { name: 'Switch to light mode' }).waitFor();
       assert.equal(await theme(), 'dark', 'Saved choice survives navigation');

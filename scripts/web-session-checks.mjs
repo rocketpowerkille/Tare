@@ -25,6 +25,22 @@ export async function checkSession({ browser, origin, capabilities }) {
     assert.ok(!(await page.locator('body').innerText()).includes(token));
     assert.equal(await page.evaluate(() => localStorage.getItem('tare-access-session')), null);
 
+    assert.equal(await page.locator('.change-investigator').count(), 0, 'Explorer contains only the single-position workflow');
+    const navigation = page.getByRole('navigation', { name: 'Primary navigation' });
+    assert.deepEqual((await navigation.getByRole('link').allTextContents()).slice(0, 2), ['Explorer', 'Investigate']);
+    await navigation.getByRole('link', { name: 'Investigate', exact: true }).click();
+    await page.locator('.change-investigator').waitFor();
+    assert.equal(await page.locator('#example').count(), 0);
+    assert.equal(await navigation.getByRole('link', { name: 'Investigate', exact: true }).getAttribute('aria-current'), 'page');
+    await page.reload();
+    await page.locator('.change-investigator').waitFor();
+    assert.equal(received, `Bearer ${token}`, 'Investigate restores the same accepted session');
+    assert.equal(await page.locator('#access-token').count(), 0);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.getByRole('button', { name: 'Toggle navigation' }).click();
+    await page.getByRole('navigation', { name: 'Mobile navigation' }).getByRole('link', { name: 'Explorer', exact: true }).click();
+    await page.locator('#example').waitFor();
+
     status = 503;
     await page.reload();
     await page.getByRole('button', { name: 'Retry connection' }).waitFor();

@@ -20,7 +20,7 @@ import { ChangeInvestigator } from '../components/explorer/ChangeInvestigator';
 import type { StageStatus } from '../lib/progress';
 import type { AccessOptions, Capabilities, DiscoveryResult, JsonRecord, OperationId, PositionAnalyzeInput } from '../lib/types';
 
-export function ExplorerPage() {
+export function ExplorerPage({ mode = 'explore' }: { mode?: 'explore' | 'investigate' }) {
   const [token, setToken] = useState(readAccessSession);
   const [accessOptions, setAccessOptions] = useState<AccessOptions>();
   const [capabilities, setCapabilities] = useState<Capabilities>();
@@ -138,7 +138,7 @@ export function ExplorerPage() {
 
   return <div className="explorer-page page-width">
     <header className="page-intro explorer-intro">
-      <div><p className="kicker">Investigation workspace</p><h1>Start with a position.</h1><p className="lead">Trace its path. Inspect the evidence. Keep the unknowns in view.</p></div>
+      <div><p className="kicker">{mode === 'investigate' ? 'Investigation workspace' : 'Position explorer'}</p><h1>{mode === 'investigate' ? 'Follow the evidence.' : 'Start with a position.'}</h1><p className="lead">{mode === 'investigate' ? 'Explore a wallet’s positions or compare what changed between two blocks.' : 'Trace its path. Inspect the evidence. Keep the unknowns in view.'}</p></div>
       <div className="service-state"><span className={capabilities ? 'network-dot' : 'network-dot offline'} /><div><strong>{capabilities ? 'Service ready' : 'Connection needed'}</strong><span>{capabilities ? `${Object.values(capabilities.live).filter(Boolean).length} live checks configured` : 'Connect to continue'}</span></div></div>
     </header>
 
@@ -149,9 +149,10 @@ export function ExplorerPage() {
 
     {capabilities && <>
       {!authRequired && <SessionEvidence token={token} />}
-      <WalletInvestigation token={token} disabled={busy || authRequired || connecting} />
-      <ChangeInvestigator token={token} capabilities={capabilities} disabled={busy || authRequired || connecting} />
-      <div className="explorer-grid">
+      {mode === 'investigate' ? <>
+        <WalletInvestigation token={token} disabled={busy || authRequired || connecting} />
+        <ChangeInvestigator token={token} capabilities={capabilities} disabled={busy || authRequired || connecting} />
+      </> : <div className="explorer-grid">
         <div className="control-stack">
           <OperationForm capabilities={capabilities} busy={busy || authRequired || connecting} operation={operation} onOperationChange={setOperation} onQueryChange={clearQueryResult} onDiscover={discover} onRun={analyze} />
           <ExamplePanel examples={capabilities.examples} busy={busy || authRequired || connecting} onRun={id => void run('Replaying saved evidence, with no live blockchain query.', () => api.example(token, id), false, true, id)} />
@@ -163,7 +164,7 @@ export function ExplorerPage() {
           {busy && partial && <section className="partial-evidence"><p className="section-label">Position response received</p><p>Inspect the returned path while remaining evidence checks finish. This is not the final report.</p><PositionDiagram report={partial} /></section>}
           {report ? (report.reportType === 'comprehensive-position-check' ? <ComprehensiveReportView report={report} access={reportAccess} token={token} /> : <ReportView report={report} access={reportAccess} token={token} />) : busy ? <div className="skeleton-stack" aria-hidden="true"><div className="skeleton" /><div className="skeleton short" /><div className="skeleton" /></div> : <div className="result-empty"><div className="empty-symbol"><FileSearch size={31} /></div><p className="section-label">Your evidence report</p><h2>An answer you can inspect.</h2><p>Run a check to see the position path, observed amounts and missing evidence. Or begin with a saved report.</p><button className="text-button" type="button" onClick={() => document.getElementById('example')?.focus()}>Try a saved example <ArrowRight size={16} /></button></div>}
         </section>
-      </div>
+      </div>}
     </>}
   </div>;
 }
