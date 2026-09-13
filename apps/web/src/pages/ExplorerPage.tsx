@@ -7,6 +7,7 @@ import { ReplayPanel } from '../components/explorer/ReplayPanel';
 import { ReportView } from '../components/explorer/ReportView';
 import { ComprehensiveReportView } from '../components/explorer/ComprehensiveReportView';
 import { api, ApiError } from '../lib/api';
+import { readAccessSession, saveAccessSession } from '../lib/access-session';
 import { acceptedReportAccess, type ReportAccess } from '../lib/agent-handoff';
 import { runComprehensiveCheck } from '../lib/comprehensive';
 import { initialStages, type EvidenceStage, type ProgressObserver } from '../lib/progress';
@@ -20,7 +21,7 @@ import type { StageStatus } from '../lib/progress';
 import type { AccessOptions, Capabilities, DiscoveryResult, JsonRecord, OperationId, PositionAnalyzeInput } from '../lib/types';
 
 export function ExplorerPage() {
-  const [token, setToken] = useState('');
+  const [token, setToken] = useState(readAccessSession);
   const [accessOptions, setAccessOptions] = useState<AccessOptions>();
   const [capabilities, setCapabilities] = useState<Capabilities>();
   const [authRequired, setAuthRequired] = useState(false);
@@ -42,12 +43,14 @@ export function ExplorerPage() {
     setError('');
     try {
       const next = await api.capabilities(nextToken);
+      saveAccessSession(nextToken);
       setToken(nextToken);
       setCapabilities(next);
       setAuthRequired(false);
       setSessionState('complete');
     } catch (failure) {
       if (failure instanceof ApiError && failure.status === 401) {
+        setToken('');
         setAuthRequired(true);
         setSessionState(nextToken ? 'error' : 'waiting');
         setCapabilities(undefined);
@@ -62,7 +65,7 @@ export function ExplorerPage() {
 
   useEffect(() => {
     void api.accessOptions().then(options => { setAccessOptions(options); setOptionsState('complete'); }).catch(() => setOptionsState('unavailable'));
-    void connect('');
+    void connect(token);
   }, []);
   useEffect(() => {
     const focusExamples = () => {

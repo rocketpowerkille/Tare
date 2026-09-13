@@ -10,7 +10,7 @@ export async function checkWorkspace({ page, origin, fixture, capabilities, fits
     return route.fulfill({ status: 401, json: { error: { message: 'Access required.' } } });
   });
   await page.goto(origin + '/explore');
-  await page.locator('.connection-timeline .stage-active').waitFor();
+  await page.locator('.connection-timeline .stage-active').filter({ hasText: 'Validating the access session' }).waitFor();
   assert.match(await page.locator('.connection-timeline').innerText(), /Validating the access session/);
   releaseConnection();
   await page.locator('#access-token').waitFor();

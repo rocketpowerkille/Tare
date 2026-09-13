@@ -5,6 +5,7 @@ import { mkdir, readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { checkWorkspace } from './web-workspace-checks.mjs';
 import { checkTheme } from './web-theme-checks.mjs';
+import { checkSession } from './web-session-checks.mjs';
 import { checkDocs } from './web-docs-checks.mjs';
 import { checkChanges } from './web-change-checks.mjs';
 
@@ -260,6 +261,7 @@ try {
   console.log('Sandbox guide and session evidence rendering passed using an isolated authorization fixture. No payment made.');
   await checkWorkspace({ page, origin, fixture, capabilities, fits });
   await checkChanges({ page, origin, fixture, capabilities, fits });
+  await checkSession({ browser, origin, capabilities });
   assert.deepEqual(errors, [], 'Uncaught browser exceptions');
   console.log('Web UI regression checks passed. Screenshots: tmp/ui-review');
 } finally {

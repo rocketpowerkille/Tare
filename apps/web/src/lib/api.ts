@@ -1,4 +1,5 @@
 import type { AccessOptions, Capabilities, DiscoveryResult, JsonRecord, OperationId } from './types';
+import { clearRejectedSession } from './access-session';
 
 export class ApiError extends Error {
   constructor(readonly status: number, message: string) {
@@ -14,6 +15,7 @@ async function request<T>(path: string, token: string, input?: unknown): Promise
     },
     ...(input === undefined ? {} : { method: 'POST', body: JSON.stringify(input) }),
   });
+  if (response.status === 401) clearRejectedSession(token);
   const value = await response.json() as JsonRecord;
   if (!response.ok) {
     const error = value.error as JsonRecord | undefined;
