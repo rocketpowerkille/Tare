@@ -1,7 +1,12 @@
 import { AlertCircle, CheckCircle2, ChevronDown, Clock3, Download, FileJson, Radio, ShieldAlert } from '../Icons';
 import { StatusBadge } from '../StatusBadge';
-import { isRecord, list, record, text, type JsonRecord } from '../../lib/types';
+import { list, record, text, type JsonRecord } from '../../lib/types';
 import { PositionOverview } from './PositionOverview';
+import { CopyValue } from '../CopyValue';
+import { PositionDiagram } from './PositionDiagram';
+import { ValueConversion } from './ValueConversion';
+import { EvidenceSources } from './EvidenceSources';
+import { displayBlock } from '../../lib/report-display';
 
 function readable(value: string) {
   return value.replaceAll('-', ' ').replaceAll('_', ' ');
@@ -12,19 +17,10 @@ function address(value: unknown) {
   return full && full.length > 18 ? `${full.slice(0, 8)}...${full.slice(-6)}` : full;
 }
 
-function blockFrom(capture: JsonRecord) {
-  const direct = record(capture.block);
-  if (Object.keys(direct).length) return direct;
-  const rpc = record(capture.rpc);
-  if (isRecord(rpc.block)) return rpc.block;
-  const witness = list(capture.witnesses).find(isRecord);
-  return witness ? record(record(witness.rpc).block) : {};
-}
-
 function verdict(status: string, sourceMode: string) {
   if (status === 'matched') return {
     title: 'The records agree for this check.',
-    meaning: 'Tare compared indexed records with direct blockchain readings from the same point in time. The values matched within the scope shown below.',
+    meaning: 'The compared evidence sources agreed within the scope of this check. Review the source records and their blocks before extending that conclusion.',
     next: 'You can use this as supporting evidence, but it does not prove that every borrower, collateral asset, or price is safe.',
     tone: 'success' as const, icon: CheckCircle2,
   };
@@ -57,7 +53,7 @@ function verdict(status: string, sourceMode: string) {
 const reasonCopy: Record<string, string> = {
   'missing-independent-verification': 'Independent backing verification is not available for this result.',
   'missing-independent-backing-verification': 'Independent backing verification is not available for this result.',
-  'missing-valuation': 'Tare could not make a reliable value comparison.',
+  'missing-valuation': 'The primary backing calculation has no qualifying valuation. A separate market price does not remove this limit.',
   'recorded-evidence': 'This uses saved evidence rather than a fresh network check.',
   'incomplete-resolution': 'Part of the position could not be traced.',
   'source-unavailable': 'A required data source was unavailable.',
@@ -83,14 +79,14 @@ function download(value: unknown, filename: string) {
   URL.revokeObjectURL(url);
 }
 
-export function ReportView({ report }: { report: JsonRecord }) {
+export function ReportView({ report, modules = [] }: { report: JsonRecord; modules?: JsonRecord[] }) {
   const capture = record(report.capture);
   const metric = record(report.metric);
-  const block = blockFrom(capture);
+  const block = displayBlock(report);
   const sourceMode = text(report.sourceMode) ?? 'unknown source';
-  const status = text(report.status) ?? text(report.kind) ?? 'complete';
+  const status = text(report.status) ?? text(report.kind) ?? 'unknown';
   const reportType = text(report.reportType) ?? text(report.protocol) ?? 'Position evidence';
-  const capturedAt = text(capture.capturedAt);
+  const capturedAt = text(capture.capturedAt) ?? text(report.capturedAt);
   const chainId = capture.chainId ?? report.chainId;
   const network = chainId === 84532 ? 'Base Sepolia' : chainId === 8453 ? 'Base' : chainId === 42161 ? 'Arbitrum' : chainId === 1 ? 'Ethereum' : 'Network unavailable';
   const result = verdict(status, sourceMode);
@@ -100,10 +96,12 @@ export function ReportView({ report }: { report: JsonRecord }) {
   const view = record(report.view);
   const facts = [
     ['Network', network],
-    ['Wallet', address(capture.owner)],
-    ['Vault', address(capture.vault ?? record(capture.deployment).outerVault)],
-    ['Checked at block', block.number ? BigInt(String(block.number)).toString() : undefined],
-    ['Evidence', sourceMode.startsWith('live') ? 'Fresh public data' : 'Saved example'],
+    ['Wallet', text(capture.owner) ?? text(report.owner)],
+    ['Vault', text(capture.vault ?? record(capture.deployment).outerVault)],
+    ['Observed at block', block],
+    ['Capture timestamp', capturedAt],
+    ['Evidence ID', text(report.captureDigest) ?? 'Not included in this report'],
+    ['Evidence', sourceMode.startsWith('live') ? 'Fresh public data' : sourceMode.startsWith('recorded') ? 'Recorded evidence' : readable(sourceMode)],
   ].filter((item): item is [string, string] => item[1] !== undefined);
   const technicalFacts = [
     ['Report type', readable(reportType)],
@@ -119,12 +117,16 @@ export function ReportView({ report }: { report: JsonRecord }) {
       <div><div className="report-meta"><StatusBadge tone={sourceMode.startsWith('live') ? 'success' : 'info'}>{sourceMode.startsWith('live') ? 'Fresh check' : 'Saved example'}</StatusBadge><span>{readable(reportType)}</span></div><h2>{result.title}</h2></div>
       <span className={`verdict-icon verdict-${result.tone}`}><VerdictIcon size={25} /></span>
     </header>
-    <PositionOverview report={report} />
     <section className={`plain-summary summary-${result.tone}`}>
-      <div><p className="section-label">What this means</p><p>{result.meaning}</p></div>
+      <div><p className="section-label">Executive summary</p><p>{result.meaning}</p></div>
       <div><p className="section-label">What to do next</p><p>{result.next}</p></div>
+      {metric.kind !== 'available' && <div><StatusBadge tone="warning">Backing not established</StatusBadge><p>Position accounting and market prices are not independent proof of the assets behind this claim.</p></div>}
     </section>
-    <div className="fact-grid">{facts.map(([label, value]) => <div key={label}><dt>{label}</dt><dd title={String(value)}>{value}</dd></div>)}</div>
+    <dl className="fact-grid">{facts.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{['Wallet', 'Vault', 'Observed at block', 'Evidence ID'].includes(label) && value !== 'Not included in this report' ? <CopyValue value={value} label={label} /> : value}</dd></div>)}</dl>
+    <ValueConversion report={report} modules={modules} />
+    <PositionOverview report={report} />
+    <PositionDiagram report={report} />
+    {modules.length > 0 && <EvidenceSources report={report} modules={modules} />}
 
     <section className="report-section metric-section">
       <div><p className="section-label">Measured result</p><h3>{metric.kind === 'available' ? formatMetric(metric) : 'No reliable backing measure yet'}</h3></div>

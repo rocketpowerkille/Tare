@@ -7,7 +7,8 @@ interface AppLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
 export function navigate(href: string) {
   window.history.pushState({}, '', href);
   window.dispatchEvent(new PopStateEvent('popstate'));
-  window.scrollTo({ top: 0, behavior: 'instant' });
+  if (!window.location.hash) window.scrollTo({ top: 0, behavior: 'instant' });
+  else requestAnimationFrame(() => document.getElementById(window.location.hash.slice(1))?.scrollIntoView());
 }
 
 export function AppLink({ href, onClick, ...props }: AppLinkProps) {

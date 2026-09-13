@@ -35,7 +35,8 @@ export function App() {
     const metadata = routeMetadata[path] ?? routeMetadata['/'];
     document.title = metadata.title;
     document.querySelector('meta[name="description"]')?.setAttribute('content', metadata.description);
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    if (!window.location.hash) window.scrollTo({ top: 0, behavior: 'instant' });
+    else requestAnimationFrame(() => document.getElementById(window.location.hash.slice(1))?.scrollIntoView());
   }, [path]);
 
   const page = path === '/explore' ? <ExplorerPage />

@@ -1,5 +1,6 @@
 import { api } from './api';
 import { record, text, type Capabilities, type JsonRecord, type PositionAnalyzeInput } from './types';
+import { observeModule, observePrimary, type ProgressObserver } from './progress';
 
 type ModuleStatus = 'complete' | 'verified' | 'incomplete' | 'mismatch' | 'unavailable' | 'not-used' | 'not-eligible';
 
@@ -114,28 +115,44 @@ function bazanticModule(token: string): EvidenceModule {
   };
 }
 
-export async function runComprehensiveCheck(token: string, capabilities: Capabilities, input: PositionAnalyzeInput) {
+export async function runComprehensiveCheck(token: string, capabilities: Capabilities, input: PositionAnalyzeInput, notify: ProgressObserver = () => {}) {
   const graphEligible = input.operation === 'resolve-v1' && (input.chainId ?? 1) === 1
     && capabilities.live['verify-graph-composition'];
-  const primaryPromise = api.analyze(token, input);
+  notify('position', 'active', 'Requesting shares, vault layers and allocations. These arrive in one API response.');
+  notify('the-graph', graphEligible ? 'active' : 'unavailable', graphEligible ? 'Querying the configured Graph composition alongside the position trace.' : 'No eligible Graph composition for this operation and network.');
+  const primaryPromise = api.analyze(token, input).then(result => {
+    observePrimary(result, notify);
+    return result;
+  });
   const graphPromise = graphEligible
     ? api.analyze(token, { operation: 'verify-graph-composition', owner: input.owner, vault: input.vault })
     : undefined;
   const [primaryResult, graphResult] = await Promise.all([
     primaryPromise,
     graphPromise ? Promise.resolve(graphPromise).then(
-      value => ({ status: 'fulfilled', value }) as PromiseFulfilledResult<JsonRecord>,
-      reason => ({ status: 'rejected', reason }) as PromiseRejectedResult,
+      value => {
+        const result = { status: 'fulfilled', value } as PromiseFulfilledResult<JsonRecord>;
+        observeModule({ ...graphModule(result) }, notify);
+        return result;
+      },
+      reason => {
+        const result = { status: 'rejected', reason } as PromiseRejectedResult;
+        observeModule({ ...graphModule(result) }, notify);
+        return result;
+      },
     ) : Promise.resolve(undefined),
   ]);
 
+  notify('chainlink', 'active', 'Evaluating the asset adapter and requesting an eligible reference price.');
+  const chainlink = await chainlinkModule(token, primaryResult, input);
+  observeModule({ ...chainlink }, notify);
   const modules: EvidenceModule[] = [
     {
       id: 'position', name: 'Position and exposure', partner: null, eligible: true,
       status: baseStatus(primaryResult), summary: 'Direct blockchain readings produced the primary position report.', report: primaryResult,
     },
     graphModule(graphResult),
-    await chainlinkModule(token, primaryResult, input),
+    chainlink,
     bazanticModule(token),
   ];
   const relevant = modules.filter(module => module.eligible);
@@ -143,6 +160,9 @@ export async function runComprehensiveCheck(token: string, capabilities: Capabil
     : relevant.some(module => ['incomplete', 'unavailable'].includes(module.status)) ? 'incomplete'
       : 'complete';
   const primaryCapture = record(primaryResult.capture);
+  const backingAvailable = record(primaryResult.metric).kind === 'available';
+  notify('coverage', status === 'complete' && backingAvailable ? 'complete' : 'warning',
+    backingAvailable ? 'Review the measured scope and all remaining limitations in the report.' : 'Position, accounting and price checks do not establish independent asset backing.');
 
   return {
     schemaVersion: 1,

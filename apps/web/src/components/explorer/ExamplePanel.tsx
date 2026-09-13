@@ -4,7 +4,7 @@ import type { ExampleCapability } from '../../lib/types';
 
 export function ExamplePanel({ examples, busy, onRun }: { examples: ExampleCapability[]; busy: boolean; onRun: (id: string) => void }) {
   const [example, setExample] = useState(examples[0]?.id ?? '');
-  return <section className="secondary-panel">
+  return <section className="secondary-panel" id="examples" tabIndex={-1}>
     <div className="secondary-panel-heading"><FileClock size={20} /><div><h2>Learn from a recorded example</h2><p>No live network request is made.</p></div></div>
     <label htmlFor="example">Example</label>
     <select id="example" value={example} onChange={event => setExample(event.target.value)}>

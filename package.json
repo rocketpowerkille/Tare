@@ -22,6 +22,8 @@
     "verify:hosted:graph-products": "node scripts/verify-hosted.mjs --graph-products",
     "test:graph": "node graph/integration/run.mjs",
     "test": "node --test dist/tests/*.test.js",
+    "test:web": "node --test tests/web-display.test.mjs",
+    "test:web:browser": "node scripts/verify-web-ui.mjs",
     "cli": "node dist/apps/cli/src/main.js",
     "serve": "node dist/apps/api/src/main.js",
     "mcp": "node dist/apps/mcp/src/main.js",
