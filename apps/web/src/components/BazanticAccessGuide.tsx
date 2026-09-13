@@ -33,7 +33,12 @@ export function BazanticAccessGuide({ gatewayUrl, sessionPath }: {
     <p className="setup-note">Mark steps as you finish them. This checklist is your progress, not server-verified payment evidence.</p>
     <ol className="access-tracker">{stepNames.map((name, index) => <li key={name} aria-current={index === current ? 'step' : undefined} className={completed.includes(index) ? 'done' : ''}><label><input type="checkbox" checked={completed.includes(index)} onChange={event => setCompleted(previous => event.target.checked ? [...previous, index] : previous.filter(step => step !== index))} /><span>{index + 1}. {name}</span></label></li>)}</ol>
     <ol className="bazantic-steps">
-      <li><span>1</span><div><strong>Prepare Bazantic</strong><p>Install <code>@bazantic/cli</code>, sign in, and fund your Bazantic receiving address with Base Sepolia test USDC.</p></div></li>
+      <li><span>1</span><div>
+        <strong>Prepare Bazantic</strong>
+        <p>Run this in your terminal to install or update the Bazantic CLI. Node.js and npm are required.</p>
+        <CopyCommand command="npm i -g @bazantic/cli@latest" label="Copy install command" />
+        <p>Then sign in and fund your Bazantic receiving address with Base Sepolia test USDC.</p>
+      </div></li>
       <li><span>2</span><div><strong>Create a testnet grant</strong><CopyCommand command={grantCommand} label="Copy grant command" /></div></li>
       <li><span>3</span><div>
         <strong>Call the public Tare gateway</strong>

@@ -202,6 +202,10 @@ try {
   await page.goto(origin + '/explore');
   await page.locator('.developer-access > summary').click();
   await page.locator('.bazantic-guide').waitFor();
+  assert.equal(await page.locator('.bazantic-steps li').first().locator('code').innerText(), 'npm i -g @bazantic/cli@latest');
+  await page.getByRole('button', { name: 'Copy install command', exact: true }).click();
+  assert.equal(await page.evaluate(() => navigator.clipboard.readText()), 'npm i -g @bazantic/cli@latest');
+  await page.getByRole('button', { name: 'Copy install command', exact: true }).getByRole('status').filter({ hasText: 'Copied' }).waitFor();
   assert.match(await page.locator('.access-tracker [aria-current=step]').innerText(), /Prepare Bazantic/);
   await page.getByRole('checkbox', { name: '1. Prepare Bazantic' }).check();
   assert.match(await page.locator('.access-tracker [aria-current=step]').innerText(), /Create grant/);
