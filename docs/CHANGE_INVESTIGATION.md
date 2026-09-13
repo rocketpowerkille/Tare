@@ -6,7 +6,7 @@ payments. Their implementation and fixture tests are not live-provider acceptanc
 
 ## Compare two blocks
 
-In `/explore`, open **Investigate changes between two blocks**. Supply one
+In `/investigate`, open **Investigate changes between two blocks**. Supply one
 Ethereum Morpho V1 wallet/vault pair and two increasing decimal block numbers.
 The browser performs at most four operations through existing `/api/analyze`:
 
@@ -62,7 +62,7 @@ or silently truncate facts to force an answer.
 
 ## Exposure overlap
 
-**Investigate a wallet across supported vaults** now shows shared Morpho V1
+On `/investigate`, **Investigate a wallet across supported vaults** shows shared Morpho V1
 markets from the same existing, at-most-three-position investigation. This is a
 pure calculation over returned reports, not a new provider query. The view shows
 each vault's attributed raw amount, asset/decimals, source block and dependencies.
@@ -87,7 +87,7 @@ aggregation boundaries, acquisition cancellation, access/payment stops and
 citeable snapshots. Browser fixtures cover input validation, pinned requests,
 source states, downloads, uploads, mobile layout and keyboard operation.
 
-Local verification on 2026-09-13 passed `node --run check`,
+Historical local verification of the initial implementation on 2026-09-13 passed `node --run check`,
 `node --run verify` (225 core tests, build and CLI demonstrations),
 `node --run test:web` (12 tests), and `node --run test:web:browser` using Chrome.
 The browser suite covered all four routes at 320, 390, 768, 1024 and 1440px;

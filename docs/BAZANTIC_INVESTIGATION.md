@@ -97,10 +97,13 @@ Wallet context also includes scoped shared-market overlap facts. Differences are
 not proof of cause, profit, loss or a transaction. See
 [change investigation and overlap](CHANGE_INVESTIGATION.md) for coverage and limits.
 
-## Using it in Explorer
+## Using it in the web workspaces
 
-1. Connect if the deployment requires access, then run a supported check or a
-   saved example. A saved example stays historical in the explanation.
+1. Connect if the deployment requires access. Use `/explore` for one supported
+   position, `/investigate` for a bounded wallet investigation or two-block
+   comparison, and `/examples` for saved examples or capture replay. A saved
+   example stays historical in the explanation. These scopes reuse the same
+   evidence engine; comparison does not add a new verification guarantee.
 2. In **Ask about this report**, choose a question or type up to 1500 characters.
    Optionally attach a previous report JSON, not a raw capture.
 3. Read the transfer notice and explicitly check consent. Only then select

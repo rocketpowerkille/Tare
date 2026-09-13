@@ -10,6 +10,23 @@ import { AnalyzeSchema, DiscoverSchema, ReplaySchema } from '../packages/service
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const read = (path: string) => readFile(resolve(root, path), 'utf8');
 
+test('current workspace routes and session budget boundaries are documented', async () => {
+  const reference = await read('docs/API_REFERENCE.md');
+  for (const route of ['/explore', '/investigate', '/examples', '/docs', '/developers']) {
+    assert.ok(reference.includes(`\`${route}\``));
+  }
+  const guide = await read('apps/web/src/components/BazanticAccessGuide.tsx');
+  assert.match(guide, /at most 10 session purchases/);
+  assert.match(guide, /multiple analyses until it expires/);
+  assert.match(guide, /no other calls consume its budget/);
+  const docs = await read('apps/web/src/pages/DocsPage.tsx');
+  assert.match(docs, /id="workspaces"/);
+  assert.match(docs, /not a ten-analysis limit/);
+  assert.match(docs, /Disconnect session/);
+  const changes = await read('docs/CHANGE_INVESTIGATION.md');
+  assert.match(changes, /In `\/investigate`, open/);
+});
+
 test('repository documentation relative links and Markdown anchors resolve', async () => {
   const docs = (await readdir(resolve(root, 'docs'))).filter(name => name.endsWith('.md')).map(name => `docs/${name}`);
   const files = ['README.md', ...docs, 'graph/subgraph/README.md', 'graph/integration/README.md',

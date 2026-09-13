@@ -11,8 +11,24 @@ verifier, proof-of-reserves system, or solvency oracle.
 
 [Open Tare](https://tare.visk404.dev/) |
 [Explorer](https://tare.visk404.dev/explore) |
+[Investigate](https://tare.visk404.dev/investigate) |
+[Examples](https://tare.visk404.dev/examples) |
 [Evidence model](docs/EVIDENCE_MODEL.md) |
 [Bazantic Recipe](https://bazantic.com/recipes/explain-defi-vault-evidence-clearly)
+
+## Choose a workspace
+
+| Page | Question | Scope |
+| --- | --- | --- |
+| Explorer (`/explore`) | What does this position rest on? | One selected wallet–vault position, its trace and eligible evidence checks. |
+| Investigate (`/investigate`) | What do my positions share, or what changed? | At most three supported positions and shared-market dependencies, or one position compared at two explicit blocks. |
+| Examples (`/examples`) | How can I read or reproduce a report? | Saved examples and compatible capture uploads; no fresh source acquisition. |
+
+Explorer and Investigate reuse the same evidence engine. The added value is the
+comparison, not stronger verification. Investigation is not a complete wallet
+inventory or continuous monitoring; shared dependencies do not predict losses,
+and a change does not establish causation. Different-block amounts are not summed
+as a synchronized portfolio. See [comparison limits](docs/CHANGE_INVESTIGATION.md).
 
 ## Why Tare exists
 
@@ -178,6 +194,15 @@ same-prompt experiment.
 
 Sandbox session issuance authorizes Explorer access for 15 minutes by default.
 It is separate from an actual settlement receipt and from vault evidence.
+At the documented 0.001 test USDC session price, an unused `--cap 0.01` grant
+covers at most **10 session purchases**, assuming no other spending and an
+unchanged price. This is a budget ceiling, not prepaid funds or ten analysis
+credits: reuse one unexpired code for multiple API requests, subject to quotas.
+`--max-amount 0.001` limits one purchase. A new grant does not fund the wallet.
+The setup guide prints only the access code using Git Bash/Bash/Zsh and Node.js.
+Explorer, Investigate and Examples remember it in this tab across refreshes;
+**Disconnect session** clears the credential and current workspace without
+revoking the key or grant. Refreshing never extends the session's expiry.
 The UI offers three separate explanation paths: copy context to an assistant,
 open the public Recipe, or explicitly consent to **Ask with Bazantic** when the
 in-page assistant is configured. Only the last path executes a Recipe from Tare.
@@ -318,7 +343,7 @@ market-identity matching and shared Morpho V1 dependencies. Bazantic can cite th
 derived facts after consent. This is not continuous monitoring; live acceptance
 of the new flow must be retained separately from fixture tests.
 
-Application verification for this documentation refresh
+Historical application verification before the separate workspaces and disconnect feature
 (2026-09-13, Node 24.13.0) passed 211 core tests, 12 web tests and Chrome
 regressions across all four routes at widths from 320px to 1440px. These include
 Recipe response parsing, citation/page validation, session setup and terminal

@@ -108,6 +108,25 @@ allow Base Sepolia test USDC and the Tare gateway; a mainnet balance alone is no
 proof of testnet funding. `tare-demo` below is a local grant name, not a shared
 project account. Use a new name if it already exists.
 
+### Grant budget versus session lifetime
+
+- `--cap 0.01` is the grant's total spending ceiling, not a wallet deposit.
+- `--max-amount 0.001` caps a single session request. `--yes` approves that bounded
+  request when you run it; copying the command does not make a request.
+- At the documented 0.001 test USDC price, `0.01 / 0.001 = 10`: an unused grant
+  covers at most **10 session purchases** if the price stays unchanged and no
+  other calls spend from it. Prior charges can leave fewer; ten returned codes
+  are not guaranteed. Other gateway tools can have different prices.
+- This is **not ten analyses**. One accepted access code supports multiple
+  ordinary Tare API requests until it expires, subject to quotas and provider
+  availability. Reuse it rather than buying a code for each check.
+- Inspect remaining grant budget and test USDC balance if a payment is rejected.
+  A fresh grant still needs funds; do not automatically increase spending or
+  repeatedly request sessions. Login, spend authorization, session access and
+  Recipe execution are separate concepts.
+
+### Install and obtain an access code
+
 Install/update the CLI and sign in first. Login manages the Bazantic account; the
 grant separately authorizes bounded spending. These examples use Git Bash,
 macOS or Linux shell quoting, not PowerShell or Command Prompt:
@@ -133,7 +152,7 @@ paste the error as a code.
 The default lifetime is 900 seconds; configuration can change it. An authorization
 card cannot reconstruct a transaction receipt from that token.
 
-Explorer and Investigate remember an accepted credential in tab-scoped session
+Explorer, Investigate and Examples remember an accepted credential in tab-scoped session
 storage and revalidate it on reload. Use **Disconnect session** beneath the service
 status to clear that tab's credential and reload its workspace before entering a
 different key. This removes in-memory reports from the screen, not downloaded

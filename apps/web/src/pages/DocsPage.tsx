@@ -3,6 +3,7 @@ import { AppLink } from '../components/AppLink';
 
 const sections = [
   ['overview', 'Overview'],
+  ['workspaces', 'Choose a workspace'],
   ['how-it-works', 'How it works'],
   ['reading-a-report', 'Read a report'],
   ['using-the-explorer', 'Use the explorer'],
@@ -34,6 +35,16 @@ export function DocsPage() {
           <strong>A simple example</strong>
           <p>You deposit into Vault A. Vault A allocates to Vault B. Vault B supplies assets to several lending markets. To understand your position, you need to follow every supported layer and keep track of where the evidence came from.</p>
         </div>
+      </section>
+
+      <section className="doc-section" id="workspaces">
+        <p className="section-label">Choose a workspace</p><h2>Explorer, Investigate or Examples?</h2>
+        <div className="doc-cards">
+          <article><h3><AppLink href="/explore">Explorer</AppLink></h3><p>What does this one position rest on? Select one wallet–vault pair for a detailed trace, observed values, eligible source checks and limitations.</p></article>
+          <article><h3><AppLink href="/investigate">Investigate</AppLink></h3><p>What do my positions share, or what changed? Check at most 3 supported positions for shared market dependencies, or compare one position at two explicit blocks.</p></article>
+          <article><h3><AppLink href="/examples">Examples</AppLink></h3><p>How do I read or reproduce a report? Replay saved examples or upload a compatible capture. This does not acquire fresh blockchain evidence.</p></article>
+        </div>
+        <p>Explorer and Investigate reuse the same evidence engine. Investigate adds comparisons, not stronger verification: it is neither a complete wallet inventory nor continuous monitoring. Shared markets do not predict losses; changed values do not establish their cause. Bazantic can explain the returned facts after consent, but does not add verification.</p>
       </section>
 
       <section className="doc-section" id="changes">
@@ -102,6 +113,9 @@ export function DocsPage() {
           <li><span>2</span><div><strong>Call Tare's public gateway</strong><p>Use the token-only command in the setup guide in Git Bash or Bash / Zsh. It approves one session request capped at 0.001 test USDC and extracts the access code locally with Node.js. Repeating the command requests another paid session.</p></div></li>
           <li><span>3</span><div><strong>Paste only the access code</strong><p>Copy the single code printed in the terminal, without quotes. Do not paste an error message. No clipboard utility is required. The session defaults to 15 minutes; the returned expiry is authoritative. The accepted credential stays in this tab across refreshes and is revalidated without extending its expiry. Use “Disconnect session” beneath the service status to clear the credential and current workspace before switching keys; this does not revoke the key or grant. The code is authorization, not a settlement receipt or vault evidence.</p></div></li>
         </ol>
+        <h3>How many access codes does a grant cover?</h3>
+        <p><code>--cap 0.01</code> sets a total spending ceiling. At 0.001 test USDC per session, <code>0.01 / 0.001 = 10</code>: at most 10 session purchases from an unused grant, assuming no other charged calls and an unchanged price. It does not guarantee ten codes or supply test funds. <code>--max-amount 0.001</code> caps one request, not the whole grant.</p>
+        <p>This is not a ten-analysis limit. Reuse an unexpired access code for multiple analyses, subject to API quotas and source availability. Repeating the gateway command requests another paid session. If the remaining budget or balance is insufficient, inspect the grant and test USDC balance before retrying; do not automatically increase spending. Session access and Recipe execution remain separate.</p>
         <div className="callout safe"><LockKeyhole size={21} /><div><strong>Testnet only.</strong><p>Mainnet payment access is a future stretch goal and is not enabled in this release.</p></div></div>
         <AppLink className="text-link" href="/developers">See the exact gateway commands <ArrowRight size={16} /></AppLink>
       </section>

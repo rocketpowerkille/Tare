@@ -47,13 +47,19 @@ export function DevelopersPage() {
     <section className="developer-section" id="bazantic-sandbox">
       <div className="section-heading"><p className="kicker">Bazantic sandbox</p><h2>Create a short-lived Explorer session</h2><p>These commands use the public Tare gateway. Login, a spend grant, an Explorer session and Recipe execution are separate steps. Session authorization is not vault evidence or a settlement receipt.</p></div>
       <BazanticAccessGuide gatewayUrl={BAZANTIC_GATEWAY_URL} sessionPath={BAZANTIC_SESSION_PATH} />
-      <p className="developer-note">The paid call includes --yes and a 0.001 test USDC maximum. Use only one command alternative per requested session. If tare-demo already exists, use a new grant name and the same name in --account. Returned expiresAt is authoritative; 15 minutes is the default. Mainnet payment access is not supported by this session flow.</p>
+      <p className="developer-note">The token-only command includes --yes and a 0.001 test USDC per-request maximum. The grant's --cap 0.01 is a separate total budget: at the documented price, at most 10 session purchases if unused and spent only on sessions. A session supports multiple API requests until expiry, subject to quotas; it is not one analysis credit. If tare-demo already exists, use a new grant name and the same name in --account. Returned expiresAt is authoritative; 15 minutes is the default. Mainnet payment access is not supported by this session flow.</p>
     </section>
 
     <section className="developer-section">
       <div className="section-heading"><p className="kicker">The Graph</p><h2>Compose Token API and Studio accounting</h2><p>This operation compares the wallet's vault-share balance and the subgraph accounting checkpoint with direct Ethereum RPC reads. The Graph Market token remains server-side.</p></div>
       <CodeBlock code={graphExample} label="Git Bash / macOS / Linux" />
       <p className="developer-note">Requires configured Ethereum RPC, Graph Token API access and eligible Studio coverage. Accounting uses its indexed head; source blocks may differ from the position trace. Accounting agreement is not backing. A completed historical subgraph sync still needs separate ledger/RPC acceptance.</p>
+    </section>
+
+    <section className="developer-section" id="workspaces">
+      <div className="section-heading"><p className="kicker">Web workspaces</p><h2>One evidence engine, different scopes</h2></div>
+      <p><a href="/explore">Explorer</a> orchestrates one selected position's analysis and eligible Graph/Chainlink checks. <a href="/investigate">Investigate</a> uses /api/investigation/wallet for bounded multi-position reports and shared-market comparisons, or existing /api/analyze operations for two-block changes. <a href="/examples">Examples</a> uses /api/example and /api/replay for saved evidence. These are distinct web routes, not new evidence methodologies.</p>
+      <p>All three share tab-scoped access. “Disconnect session” clears the saved credential and reloads the workspace without revoking the key or grant. Comparing reports does not create synchronized observations, prove backing or explain causation; source blocks, coverage and limitations remain attached.</p>
     </section>
 
     <DeveloperEndpoints />

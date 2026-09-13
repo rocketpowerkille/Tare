@@ -3,6 +3,10 @@ import assert from 'node:assert/strict';
 // Local UI checks only. Do not execute the displayed CLI commands or pay for access.
 export async function checkDocs({ page, origin, fits }) {
   await page.goto(origin + '/docs');
+  assert.equal(await page.locator('#workspaces a[href="/explore"]').count(), 1);
+  assert.equal(await page.locator('#workspaces a[href="/investigate"]').count(), 1);
+  assert.equal(await page.locator('#workspaces a[href="/examples"]').count(), 1);
+  assert.match(await page.locator('#access').innerText(), /not a ten-analysis limit/);
   for (const link of await page.locator('.docs-nav a').all()) {
     const href = await link.getAttribute('href');
     assert.equal(await page.locator(href).count(), 1, `Missing documentation section ${href}`);
@@ -26,6 +30,7 @@ export async function checkDocs({ page, origin, fits }) {
   assert.match(command, /https:\/\/tare.visk404.dev\/api\/agent-example/);
   assert.match(command, /"id": "steakhouse-usdc"/);
   await page.getByRole('button', { name: 'Copy install command', exact: true }).click();
+  assert.match(await page.locator('.bazantic-guide').innerText(), /at most 10 session purchases/);
   assert.equal(await page.evaluate(() => navigator.clipboard.readText()), 'npm i -g @bazantic/cli@latest');
   await page.getByRole('button', { name: 'Copy login command', exact: true }).click();
   assert.equal(await page.evaluate(() => navigator.clipboard.readText()), 'baz login');

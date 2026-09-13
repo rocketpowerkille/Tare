@@ -15,6 +15,14 @@ identity, not an ordinary Explorer session. A gateway grant is not a Tare bearer
 token. `baz login` signs into Bazantic management; it does not create a spend grant
 or an Explorer session.
 
+The documented sandbox grant command uses `--cap 0.01` (total spending ceiling),
+while the session command uses `--max-amount 0.001` (one-request ceiling). At
+0.001 test USDC per session, a fresh, unused grant permits at most ten session
+purchases if the price stays unchanged and no other charges consume its budget.
+This is not a count of analyses: reuse the bearer session until its expiry,
+subject to quotas. A grant does not supply funds or authorize Recipe spending
+through the in-page runner. See [session setup](BAZANTIC_INTEGRATION.md#sandbox-payment-and-session-issuance).
+
 JSON POST requests require `Content-Type: application/json`. General input is
 limited to 5 MiB; investigation snapshots have a stricter 1 MiB combined limit.
 Hosted requests are also subject to origin checks and per-identity quotas (60 per
@@ -48,7 +56,12 @@ these checks to resolve a domain migration; see the
 | GET | `/api/investigation/run/{id}` | Poll the same access identity's run; `id` is a UUID. |
 | POST | `/api/investigation/wallet` | `owner`; discover up to 10 candidates and analyze at most 3 supported positions. |
 
-Web routes are `/`, `/explore`, `/docs`, `/developers`.
+Web routes are `/`, `/explore`, `/investigate`, `/examples`, `/docs`, `/developers`.
+Explorer checks one selected position; Investigate performs bounded wallet or
+two-block comparisons; Examples replays saved evidence and uploaded captures.
+All three workspaces share tab-scoped credentials, revalidated on reload.
+**Disconnect session** clears this tab's credential and workspace locally;
+there is no logout/revocation API route and no grant revocation from this action.
 Public JSON contracts are `/openapi.json`, `/openapi-mcp.json`,
 `/openapi-mcp-v2.json`, `/openapi-mcp-v3.json` and `/openapi-graph.json`.
 The MCP aliases serve the same small Tare gateway specification, not separate

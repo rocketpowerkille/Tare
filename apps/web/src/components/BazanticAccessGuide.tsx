@@ -33,7 +33,12 @@ export function BazanticAccessGuide({ gatewayUrl, sessionPath }: {
         <CopyCommand command="baz login" label="Copy login command" />
         <p>Fund your Bazantic receiving address with Base Sepolia test USDC.</p>
       </div></li>
-      <li><span>2</span><div><strong>Create a testnet grant</strong><CopyCommand command={grantCommand} label="Copy grant command" /></div></li>
+      <li><span>2</span><div>
+        <strong>Create a testnet grant</strong><CopyCommand command={grantCommand} label="Copy grant command" />
+        <p><code>--cap 0.01</code> is the grant's total spending limit, not a deposit or a per-call price. At {BAZANTIC_PRICE_USDC} test USDC per session, an unused grant covers at most 10 session purchases if the price stays the same and no other calls consume its budget. Previous spending can leave fewer.</p>
+        <p>One access code can authorize multiple analyses until it expires, subject to API limits—not just one check. Reuse your current code rather than purchasing one for every analysis. The default session lasts 15 minutes; refreshing does not extend it.</p>
+        <p>If <code>tare-demo</code> already exists, choose a new grant name and use that same name in <code>--account</code>. A new grant still needs an available test USDC balance; it does not provide funds.</p>
+      </div></li>
       <li><span>3</span><div>
         <strong>Get your access code</strong>
         <p>Run in Git Bash on Windows, or a Bash / Zsh terminal on macOS or Linux—not PowerShell or Command Prompt. This makes one session request and uses Node.js to print only your access code.</p>
