@@ -4,6 +4,7 @@ import { createRequire } from 'node:module';
 import { mkdir, readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { checkWorkspace } from './web-workspace-checks.mjs';
+import { checkTheme } from './web-theme-checks.mjs';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.TARE_PLAYWRIGHT_MODULE || 'playwright');
@@ -27,6 +28,7 @@ async function fits(label) {
 }
 
 try {
+  await checkTheme({ page, origin, fits });
   for (const width of [1440, 1024, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 1000 });
     for (const route of ['/', '/explore', '/docs', '/developers']) {

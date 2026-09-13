@@ -32,6 +32,39 @@
   margin: 4px 0 0;
 }
 
+.terminal-selector {
+  display: flex;
+  gap: 4px;
+  margin-top: 9px;
+  padding: 4px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-subtle);
+}
+
+.terminal-selector button {
+  flex: 0 0 auto;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 7px 10px;
+  color: var(--ink-soft);
+  background: transparent;
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.terminal-selector button[aria-pressed="true"] {
+  border-color: var(--line-strong);
+  color: var(--green);
+  background: var(--surface);
+}
+
+.terminal-selector button:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: -2px;
+}
+
 .copy-command {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;

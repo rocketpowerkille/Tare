@@ -2,6 +2,7 @@ import { BookOpen, Code2, FileSearch, FileClock, Menu, X } from './Icons';
 import { useState } from 'react';
 import { AppLink } from './AppLink';
 import { BrandMark } from './BrandMark';
+import { ThemeToggle } from './ThemeToggle';
 
 const items = [
   { href: '/explore', label: 'Explorer', icon: FileSearch },
@@ -23,7 +24,7 @@ export function AppShell({ path, children }: { path: string; children: React.Rea
         <nav className="desktop-nav" aria-label="Primary navigation">
           {items.map(item => <NavItem key={item.href} {...item} active={path === item.href} />)}
         </nav>
-        <div className="header-meta"><AppLink href="/explore" className="button primary">Run a check</AppLink></div>
+        <div className="header-meta"><ThemeToggle /><AppLink href="/explore" className="button primary">Run a check</AppLink></div>
         <button className="menu-button" type="button" aria-label="Toggle navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen(value => !value)}>
           {menuOpen ? <X size={21} /> : <Menu size={21} />}
         </button>

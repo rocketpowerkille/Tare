@@ -5,6 +5,8 @@ import {
   BAZANTIC_GRANT_DOCS,
   BAZANTIC_PRICE_USDC,
   CIRCLE_TESTNET_FAUCET,
+  TERMINALS,
+  type Terminal,
   bazanticGrantCommand,
   bazanticSessionCommand,
   bazanticSessionUrl,
@@ -14,8 +16,9 @@ export function BazanticAccessGuide({ gatewayUrl, sessionPath }: {
   gatewayUrl: string;
   sessionPath: string;
 }) {
+  const [terminal, setTerminal] = useState<Terminal>('powershell');
   const grantCommand = bazanticGrantCommand();
-  const sessionCommand = bazanticSessionCommand(gatewayUrl, sessionPath);
+  const sessionCommand = bazanticSessionCommand(gatewayUrl, sessionPath, terminal);
   const endpoint = bazanticSessionUrl(gatewayUrl, sessionPath);
   const [completed, setCompleted] = useState<number[]>([]);
   const stepNames = ['Prepare Bazantic', 'Create grant', 'Call gateway', 'Paste access code'];
@@ -32,7 +35,19 @@ export function BazanticAccessGuide({ gatewayUrl, sessionPath }: {
     <ol className="bazantic-steps">
       <li><span>1</span><div><strong>Prepare Bazantic</strong><p>Install <code>@bazantic/cli</code>, sign in, and fund your Bazantic receiving address with Base Sepolia test USDC.</p></div></li>
       <li><span>2</span><div><strong>Create a testnet grant</strong><CopyCommand command={grantCommand} label="Copy grant command" /></div></li>
-      <li><span>3</span><div><strong>Call the public Tare gateway</strong><CopyCommand command={sessionCommand} label="Copy paid call" /></div></li>
+      <li><span>3</span><div>
+        <strong>Call the public Tare gateway</strong>
+        <div className="terminal-selector" role="group" aria-label="Choose your terminal">
+          {TERMINALS.map(option => <button
+            key={option.id}
+            type="button"
+            aria-pressed={terminal === option.id}
+            onClick={() => setTerminal(option.id)}
+          >{option.label}</button>)}
+        </div>
+        <CopyCommand key={terminal} command={sessionCommand} label="Copy paid call" />
+        <p>Copy the whole command; keep each continuation character at the end of its line.</p>
+      </div></li>
       <li><span>4</span><div><strong>Paste the returned code</strong><p>Copy <code>body.accessToken</code> from the response into the access-code field. The session costs {BAZANTIC_PRICE_USDC} test USDC.</p></div></li>
     </ol>
     <div className="bazantic-endpoint"><span>Public paid endpoint</span><code>{endpoint}</code></div>

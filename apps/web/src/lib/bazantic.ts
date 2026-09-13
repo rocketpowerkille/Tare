@@ -6,6 +6,14 @@ export const BAZANTIC_CLI_DOCS = 'https://bazantic.com/docs/cli#make-a-paid-call
 export const BAZANTIC_GRANT_DOCS = 'https://bazantic.com/docs/spend-grants#create-a-grant';
 export const CIRCLE_TESTNET_FAUCET = 'https://faucet.circle.com/';
 
+export const TERMINALS = [
+  { id: 'powershell', label: 'PowerShell', continuation: '`' },
+  { id: 'git-bash', label: 'Git Bash', continuation: '\\' },
+  { id: 'bash-zsh', label: 'macOS / Linux', continuation: '\\' },
+  { id: 'cmd', label: 'Command Prompt', continuation: '^' },
+] as const;
+export type Terminal = typeof TERMINALS[number]['id'];
+
 export function bazanticSessionUrl(
   gatewayUrl = BAZANTIC_GATEWAY_URL,
   sessionPath = BAZANTIC_SESSION_PATH,
@@ -20,13 +28,18 @@ export function bazanticGrantCommand() {
 export function bazanticSessionCommand(
   gatewayUrl = BAZANTIC_GATEWAY_URL,
   sessionPath = BAZANTIC_SESSION_PATH,
+  terminal: Terminal = 'git-bash',
 ) {
-  return `baz curl ${bazanticSessionUrl(gatewayUrl, sessionPath)} \\
-  -X POST \\
-  -H "Content-Type: application/json" \\
-  -d '{}' \\
-  --account tare-demo \\
-  --max-amount ${BAZANTIC_PRICE_USDC} \\
-  --yes \\
-  --json`;
+  const { continuation } = TERMINALS.find(option => option.id === terminal)!;
+  const body = terminal === 'cmd' ? '"{}"' : "'{}'";
+  return [
+    `baz curl ${bazanticSessionUrl(gatewayUrl, sessionPath)}`,
+    '-X POST',
+    '-H "Content-Type: application/json"',
+    `-d ${body}`,
+    '--account tare-demo',
+    `--max-amount ${BAZANTIC_PRICE_USDC}`,
+    '--yes',
+    '--json',
+  ].join(` ${continuation}\n  `);
 }
