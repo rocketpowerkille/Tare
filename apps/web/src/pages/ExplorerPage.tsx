@@ -11,6 +11,9 @@ import { runComprehensiveCheck } from '../lib/comprehensive';
 import { initialStages, type EvidenceStage, type ProgressObserver } from '../lib/progress';
 import { EvidenceTimeline } from '../components/explorer/EvidenceTimeline';
 import { SessionEvidence } from '../components/explorer/SessionEvidence';
+import { ConnectionTimeline } from '../components/explorer/ConnectionTimeline';
+import { PositionDiagram } from '../components/explorer/PositionDiagram';
+import type { StageStatus } from '../lib/progress';
 import type { AccessOptions, Capabilities, DiscoveryResult, JsonRecord, OperationId, PositionAnalyzeInput } from '../lib/types';
 
 export function ExplorerPage() {
@@ -19,6 +22,9 @@ export function ExplorerPage() {
   const [capabilities, setCapabilities] = useState<Capabilities>();
   const [authRequired, setAuthRequired] = useState(false);
   const [connecting, setConnecting] = useState(true);
+  const [optionsState, setOptionsState] = useState<StageStatus>('active');
+  const [sessionState, setSessionState] = useState<StageStatus>('active');
+  const [partial, setPartial] = useState<JsonRecord>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [report, setReport] = useState<JsonRecord>();
@@ -28,23 +34,30 @@ export function ExplorerPage() {
 
   async function connect(nextToken: string) {
     setConnecting(true);
+    setSessionState('active');
     setError('');
     try {
       const next = await api.capabilities(nextToken);
       setToken(nextToken);
       setCapabilities(next);
       setAuthRequired(false);
+      setSessionState('complete');
     } catch (failure) {
       if (failure instanceof ApiError && failure.status === 401) {
         setAuthRequired(true);
+        setSessionState(nextToken ? 'error' : 'waiting');
+        setCapabilities(undefined);
         if (nextToken) setError('That access code is invalid or expired. Paste a current code or start a new sandbox session.');
       }
-      else setError(failure instanceof Error ? failure.message : 'The service could not be reached.');
+      else {
+        setSessionState('error');
+        setError(failure instanceof Error ? failure.message : 'The service could not be reached.');
+      }
     } finally { setConnecting(false); }
   }
 
   useEffect(() => {
-    void api.accessOptions().then(setAccessOptions).catch(() => undefined);
+    void api.accessOptions().then(options => { setAccessOptions(options); setOptionsState('complete'); }).catch(() => setOptionsState('unavailable'));
     void connect('');
   }, []);
   useEffect(() => {
@@ -64,6 +77,7 @@ export function ExplorerPage() {
     setBusy(true);
     setError('');
     setReport(undefined);
+    setPartial(undefined);
     setActivity(label);
     setStages(initialStages(composed, replay));
     let acceptingEvents = true;
@@ -79,11 +93,11 @@ export function ExplorerPage() {
       setReport(result);
       setActivity('Your result is ready. Start with the plain-language answer.');
     } catch (failure) {
-      if (failure instanceof ApiError && failure.status === 401) setAuthRequired(true);
+      if (failure instanceof ApiError && failure.status === 401) { setAuthRequired(true); setSessionState('waiting'); }
       setError(failure instanceof Error ? failure.message : 'The request could not be completed.');
       setActivity('No result was produced.');
       setStages(current => current.map(stage => ['waiting', 'active'].includes(stage.status)
-        ? { ...stage, status: 'unavailable', detail: 'Not completed. The request stopped; see the error details.' } : stage));
+        ? { ...stage, status: stage.status === 'active' ? 'error' : 'unavailable', detail: stage.status === 'active' ? 'The request could not complete. See technical details; this is not a finding about backing.' : 'Not checked because the request stopped.' } : stage));
     } finally { acceptingEvents = false; setBusy(false); }
   }
 
@@ -91,13 +105,14 @@ export function ExplorerPage() {
     const positionCheck = ['resolve-v1', 'resolve-v2', 'resolve-erc4626'].includes(input.operation)
       && input.owner !== undefined && input.vault !== undefined;
     void run('Running the position trace and eligible evidence checks.', notify => positionCheck && capabilities
-      ? runComprehensiveCheck(token, capabilities, input as PositionAnalyzeInput, notify)
+      ? runComprehensiveCheck(token, capabilities, input as PositionAnalyzeInput, notify, setPartial)
       : api.analyze(token, input), positionCheck);
   }
 
   function clearQueryResult() {
     setError('');
     setReport(undefined);
+    setPartial(undefined);
     setStages([]);
     setActivity('Enter a wallet address to find supported vaults.');
   }
@@ -106,12 +121,10 @@ export function ExplorerPage() {
     try {
       return await api.discover(token, owner);
     } catch (failure) {
-      if (failure instanceof ApiError && failure.status === 401) setAuthRequired(true);
+      if (failure instanceof ApiError && failure.status === 401) { setAuthRequired(true); setSessionState('waiting'); }
       throw failure;
     }
   }
-
-  if (connecting && !capabilities && !authRequired) return <div className="page-width skeleton-stack" role="status"><p>Connecting to the evidence service…</p><div className="skeleton" /><div className="skeleton short" /><div className="skeleton" /></div>;
 
   return <div className="explorer-page page-width">
     <header className="page-intro explorer-intro">
@@ -119,20 +132,23 @@ export function ExplorerPage() {
       <div className="service-state"><span className={capabilities ? 'network-dot' : 'network-dot offline'} /><div><strong>{capabilities ? 'Service ready' : 'Connection needed'}</strong><span>{capabilities ? `${Object.values(capabilities.live).filter(Boolean).length} live checks configured` : 'Connect to continue'}</span></div></div>
     </header>
 
-    {authRequired && <AccessPanel options={accessOptions} onConnect={value => void connect(value)} error={error || undefined} />}
+    {(!capabilities || authRequired || connecting) && <ConnectionTimeline optionsState={optionsState} sessionState={sessionState} ready={Boolean(capabilities)} />}
+    {authRequired && <AccessPanel options={accessOptions} onConnect={value => void connect(value)} error={error || undefined} connecting={connecting} />}
+    {connecting && !authRequired && !capabilities && <div className="skeleton-stack" aria-hidden="true"><div className="skeleton" /><div className="skeleton short" /></div>}
     {error && !authRequired && <div className="error-banner" role="alert"><AlertCircle size={20} /><div><strong>This check could not be completed.</strong><p>Review the input or try again. No new conclusion was produced.</p><details><summary>Technical details</summary><p>{error}</p></details>{!capabilities && <button className="button secondary" onClick={() => void connect(token)}>Retry connection</button>}</div></div>}
 
     {capabilities && <>
       {!authRequired && <SessionEvidence token={token} />}
       <div className="explorer-grid">
         <div className="control-stack">
-          <OperationForm capabilities={capabilities} busy={busy} operation={operation} onOperationChange={setOperation} onQueryChange={clearQueryResult} onDiscover={discover} onRun={analyze} />
-          <ExamplePanel examples={capabilities.examples} busy={busy} onRun={id => void run('Replaying saved evidence, with no live blockchain query.', () => api.example(token, id), false, true)} />
-          <ReplayPanel operation={operation} busy={busy} onReplay={capture => void run('Recalculating the uploaded capture.', () => api.replay(token, operation, capture), false, true)} onError={setError} />
+          <OperationForm capabilities={capabilities} busy={busy || authRequired || connecting} operation={operation} onOperationChange={setOperation} onQueryChange={clearQueryResult} onDiscover={discover} onRun={analyze} />
+          <ExamplePanel examples={capabilities.examples} busy={busy || authRequired || connecting} onRun={id => void run('Replaying saved evidence, with no live blockchain query.', () => api.example(token, id), false, true)} />
+          <ReplayPanel operation={operation} busy={busy || authRequired || connecting} onReplay={capture => void run('Recalculating the uploaded capture.', () => api.replay(token, operation, capture), false, true)} onError={setError} />
         </div>
         <section className="result-panel" id="report-result" tabIndex={-1} aria-label="Evidence result">
           <div className="activity-line" role="status" aria-live="polite">{busy ? <LoaderCircle className="spin" size={16} /> : <Radio size={16} />}<span>{activity}</span></div>
           <EvidenceTimeline stages={stages} busy={busy} />
+          {busy && partial && <section className="partial-evidence"><p className="section-label">Position response received</p><p>Inspect the returned path while remaining evidence checks finish. This is not the final report.</p><PositionDiagram report={partial} /></section>}
           {report ? (report.reportType === 'comprehensive-position-check' ? <ComprehensiveReportView report={report} /> : <ReportView report={report} />) : busy ? <div className="skeleton-stack" aria-hidden="true"><div className="skeleton" /><div className="skeleton short" /><div className="skeleton" /></div> : <div className="result-empty"><div className="empty-symbol"><FileSearch size={31} /></div><p className="section-label">Your evidence report</p><h2>An answer you can inspect.</h2><p>Run a check to see the position path, observed amounts and missing evidence. Or begin with a saved report.</p><button className="text-button" type="button" onClick={() => document.getElementById('example')?.focus()}>Try a saved example <ArrowRight size={16} /></button></div>}
         </section>
       </div>

@@ -17,6 +17,9 @@ export function BazanticAccessGuide({ gatewayUrl, sessionPath }: {
   const grantCommand = bazanticGrantCommand();
   const sessionCommand = bazanticSessionCommand(gatewayUrl, sessionPath);
   const endpoint = bazanticSessionUrl(gatewayUrl, sessionPath);
+  const [completed, setCompleted] = useState<number[]>([]);
+  const stepNames = ['Prepare Bazantic', 'Create grant', 'Call gateway', 'Paste access code'];
+  const current = stepNames.findIndex((_, index) => !completed.includes(index));
 
   return <div className="bazantic-guide">
     <div>
@@ -24,6 +27,8 @@ export function BazanticAccessGuide({ gatewayUrl, sessionPath }: {
       <h3>Get a 15-minute access code</h3>
     </div>
     <p>Use the public Tare gateway with the Bazantic command line tool. Bazantic Playground only lists gateways owned by your account.</p>
+    <p className="setup-note">Mark steps as you finish them. This checklist is your progress, not server-verified payment evidence.</p>
+    <ol className="access-tracker">{stepNames.map((name, index) => <li key={name} aria-current={index === current ? 'step' : undefined} className={completed.includes(index) ? 'done' : ''}><label><input type="checkbox" checked={completed.includes(index)} onChange={event => setCompleted(previous => event.target.checked ? [...previous, index] : previous.filter(step => step !== index))} /><span>{index + 1}. {name}</span></label></li>)}</ol>
     <ol className="bazantic-steps">
       <li><span>1</span><div><strong>Prepare Bazantic</strong><p>Install <code>@bazantic/cli</code>, sign in, and fund your Bazantic receiving address with Base Sepolia test USDC.</p></div></li>
       <li><span>2</span><div><strong>Create a testnet grant</strong><CopyCommand command={grantCommand} label="Copy grant command" /></div></li>
@@ -42,18 +47,23 @@ export function BazanticAccessGuide({ gatewayUrl, sessionPath }: {
 
 function CopyCommand({ command, label }: { command: string; label: string }) {
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState(false);
 
   async function copy() {
-    await navigator.clipboard.writeText(command);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1600);
+    try {
+      await navigator.clipboard.writeText(command);
+      setError(false);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch { setError(true); }
   }
 
   return <div className="copy-command">
     <code>{command}</code>
     <button type="button" onClick={() => void copy()} aria-label={label}>
       {copied ? <Check size={15} /> : <Copy size={15} />}
-      {copied ? 'Copied' : 'Copy'}
+      <span role="status">{copied ? 'Copied' : label}</span>
     </button>
+    {error && <p role="alert">Clipboard unavailable. Select and copy the command manually.</p>}
   </div>;
 }

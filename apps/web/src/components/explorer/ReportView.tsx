@@ -7,6 +7,7 @@ import { PositionDiagram } from './PositionDiagram';
 import { ValueConversion } from './ValueConversion';
 import { EvidenceSources } from './EvidenceSources';
 import { displayBlock } from '../../lib/report-display';
+import { useId } from 'react';
 
 function readable(value: string) {
   return value.replaceAll('-', ' ').replaceAll('_', ' ');
@@ -80,6 +81,7 @@ function download(value: unknown, filename: string) {
 }
 
 export function ReportView({ report, modules = [] }: { report: JsonRecord; modules?: JsonRecord[] }) {
+  const sectionId = useId();
   const capture = record(report.capture);
   const metric = record(report.metric);
   const block = displayBlock(report);
@@ -114,19 +116,20 @@ export function ReportView({ report, modules = [] }: { report: JsonRecord; modul
 
   return <article className="report-view">
     <header className="report-header">
-      <div><div className="report-meta"><StatusBadge tone={sourceMode.startsWith('live') ? 'success' : 'info'}>{sourceMode.startsWith('live') ? 'Fresh check' : 'Saved example'}</StatusBadge><span>{readable(reportType)}</span></div><h2>{result.title}</h2></div>
+      <div><p className="section-label">Evidence report</p><div className="report-meta"><StatusBadge tone={sourceMode.startsWith('live') ? 'success' : 'info'}>{sourceMode.startsWith('live') ? 'Fresh check' : 'Saved example'}</StatusBadge><span>{readable(reportType)}</span></div><h2>{result.title}</h2></div>
       <span className={`verdict-icon verdict-${result.tone}`}><VerdictIcon size={25} /></span>
     </header>
-    <section className={`plain-summary summary-${result.tone}`}>
+    <nav className="report-sections" aria-label="Report sections">{['Summary', 'Evidence path', ...(modules.length ? ['Source checks'] : []), 'Limitations', 'Raw JSON'].map(label => <a key={label} href={`#${sectionId}-${label.replaceAll(' ', '-')}`}>{label}</a>)}</nav>
+    <section id={`${sectionId}-Summary`} className={`plain-summary summary-${result.tone}`}>
       <div><p className="section-label">Executive summary</p><p>{result.meaning}</p></div>
-      <div><p className="section-label">What to do next</p><p>{result.next}</p></div>
+      <div><p className="section-label">What this report does not establish</p><p>{result.next}</p></div>
       {metric.kind !== 'available' && <div><StatusBadge tone="warning">Backing not established</StatusBadge><p>Position accounting and market prices are not independent proof of the assets behind this claim.</p></div>}
     </section>
     <dl className="fact-grid">{facts.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{['Wallet', 'Vault', 'Observed at block', 'Evidence ID'].includes(label) && value !== 'Not included in this report' ? <CopyValue value={value} label={label} /> : value}</dd></div>)}</dl>
     <ValueConversion report={report} modules={modules} />
     <PositionOverview report={report} />
-    <PositionDiagram report={report} />
-    {modules.length > 0 && <EvidenceSources report={report} modules={modules} />}
+    <div id={`${sectionId}-Evidence-path`}><PositionDiagram report={report} /></div>
+    {modules.length > 0 && <div id={`${sectionId}-Source-checks`}><EvidenceSources report={report} modules={modules} /></div>}
 
     <section className="report-section metric-section">
       <div><p className="section-label">Measured result</p><h3>{metric.kind === 'available' ? formatMetric(metric) : 'No reliable backing measure yet'}</h3></div>
@@ -138,7 +141,7 @@ export function ReportView({ report, modules = [] }: { report: JsonRecord; modul
       {Object.entries(view).filter(([, value]) => typeof value === 'string').map(([key, value]) => <div key={key}><span>{readable(key)}</span><strong title={String(value)}>{address(value)}</strong></div>)}
     </div></section>}
 
-    <section className="report-section">
+    <section className="report-section" id={`${sectionId}-Limitations`}>
       <div className="section-title-row"><div><p className="section-label">What remains unknown</p><h3>{uniqueReasons.length ? 'These limits matter' : 'No missing evidence was reported for this check'}</h3></div><ShieldAlert size={20} /></div>
       <ul className="finding-list">
         {uniqueReasons.map((item, index) => <li key={index}>{friendlyReason(item)}</li>)}
@@ -147,7 +150,7 @@ export function ReportView({ report, modules = [] }: { report: JsonRecord; modul
     </section>
 
     <details className="technical-details"><summary><span><FileJson size={18} />Technical details</span><ChevronDown size={18} /></summary><div className="technical-facts">{technicalFacts.map(([label, value]) => <div key={label}><span>{label}</span><strong title={value}>{value}</strong></div>)}</div></details>
-    <details className="raw-report"><summary><span><FileJson size={18} />Full JSON report</span><ChevronDown size={18} /></summary><pre>{JSON.stringify(report, null, 2)}</pre></details>
+    <details className="raw-report" id={`${sectionId}-Raw-JSON`}><summary><span><FileJson size={18} />Full JSON report</span><ChevronDown size={18} /></summary><pre>{JSON.stringify(report, null, 2)}</pre></details>
     <div className="report-actions"><button className="button secondary" type="button" onClick={() => download(report, 'tare-report.json')}><Download size={16} />Download report</button>{Object.keys(capture).length > 0 && <button className="button quiet" type="button" onClick={() => download(capture, 'tare-capture.json')}><Download size={16} />Download capture</button>}</div>
     <footer className="report-foot"><span><Radio size={15} />{sourceMode.startsWith('live') ? 'Requested from configured providers' : 'Recalculated without a network request'}</span>{capturedAt && <span><Clock3 size={15} />Captured {new Date(capturedAt).toLocaleString()}</span>}</footer>
   </article>;

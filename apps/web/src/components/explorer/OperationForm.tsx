@@ -100,14 +100,11 @@ export function OperationForm({ capabilities, busy, operation, onOperationChange
     <form onSubmit={submit}>
       <fieldset disabled={busy || discovering} className="query-fields">
       <p className="form-intro">Find indexed <Term name="Morpho" /> positions, or enter a vault directly for an eligible <Term name="ERC-4626" /> check.</p>
-      {['resolve-v1', 'resolve-erc4626'].includes(operation) && <><label htmlFor="chain">Check network</label><select id="chain" value={chainId} onChange={event => { setChainId(Number(event.target.value)); setVault(''); onQueryChange(); }}>
-        {!capabilities.networks.some(network => operation === 'resolve-v1' ? network.resolveV1 : network.erc4626) && <option value={chainId}>No live network configured</option>}
-        {capabilities.networks.filter(network => operation === 'resolve-v1' ? network.resolveV1 : network.erc4626).map(network => <option key={network.chainId} value={network.chainId}>{network.name}</option>)}
-      </select><p className="field-help">Wallet discovery searches across supported networks.</p></>}
       {definition.owner && <><label htmlFor="owner">Wallet address</label><input id="owner" value={owner} onChange={event => updateOwner(event.target.value)} placeholder="0x0000..." pattern={ADDRESS.source} required autoComplete="off" spellCheck={false} /><p className="field-help">The public address that owns the vault shares.</p></>}
       {['resolve-v1', 'resolve-v2', 'resolve-erc4626'].includes(operation) && <div className="vault-discovery">
         <button className="button secondary full-button" type="button" disabled={busy || discovering} onClick={() => void discoverVaults()}>{discovering ? <><LoaderCircle className="spin" size={16} />Finding supported vaults</> : <><ScanSearch size={16} />Find my vaults</>}</button>
-        {discoveryError && <p className="discovery-error" role="alert">{discoveryError}</p>}
+        <p className="field-help">Discovery searches supported networks automatically. Selecting a result sets the network and check type.</p>
+        {discoveryError && <div className="discovery-error" role="alert"><p>Vault discovery could not complete.</p><details><summary>Details and next step</summary><p>{discoveryError}</p></details></div>}
         {discovery && <div className="discovery-results" aria-live="polite">
           <div className="discovery-heading"><strong>{discovery.positions.length ? `${discovery.positions.length} position candidate${discovery.positions.length === 1 ? '' : 's'} found` : 'No indexed or registered positions found'}</strong><span>Discovery is not verification. Tare confirms a supported candidate with direct blockchain reads.</span></div>
           {discovery.positions.map(position => <button
@@ -126,6 +123,10 @@ export function OperationForm({ capabilities, busy, operation, onOperationChange
       <details className="advanced-options">
         <summary>Advanced options</summary>
         <div className="advanced-options-body">
+          {['resolve-v1', 'resolve-erc4626'].includes(operation) && <><label htmlFor="chain">Check network</label><select id="chain" value={chainId} onChange={event => { setChainId(Number(event.target.value)); setVault(''); onQueryChange(); }}>
+            {!capabilities.networks.some(network => operation === 'resolve-v1' ? network.resolveV1 : network.erc4626) && <option value={chainId}>No live network configured</option>}
+            {capabilities.networks.filter(network => operation === 'resolve-v1' ? network.resolveV1 : network.erc4626).map(network => <option key={network.chainId} value={network.chainId}>{network.name}</option>)}
+          </select><p className="field-help">For manually entered vaults. Discovery selects this automatically.</p></>}
           <label htmlFor="operation">Type of check</label>
           <select id="operation" value={operation} onChange={event => { onOperationChange(event.target.value as OperationId); onQueryChange(); }}>
             {operations.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}

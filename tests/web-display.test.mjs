@@ -86,4 +86,6 @@ test('zero shares, missing quotes and unavailable providers remain distinct', ()
   assert.equal(events.find(([id]) => id === 'allocations')[1], 'unavailable');
   observeModule({ id: 'the-graph', status: 'unavailable', summary: 'Source timed out.' }, notify);
   assert.deepEqual(events.at(-1), ['the-graph', 'unavailable', 'Source timed out.']);
+  observeModule({ id: 'chainlink', status: 'unavailable', technicalError: true, summary: 'Invalid response.' }, notify);
+  assert.deepEqual(events.at(-1), ['chainlink', 'error', 'Invalid response.']);
 });

@@ -21,7 +21,7 @@ export function EvidenceSources({ report, modules }: { report: JsonRecord; modul
     <div className="source-cards">{modules.map(module => {
       const id = String(module.id);
       const status = text(module.status) ?? 'unavailable';
-      const state = sourceState(status);
+      const state = module.technicalError === true ? { label: 'Technical error', tone: 'danger' as const } : sourceState(status);
       const evidence = record(module.report);
       const checks = record(evidence.checks);
       const capture = record(evidence.capture);
@@ -32,8 +32,8 @@ export function EvidenceSources({ report, modules }: { report: JsonRecord; modul
       const authorization = id === 'bazantic';
       const conclusion = authorization ? 'Access authorization only. Does not establish custody, backing or solvency.'
         : status === 'mismatch' ? 'Contradicts agreement within the compared scope. Review the differing values.'
-        : valuation ? 'Prices the accounting quote. Does not establish custody, liquidity or backing.'
-        : graph ? 'Agreement supports the compared accounting facts, not independent backing.'
+        : valuation ? (status === 'verified' ? 'The returned price supports a market estimate of the accounting quote. It does not establish custody, liquidity or backing.' : 'No qualifying price conclusion established. Custody, liquidity and backing remain unverified.')
+        : graph ? (status === 'verified' ? 'Agreement supports the compared accounting facts, not independent backing.' : 'Only returned comparisons can support accounting facts. Missing comparisons establish no agreement or independent backing.')
         : 'Establishes only the supported position accounting and reported path.';
       return <article className="source-card" key={id}>
         <header><div><span className="section-label">{text(module.partner) ?? 'Tare · Direct reads'}</span><h4>{text(module.name)}</h4></div><StatusBadge tone={state.tone}>{authorization && status === 'verified' ? 'Session accepted' : state.label}</StatusBadge></header>

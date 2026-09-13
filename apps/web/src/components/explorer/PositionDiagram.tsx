@@ -45,7 +45,7 @@ function Node({ node, selected, onSelect }: { node: PathNode; selected: string; 
   const descendants = <ol>{node.children.map(child => <Node key={child.id} node={child} selected={selected} onSelect={onSelect} />)}</ol>;
   return <li>
     <button type="button" className={`path-node ${selected === node.id ? 'selected' : ''}`} aria-pressed={selected === node.id} onClick={() => onSelect(node)}>
-      <Layers3 size={16} /><span><strong>{node.label}</strong><small>{node.reference.slice(0, 8)}…{node.reference.slice(-6)}</small></span>
+      <Layers3 size={16} /><span><strong>{node.label}</strong><small>{node.reference.slice(0, 8)}…{node.reference.slice(-6)}</small><small>{node.fields[0]?.[0]}: {node.fields[0]?.[1]}</small><small>{node.status}</small></span>
     </button>
     {node.children.length > 2 ? <details className="path-branches"><summary>{node.children.length} allocations</summary>{descendants}</details> : node.children.length > 0 && descendants}
   </li>;

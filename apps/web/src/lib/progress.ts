@@ -1,6 +1,6 @@
 import { list, record, text, type JsonRecord } from './types';
 
-export type StageStatus = 'waiting' | 'active' | 'complete' | 'warning' | 'unavailable';
+export type StageStatus = 'waiting' | 'active' | 'complete' | 'warning' | 'unavailable' | 'error';
 export interface EvidenceStage {
   id: string;
   title: string;
@@ -28,7 +28,13 @@ export function initialStages(composed: boolean, replay = false): EvidenceStage[
   return stages.map(([id, title, detail]) => ({ id, title, detail, status: id === 'authorization' || id === 'request' ? 'active' : 'waiting' }));
 }
 
-export function observePrimary(report: JsonRecord, notify: ProgressObserver) {
+export function observePrimary(report: JsonRecord, emit: ProgressObserver) {
+  const blockNumber = record(record(report.capture).block).number;
+  let block: string | undefined;
+  try { block = blockNumber === undefined ? undefined : BigInt(String(blockNumber)).toString(); }
+  catch { block = undefined; }
+  const notify: ProgressObserver = (id, status, detail) => emit(id, status,
+    block && id !== 'authorization' ? `${detail} Source: primary position response, block ${block}.` : detail);
   const vault = record(report.vault);
   const position = record(report.position);
   const analysis = record(report.analysis);
@@ -45,6 +51,6 @@ export function observePrimary(report: JsonRecord, notify: ProgressObserver) {
 
 export function observeModule(module: JsonRecord, notify: ProgressObserver) {
   const status = text(module.status);
-  notify(String(module.id), ['verified', 'complete'].includes(status ?? '') ? 'complete'
+  notify(String(module.id), module.technicalError === true ? 'error' : ['verified', 'complete'].includes(status ?? '') ? 'complete'
     : ['not-eligible', 'not-used', 'unavailable'].includes(status ?? '') ? 'unavailable' : 'warning', text(module.summary) ?? 'No source explanation returned.');
 }

@@ -1,4 +1,4 @@
-import { api } from './api';
+import { api, ApiError } from './api';
 import { record, text, type Capabilities, type JsonRecord, type PositionAnalyzeInput } from './types';
 import { observeModule, observePrimary, type ProgressObserver } from './progress';
 
@@ -12,6 +12,11 @@ interface EvidenceModule {
   status: ModuleStatus;
   summary: string;
   report?: JsonRecord;
+  technicalError?: boolean;
+}
+
+function isTechnicalError(failure: unknown) {
+  return failure instanceof SyntaxError || (failure instanceof ApiError && ![408, 429, 502, 503, 504].includes(failure.status));
 }
 
 const ETHEREUM_USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
@@ -31,6 +36,7 @@ function graphModule(result: PromiseSettledResult<JsonRecord> | undefined): Evid
   if (result.status === 'rejected') return {
     id: 'the-graph', name: 'Indexed accounting cross-check', partner: 'The Graph', eligible: true,
     status: 'unavailable', summary: result.reason instanceof Error ? result.reason.message : 'The Graph check was unavailable.',
+    technicalError: isTechnicalError(result.reason),
   };
   const status = text(result.value.status);
   const checks = record(result.value.checks);
@@ -98,6 +104,7 @@ async function chainlinkModule(token: string, report: JsonRecord, input: Positio
     return {
       id: 'chainlink', name: 'Position valuation', partner: 'Chainlink', eligible: true,
       status: 'unavailable', summary: failure instanceof Error ? failure.message : 'The Chainlink valuation was unavailable.',
+      technicalError: isTechnicalError(failure),
     };
   }
 }
@@ -115,13 +122,14 @@ function bazanticModule(token: string): EvidenceModule {
   };
 }
 
-export async function runComprehensiveCheck(token: string, capabilities: Capabilities, input: PositionAnalyzeInput, notify: ProgressObserver = () => {}) {
+export async function runComprehensiveCheck(token: string, capabilities: Capabilities, input: PositionAnalyzeInput, notify: ProgressObserver = () => {}, onPosition: (report: JsonRecord) => void = () => {}) {
   const graphEligible = input.operation === 'resolve-v1' && (input.chainId ?? 1) === 1
     && capabilities.live['verify-graph-composition'];
   notify('position', 'active', 'Requesting shares, vault layers and allocations. These arrive in one API response.');
   notify('the-graph', graphEligible ? 'active' : 'unavailable', graphEligible ? 'Querying the configured Graph composition alongside the position trace.' : 'No eligible Graph composition for this operation and network.');
   const primaryPromise = api.analyze(token, input).then(result => {
     observePrimary(result, notify);
+    onPosition(result);
     return result;
   });
   const graphPromise = graphEligible
@@ -143,7 +151,7 @@ export async function runComprehensiveCheck(token: string, capabilities: Capabil
     ) : Promise.resolve(undefined),
   ]);
 
-  notify('chainlink', 'active', 'Evaluating the asset adapter and requesting an eligible reference price.');
+  if (valuationInput(primaryResult, input)) notify('chainlink', 'active', 'Requesting the eligible Chainlink reference price at the position block.');
   const chainlink = await chainlinkModule(token, primaryResult, input);
   observeModule({ ...chainlink }, notify);
   const modules: EvidenceModule[] = [

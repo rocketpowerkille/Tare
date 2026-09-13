@@ -3,6 +3,7 @@
 import { createRequire } from 'node:module';
 import { mkdir, readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
+import { checkWorkspace } from './web-workspace-checks.mjs';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.TARE_PLAYWRIGHT_MODULE || 'playwright');
@@ -107,7 +108,7 @@ try {
   releasePosition();
   await page.locator('.composed-report').waitFor();
   assert.match(await page.locator('.source-cards').innerText(), /Source unavailable/);
-  assert.match(await page.locator('.value-conversion').innerText(), /Not priced/);
+  assert.match(await page.locator('.value-conversion').innerText(), /USD estimate unavailable/);
   await fits('fixture-backed incomplete combined report');
   await page.screenshot({ path: new URL('combined-mobile.png', output).pathname.replace(/^\/(?=[A-Z]:)/, ''), fullPage: true });
   await page.unroute('**/api/analyze');
@@ -149,7 +150,13 @@ try {
   console.log('Fixture-backed discovery, source outages, honest progress, expired and invalid access passed.');
   await page.route('**/api/access-options', route => route.fulfill({ json: { privateBeta: true, bazanticSandbox: { enabled: true, network: 'base-sepolia', gatewayUrl: 'https://zvnss2njirhqjllnbfsv3sneca.bazgateway.com', sessionPath: '/api/bazantic/session', sessionSeconds: 900 } } }));
   await page.goto(origin + '/explore');
+  await page.locator('.developer-access > summary').click();
   await page.locator('.bazantic-guide').waitFor();
+  assert.match(await page.locator('.access-tracker [aria-current=step]').innerText(), /Prepare Bazantic/);
+  await page.getByRole('checkbox', { name: '1. Prepare Bazantic' }).check();
+  assert.match(await page.locator('.access-tracker [aria-current=step]').innerText(), /Create grant/);
+  await page.getByRole('button', { name: 'Copy grant command', exact: true }).click();
+  await page.getByRole('button', { name: 'Copy grant command', exact: true }).getByRole('status').filter({ hasText: 'Copied' }).waitFor();
   for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 1000 });
     await fits(`sandbox instructions at ${width}`);
@@ -167,6 +174,7 @@ try {
   assert.ok(!(await page.locator('body').innerText()).includes(testToken));
   await fits('accepted session UI fixture at 320px');
   console.log('Sandbox guide and session evidence rendering passed using an isolated authorization fixture. No payment made.');
+  await checkWorkspace({ page, origin, fixture, capabilities, fits });
   assert.deepEqual(errors, [], 'Uncaught browser exceptions');
   console.log('Web UI regression checks passed. Screenshots: tmp/ui-review');
 } finally {
