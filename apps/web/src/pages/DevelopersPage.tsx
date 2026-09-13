@@ -66,6 +66,13 @@ export function DevelopersPage() {
 
     <DeveloperEndpoints />
 
+    <section className="developer-section">
+      <div className="section-heading"><p className="kicker">Chainlink</p><h2>Price the accounting quote, preserve its scope</h2></div>
+      <p>POST /api/analyze with operation value-position supports allowlisted native USDC and canonical WETH on chain IDs 1, 8453 and 42161. Supply asset, amountRaw, assetDecimals and the position's blockNumber and blockHash. /api/status lists configured chainlinkAssets. Other assets and Base Sepolia remain unsupported; token symbols never select a feed.</p>
+      <p>Configure TARE_RPC_URL, TARE_BASE_MAINNET_RPC_URL and TARE_ARBITRUM_RPC_URL for their respective networks. Base and Arbitrum include same-block sequencer checks and a 3600-second recovery grace period. Stale, invalid or unavailable observations produce no estimate. L2 responses add sequencer provenance; no new payment or Chainlink API key is required to read these contracts through your RPC provider.</p>
+      <p>Explorer and wallet investigations reuse this pricing path. Local tare_analyze exposes it through the shared schema; the compact gateway does not advertise a standalone valuation tool. The amount remains caller-supplied accounting, not custody or backing evidence. Euler downstream tracing and additional Graph accounting coverage require separate adapters and acceptance.</p>
+    </section>
+
     <section className="developer-section two-up">
       <div>
         <div className="section-heading"><p className="kicker">MCP</p><h2>Connect an agent locally</h2><p>Build the project first, then point an MCP client at the stdio server.</p></div>

@@ -163,8 +163,13 @@ See [Graph integration and reproduction](docs/GRAPH_INTEGRATION.md).
 
 ## Chainlink integration
 
-Eligible Ethereum amounts use Chainlink reference prices with block-pinned reads
-and round, answer, and timestamp checks. A price does not establish custody.
+Eligible native USDC and canonical WETH amounts on Ethereum, Base and Arbitrum
+use Chainlink reference prices with block-pinned reads and round, answer and
+timestamp checks. Base/Arbitrum also check sequencer uptime and recovery grace.
+The shared path works with supported Morpho and generic ERC-4626/Euler supply
+quotes; it does not add Euler downstream tracing or independent backing checks.
+Other tokens and Base Sepolia remain unpriced. A price does not establish custody.
+See [exact feed coverage and limitations](docs/CHAINLINK_COVERAGE.md).
 
 Separately, a CRE Confidential Workflow uses `handlerInTee` to acquire authenticated
 Tare evidence and evaluate private policy thresholds. It returns a bounded verdict

@@ -35,7 +35,7 @@ export const api = {
   discover: (token: string, owner: string) => request<DiscoveryResult>('/api/discover', token, { owner, maxPositions: 25 }),
   analyze: (token: string, input: { operation: OperationId; owner?: string; vault?: string; blockNumber?: string }) =>
     request<JsonRecord>('/api/analyze', token, input),
-  valuePosition: (token: string, input: { chainId: 1; asset: string; amountRaw: string; assetDecimals: number; blockNumber?: string }) =>
+  valuePosition: (token: string, input: { chainId: 1 | 8453 | 42161; asset: string; amountRaw: string; assetDecimals: number; blockNumber?: string; blockHash?: string }) =>
     request<JsonRecord>('/api/analyze', token, { operation: 'value-position', ...input }),
   example: (token: string, id: string) => request<JsonRecord>('/api/example', token, { id }),
   replay: (token: string, operation: OperationId, capture: unknown) =>

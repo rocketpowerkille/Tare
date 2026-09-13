@@ -1,6 +1,7 @@
 import { api, ApiError } from './api';
 import { record, text, type Capabilities, type JsonRecord, type PositionAnalyzeInput } from './types';
 import { observeModule, observePrimary, type ProgressObserver } from './progress';
+import { positionValuationInput as valuationInput } from '../../../../packages/domain/src/valuation-input';
 
 type ModuleStatus = 'complete' | 'verified' | 'incomplete' | 'mismatch' | 'unavailable' | 'not-used' | 'not-eligible';
 
@@ -18,9 +19,6 @@ interface EvidenceModule {
 function isTechnicalError(failure: unknown) {
   return failure instanceof SyntaxError || (failure instanceof ApiError && ![408, 429, 502, 503, 504].includes(failure.status));
 }
-
-const ETHEREUM_USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
-const ETHEREUM_WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
 
 function baseStatus(report: JsonRecord): ModuleStatus {
   const status = text(report.status) ?? text(report.kind) ?? 'incomplete';
@@ -61,21 +59,6 @@ function graphModule(result: PromiseSettledResult<JsonRecord> | undefined): Evid
   };
 }
 
-function valuationInput(report: JsonRecord, input: PositionAnalyzeInput) {
-  if ((input.chainId ?? 1) !== 1 || input.operation === 'resolve-v2') return undefined;
-  const position = input.operation === 'resolve-v1' ? record(report.vault) : record(report.position);
-  const asset = text(position.asset);
-  const amountRaw = text(input.operation === 'resolve-v1' ? position.convertToAssetsRaw : position.assetsRaw);
-  const assetDecimals = position.decimals;
-  if (!asset || !amountRaw || typeof assetDecimals !== 'number'
-    || ![ETHEREUM_USDC, ETHEREUM_WETH].includes(asset.toLowerCase())) return undefined;
-  const block = record(record(report.capture).block);
-  let blockNumber: string | undefined;
-  try { blockNumber = block.number === undefined ? undefined : BigInt(String(block.number)).toString(); }
-  catch { blockNumber = undefined; }
-  return { chainId: 1 as const, asset, amountRaw, assetDecimals, ...(blockNumber ? { blockNumber } : {}) };
-}
-
 async function chainlinkModule(token: string, report: JsonRecord, input: PositionAnalyzeInput): Promise<EvidenceModule> {
   if (input.operation === 'resolve-v2') {
     const valuation = record(report.valuation);
@@ -92,7 +75,7 @@ async function chainlinkModule(token: string, report: JsonRecord, input: Positio
   const valuation = valuationInput(report, input);
   if (!valuation) return {
     id: 'chainlink', name: 'Position valuation', partner: 'Chainlink', eligible: false,
-    status: 'not-eligible', summary: 'No approved Chainlink price adapter is configured for this asset and network.',
+    status: 'not-eligible', summary: 'Chainlink valuation is not supported for this asset/network, or no confirmed block-pinned asset quote was returned.',
   };
   try {
     const result = await api.valuePosition(token, valuation);

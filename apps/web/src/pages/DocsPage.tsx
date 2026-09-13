@@ -58,7 +58,8 @@ export function DocsPage() {
           <div><strong>Euler EVK / EulerEarn · Ethereum, Base, Arbitrum</strong><p>Enabled discovery finds direct supply candidates; analysis checks ERC-4626 shares and conversion quotes. It does not assess debt, subaccounts, liquidation risk or downstream backing.</p></div>
           <div><strong>Other ERC-4626 vaults</strong><p>Enter a compatible contract address on those three networks or Base Sepolia, or use a configured registry entry. Generic accounting does not trace arbitrary strategies. Yearn discovery is not yet integrated.</p></div>
         </div>
-        <p>Discovery considers at most 100 Euler entries; omissions and source failures stay visible. The wallet investigation analyzes at most 3 of its 10 discovery candidates. Source checks have narrower coverage: Graph composition and Chainlink reference valuation are Ethereum-only, and Studio accounting is specific to its configured vault. The two-block live comparison currently supports Ethereum Morpho V1.</p>
+        <p>Discovery considers at most 100 Euler entries; omissions and source failures stay visible. The wallet investigation analyzes at most 3 of its 10 discovery candidates. Graph composition remains Ethereum-only, and Studio accounting is specific to its configured vault. Chainlink can price native USDC and canonical WETH quotes on Ethereum, Base and Arbitrum; other tokens and Base Sepolia remain unpriced. L2 prices require sequencer uptime and recovery-grace checks. The two-block live comparison currently supports Ethereum Morpho V1.</p>
+        <p>Euler supply shares and conversion quotes do not include EulerEarn strategy tracing, borrower collateral or loan recovery checks. A missing nested-allocation or Graph check for these positions is a coverage limit, not evidence that the assets are absent. Chainlink pricing does not change that scope or verify backing.</p>
       </section>
 
       <section className="doc-section" id="changes">

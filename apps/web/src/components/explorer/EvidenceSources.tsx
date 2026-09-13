@@ -25,6 +25,7 @@ export function EvidenceSources({ report, modules }: { report: JsonRecord; modul
       const evidence = record(module.report);
       const checks = record(evidence.checks);
       const capture = record(evidence.capture);
+      const sequencer = record(evidence.sequencer);
       const block = displayBlock(evidence);
       const price = priceEvidence({}, [module]);
       const graph = id === 'the-graph';
@@ -48,6 +49,10 @@ export function EvidenceSources({ report, modules }: { report: JsonRecord; modul
             <div><dt>Studio coverage</dt><dd>{checks.accountingApplicable === false ? 'Not configured for this vault' : checks.accountingStatus ? `${checks.accountingStatus} · ${checks.accountingReads ?? 0} comparisons` : 'Not available'}</dd></div>
           </>}
           {valuation && price.feed && <><div><dt>Price feed</dt><dd><CopyValue value={price.feed} label="price feed" /></dd></div><div><dt>Price updated</dt><dd>{price.updatedAt ?? 'Unavailable'}</dd></div><div><dt>Round</dt><dd>{price.round ?? 'Unavailable'}</dd></div></>}
+          {valuation && sequencer.status === 'up' && <>
+            <div><dt>L2 sequencer</dt><dd>Up at the price block; {String(sequencer.gracePeriodSeconds)}-second recovery grace passed. Not a vault safety check.</dd></div>
+            {text(sequencer.feed) && <div><dt>Sequencer feed</dt><dd><CopyValue value={String(sequencer.feed)} label="sequencer feed" /></dd></div>}
+          </>}
           {authorization && <div><dt>Settlement receipt</dt><dd>Not included in the analysis response. Refer to the Bazantic purchase receipt.</dd></div>}
         </dl>
         {block && primaryBlock && block !== primaryBlock && <p className="source-caution">This source checked block {block}; the primary position uses block {primaryBlock}. Do not treat these as a same-block comparison.</p>}

@@ -97,7 +97,13 @@ Do not send fields from another operation: runtime schemas reject extra fields.
 | `verify-graph-composition` | `owner`, `vault` | No additional fields; Ethereum Token API plus eligible Studio comparison. |
 | `verify-weth` | `owner` | `blockNumber`; canonical Ethereum WETH wrapper scope only. |
 | `verify-base-custody` | `owner` | `blockNumber`; configured Base Sepolia custody control only. |
-| `value-position` | `chainId: 1`, `asset`, `amountRaw`, `assetDecimals` | `blockNumber`; eligible Ethereum USDC/WETH reference valuation. Decimals 0–36. |
+| `value-position` | `chainId: 1 / 8453 / 42161`, `asset`, `amountRaw`, `assetDecimals` | `blockNumber`, `blockHash`; allowlisted native USDC/canonical WETH reference valuation. Decimals must match the token (6 or 18). |
+
+See [Chainlink coverage](CHAINLINK_COVERAGE.md) for exact token/feed addresses,
+sequencer checks and failure boundaries. `blockHash` is an optional expected
+position hash, not a provider URL. A mismatch rejects valuation. L2 reports add
+`sequencer` provenance; `/api/status` adds configured `chainlinkAssets`.
+This prices a supplied accounting amount, not independently verified backing.
 
 `verify-shares` and `verify-accounting` accept block heights up to 2147483647.
 `value-position` is not a replay operation or an advertised compact gateway tool

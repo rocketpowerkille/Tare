@@ -3,6 +3,7 @@ import { AddressSchema, SupportedEvmChainSchema } from '../../domain/src/index.j
 import { UintSchema } from '../../domain/src/live.js';
 import { MorphoChainSchema } from '../../sources/src/morpho.js';
 import { HISTORICAL_VAULT } from '../../verification/src/historical-graph.js';
+import { HashSchema } from '../../sources/src/evm.js';
 
 const position = { owner: AddressSchema, vault: AddressSchema, blockNumber: UintSchema.optional() };
 const graphBlock = z.string().regex(/^(0|[1-9][0-9]{0,9})$/)
@@ -19,8 +20,8 @@ export const AnalyzeSchema = z.discriminatedUnion('operation', [
   z.strictObject({ operation: z.literal('verify-weth'), owner: AddressSchema, blockNumber: UintSchema.optional() }),
   z.strictObject({ operation: z.literal('verify-base-custody'), owner: AddressSchema, blockNumber: UintSchema.optional() }),
   z.strictObject({
-    operation: z.literal('value-position'), chainId: z.literal(1), asset: AddressSchema,
-    amountRaw: UintSchema, assetDecimals: z.number().int().min(0).max(36), blockNumber: UintSchema.optional(),
+    operation: z.literal('value-position'), chainId: MorphoChainSchema, asset: AddressSchema,
+    amountRaw: UintSchema, assetDecimals: z.number().int().min(0).max(36), blockNumber: UintSchema.optional(), blockHash: HashSchema.optional(),
   }),
 ]);
 export const DiscoverSchema = z.strictObject({

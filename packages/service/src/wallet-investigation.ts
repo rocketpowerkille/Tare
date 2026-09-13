@@ -2,6 +2,7 @@ import { z } from 'zod/v4';
 import { AddressSchema } from '../../domain/src/index.js';
 import type { TareService } from './index.js';
 import { publicError } from './requests.js';
+import { positionValuationInput } from '../../domain/src/valuation-input.js';
 
 export const WalletInvestigationInput = z.strictObject({ owner: AddressSchema });
 const object = (value: unknown): Record<string, unknown> => value && typeof value === 'object' ? value as Record<string, unknown> : {};
@@ -25,14 +26,10 @@ export async function investigateWallet(service: TareService, input: unknown) {
           modules.push({ id: 'the-graph', eligible: true, status: report.status, report });
         } catch { modules.push({ id: 'the-graph', eligible: true, status: 'unavailable' }); }
       }
-      const position = object(operation === 'resolve-v1' ? primary.vault : primary.position);
-      if (operation !== 'resolve-v2' && candidate.chainId === 1 && typeof position.decimals === 'number'
-        && ['0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'].includes(String(position.asset))) {
+      const valuation = positionValuationInput(primary, { operation: String(operation), chainId: Number(candidate.chainId) });
+      if (valuation) {
         try {
-          const block = object(object(primary.capture).block).number;
-          const report = await service.run('analyze', { operation: 'value-position', chainId: 1, asset: position.asset,
-            amountRaw: operation === 'resolve-v1' ? position.convertToAssetsRaw : position.assetsRaw, assetDecimals: position.decimals,
-            ...(block === undefined ? {} : { blockNumber: BigInt(String(block)).toString() }) });
+          const report = await service.run('analyze', { operation: 'value-position', ...valuation });
           modules.push({ id: 'chainlink', eligible: true, status: 'verified', report });
         } catch { modules.push({ id: 'chainlink', eligible: true, status: 'unavailable' }); }
       }

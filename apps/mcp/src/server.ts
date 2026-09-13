@@ -21,7 +21,7 @@ export function createMcpServer(service = new TareService()) {
     });
   }
   register('tare_status', 'List configured read-only operations and offline examples. Configuration is not verification.', EmptySchema, false, () => service.capabilities());
-  register('tare_analyze', 'Resolve or cross-check an Ethereum position using local provider configuration. Preserve findings and metric scope; incomplete results are not backing proof.', AnalyzeSchema, true, input => service.run('analyze', input));
+  register('tare_analyze', 'Resolve supported positions using local providers. value-position prices allowlisted native USDC/WETH on Ethereum, Base or Arbitrum; it does not verify the supplied amount or backing. Graph and custody checks retain their narrower scopes. Preserve findings and limitations.', AnalyzeSchema, true, input => service.run('analyze', input));
   register('tare_replay', 'Recalculate a raw capture offline. Recorded evidence is unsigned and cannot prove current state. Preserve sourceMode and metric limitations.', ReplaySchema, false, input => service.run('replay', input));
   register('tare_example', 'Replay a retained public example offline. These are historical captures, not live checks.', ExampleSchema, false, input => service.run('example', input));
   register('tare_compose', 'Recompute and join V1 exposure and Graph share captures. Check position, block, deployment and share accounting. Recorded composition is not live verification or backing proof.', ComposeSchema, false, input => service.run('compose', input));

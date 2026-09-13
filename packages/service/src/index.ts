@@ -17,6 +17,8 @@ import { AddressSchema, SupportedEvmChainSchema } from '../../domain/src/index.j
 import { AnalyzeSchema, ReplaySchema, ExampleSchema, MAX_INPUT_BYTES, ServiceError } from './requests.js';
 import { composePosition } from './composition.js';
 import { valuePositionWithChainlink } from '../../verification/src/valuation.js';
+import { CHAINLINK_ASSETS } from '../../domain/src/chainlink-feeds.js';
+import { SourceFailure } from '../../sources/src/http.js';
 import { verifySuppliedAccounting } from '../../verification/src/supplied-accounting.js';
 import { verifyHistoricalGraph, replayHistoricalGraph } from '../../verification/src/historical-graph.js';
 
@@ -97,12 +99,13 @@ export class TareService {
     return {
       name: 'tare', apiVersion: 1, chainId: 1, readOnly: true, examples,
       discoveryProtocols: ['morpho', ...(this.config.eulerUrl ? ['euler'] : []), ...(this.config.erc4626Registry?.length ? ['erc4626-registry'] : [])],
+      chainlinkAssets: CHAINLINK_ASSETS.filter(asset => Boolean(this.rpcForChain(asset.chainId))),
       live: { 'resolve-v1': rpc || Boolean(this.config.baseMainnetRpcUrl || this.config.arbitrumRpcUrl), 'resolve-v2': rpc,
         'resolve-erc4626': rpc || Boolean(this.config.baseMainnetRpcUrl || this.config.arbitrumRpcUrl || this.config.baseRpcUrl), 'verify-shares': graph,
         'verify-accounting': graph, 'verify-graph-composition': graph && Boolean(this.config.graphMarketToken),
         'verify-historical-graph': rpc && Boolean(this.config.historicalGraphUrl && this.config.historicalGraphDeployment),
         'verify-weth': rpc && Boolean(this.config.secondaryRpcUrl),
-        'value-position': rpc,
+        'value-position': rpc || Boolean(this.config.baseMainnetRpcUrl || this.config.arbitrumRpcUrl),
         'verify-base-custody': Boolean(this.config.baseRpcUrl && this.config.baseSecondaryRpcUrl
           && this.config.baseCustodyDeployment) },
       limits: { maxInputBytes: MAX_INPUT_BYTES, concurrentOperations: 2 },
@@ -190,11 +193,24 @@ export class TareService {
         secondaryRpcUrl: this.config.baseSecondaryRpcUrl!,
         ...(request.blockNumber === undefined ? {} : { blockNumber: request.blockNumber }),
       });
-      case 'value-position': return valuePositionWithChainlink({
-        rpcUrl: rpcUrl!, chainId: request.chainId, asset: request.asset, amountRaw: request.amountRaw,
-        assetDecimals: request.assetDecimals,
-        ...(request.blockNumber === undefined ? {} : { blockNumber: request.blockNumber }),
-      });
+      case 'value-position': {
+        const chainRpc = this.rpcForChain(request.chainId);
+        if (!chainRpc) throw new ServiceError(503, 'not-configured', `No RPC is configured for chain ${request.chainId}.`);
+        try {
+          return await valuePositionWithChainlink({
+            rpcUrl: chainRpc, chainId: request.chainId, asset: request.asset, amountRaw: request.amountRaw,
+            assetDecimals: request.assetDecimals,
+            ...(request.blockNumber === undefined ? {} : { blockNumber: request.blockNumber }),
+            ...(request.blockHash === undefined ? {} : { blockHash: request.blockHash }),
+          });
+        } catch (error) {
+          if (!(error instanceof SourceFailure)) throw error;
+          const reason = error.code === 'reorg' ? 'Position and price block hashes differ or the block was reorganized.'
+            : error.code === 'invalid-response' ? 'The price, token decimals or sequencer status did not pass validation.'
+              : 'A required RPC observation was unavailable.';
+          throw new ServiceError(503, 'valuation-unavailable', `${reason} No USD estimate was returned.`);
+        }
+      }
     }
   }
 

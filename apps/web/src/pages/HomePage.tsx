@@ -62,8 +62,8 @@ export function HomePage() {
         <table className="network-table"><thead><tr><th>Network</th><th>Supported checks</th><th>Evidence mode</th><th>Status</th></tr></thead>
           <tbody>
             <tr><th>Ethereum</th><td>Morpho V1 exposure, bounded V2 paths and ERC-4626 checks. Eligible Graph and Chainlink comparisons.</td><td>Direct reads + eligible sources</td><td><StatusBadge tone="success">Live</StatusBadge></td></tr>
-            <tr><th>Base</th><td>Morpho V1 exposure and general ERC-4626 checks.</td><td>Direct reads</td><td><StatusBadge tone="success">Live</StatusBadge></td></tr>
-            <tr><th>Arbitrum</th><td>Morpho V1 exposure and general ERC-4626 checks.</td><td>Direct reads</td><td><StatusBadge tone="success">Live</StatusBadge></td></tr>
+            <tr><th>Base</th><td>Morpho V1 exposure and general ERC-4626 checks. Eligible USDC/WETH Chainlink reference prices.</td><td>Direct reads + eligible prices</td><td><StatusBadge tone="success">Live</StatusBadge></td></tr>
+            <tr><th>Arbitrum</th><td>Morpho V1 exposure and general ERC-4626 checks. Eligible USDC/WETH Chainlink reference prices.</td><td>Direct reads + eligible prices</td><td><StatusBadge tone="success">Live</StatusBadge></td></tr>
             <tr><th>Base Sepolia</th><td>Registered ERC-4626 discovery and allowlisted two-layer custody control.</td><td>Testnet reads</td><td><StatusBadge tone="info">Live testnet</StatusBadge></td></tr>
           </tbody>
         </table>

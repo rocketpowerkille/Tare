@@ -43,6 +43,13 @@ export function classifyPosition(report: EvidenceRecord, source: string, add: Ad
 }
 
 export function classifyPrice(report: EvidenceRecord, source: string, add: AddFact) {
+  const sequencer = object(report.sequencer);
+  if (sequencer.status === 'up') {
+    add('observed', 'sequencer.feed', address(sequencer.feed), source);
+    add('observed', 'sequencer.startedAt', timestamp(sequencer.startedAt), source);
+    add('observed', 'sequencer.status', 'up', source);
+    add('checked', 'sequencer.scope', 'L2 uptime and recovery grace checked at the price block; not vault safety.', source);
+  }
   const valuation = object(report.valuation ?? (report.claim ? { price: object(report.claim).price } : report));
   const price = object(valuation.price);
   const value = object(valuation.value ?? valuation.rootClaim);

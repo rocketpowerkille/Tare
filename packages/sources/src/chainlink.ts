@@ -2,6 +2,7 @@ import type { ContractReader } from './evm.js';
 import { decodeWords, settleReads } from './evm.js';
 import { SourceFailure } from './http.js';
 import { UintSchema } from '../../domain/src/live.js';
+import { SEQUENCER_FEEDS, SEQUENCER_GRACE_SECONDS } from '../../domain/src/chainlink-feeds.js';
 
 // Ethereum USDC/USD standard proxy; directory verified 2026-09-09.
 export const USDC_USD_FEED = '0x8fffffd4afb6115b954bd326cbe7b4ba576818f6';
@@ -15,7 +16,7 @@ export async function readUsdcPrice(reader: ContractReader) {
 export async function readEthPrice(reader: ContractReader) {
   return readPrice(reader, ETH_USD_FEED, 3600n);
 }
-async function readPrice(reader: ContractReader, feed: string, maxAge: bigint) {
+export async function readPrice<Chain extends number = 1>(reader: ContractReader, feed: string, maxAge: bigint, chainId: Chain = 1 as Chain) {
   const [decimalsData, roundData] = await settleReads([
     reader.call(feed, PRICE_SELECTORS.decimals),
     reader.call(feed, PRICE_SELECTORS.round),
@@ -29,11 +30,31 @@ async function readPrice(reader: ContractReader, feed: string, maxAge: bigint) {
     throw new SourceFailure('invalid-response', 'Invalid, future or stale USD price');
   }
   return {
-    feed, chainId: 1 as const, currency: 'USD' as const,
+    feed, chainId, currency: 'USD' as const,
     decimals: 8 as const, answerRaw: answer.toString(), roundId: round.toString(),
     updatedAt: updated.toString(), blockHash: reader.block.hash,
     blockTimestamp: timestamp.toString(), maxAgeSeconds: maxAge.toString(),
   };
+}
+
+/** Sequencer timestamps describe status transitions, not periodic price updates. */
+export async function readSequencerStatus(reader: ContractReader, chainId: number) {
+  const feed = SEQUENCER_FEEDS[chainId];
+  if (!feed) throw new SourceFailure('invalid-response', 'No approved sequencer feed');
+  const [round, answer, started, updated, answered] = decodeWords(await reader.call(feed, PRICE_SELECTORS.round), 5) as
+    [bigint, bigint, bigint, bigint, bigint];
+  const timestamp = BigInt(reader.block.timestamp);
+  if (round === 0n || round >= 2n ** 80n || answered < round || answered >= 2n ** 80n
+    || answer > 1n || started === 0n || started > updated || updated > timestamp) {
+    throw new SourceFailure('invalid-response', 'Invalid or uninitialized sequencer status');
+  }
+  if (answer !== 0n) throw new SourceFailure('invalid-response', 'L2 sequencer is down');
+  if (timestamp - started <= BigInt(SEQUENCER_GRACE_SECONDS)) {
+    throw new SourceFailure('invalid-response', 'L2 sequencer recovery grace period is active');
+  }
+  return { feed, chainId, status: 'up' as const, roundId: round.toString(), startedAt: started.toString(),
+    updatedAt: updated.toString(), gracePeriodSeconds: SEQUENCER_GRACE_SECONDS,
+    blockHash: reader.block.hash, blockTimestamp: timestamp.toString() };
 }
 export type UsdcPrice = Awaited<ReturnType<typeof readUsdcPrice>>;
 
