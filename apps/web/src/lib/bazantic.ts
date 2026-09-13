@@ -56,5 +56,6 @@ export function bazanticTokenCommand(gatewayUrl: string, sessionPath: string) {
     'console.log(token);',
     '} catch { console.error("No access code returned. Check your grant, test USDC balance and gateway availability. Do not paste this error as a code."); process.exitCode = 1; }',
   ].join(' ');
-  return `${bazanticSessionCommand(gatewayUrl, sessionPath, 'git-bash')} | node --input-type=module -e '${extract}'`;
+  // Bypass Git Bash's interactive winpty alias: this process reads a pipe, not a terminal.
+  return `${bazanticSessionCommand(gatewayUrl, sessionPath, 'git-bash')} | command node --input-type=module -e '${extract}'`;
 }

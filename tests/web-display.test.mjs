@@ -3,6 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import ts from 'typescript';
 import { spawnSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
 
 // Load the pure browser presentation helpers without adding them to the API build.
 const types = ts.transpileModule(await readFile(new URL('../apps/web/src/lib/types.ts', import.meta.url), 'utf8'), { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
@@ -16,7 +17,8 @@ test('Git Bash token command prints only a successful session token and rejects 
   assert.equal(command.match(/baz curl/g).length, 1);
   assert.match(command, /--max-amount 0\.001/);
   assert.doesNotMatch(command, /clipboard|clip\.exe|Set-Clipboard/);
-  const script = command.split(" | node --input-type=module -e '")[1].slice(0, -1);
+  assert.match(command, /\| command node --input-type=module/);
+  const script = command.split(" | command node --input-type=module -e '")[1].slice(0, -1);
   assert.ok(!script.includes("'"), 'Node script must remain safe inside Bash single quotes');
   const run = input => spawnSync(process.execPath, ['--input-type=module', '-e', script], { input, encoding: 'utf8' });
   const token = 'tare_sandbox_v1.Zml4dHVyZQ.test-signature';
@@ -31,6 +33,22 @@ test('Git Bash token command prints only a successful session token and rejects 
     assert.match(failure.stderr, /No access code returned/);
     assert.ok(!failure.stderr.includes(token));
   }
+});
+const bashPath = process.platform === 'win32' ? 'C:/Program Files/Git/bin/bash.exe' : '/bin/bash';
+test('token pipeline bypasses an interactive Node alias in Bash', { skip: !existsSync(bashPath) }, () => {
+  const token = 'tare_sandbox_v1.Zml4dHVyZQ.test-signature';
+  const response = JSON.stringify({ ok: true, body: { accessToken: token } });
+  const pipeline = bazanticTokenCommand('https://example.test', '/api/bazantic/session');
+  const script = [
+    'shopt -s expand_aliases',
+    'alias node="false"',
+    `baz() { printf '%s' '${response}'; }`,
+    pipeline,
+  ].join('\n');
+  const result = spawnSync(bashPath, ['--noprofile', '--norc', '-c', script], { encoding: 'utf8' });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.stdout.trim(), token);
+  assert.equal(result.stderr, '');
 });
 async function webModule(name) {
   const source = await readFile(new URL(`../apps/web/src/lib/${name}.ts`, import.meta.url), 'utf8');
