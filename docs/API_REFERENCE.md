@@ -115,6 +115,13 @@ transport: use the Bazantic gateway's `/mcp` or local stdio as appropriate.
 
 ## Investigation lifecycle and errors
 
+Two-block investigation reuses `/api/analyze` with explicit `blockNumber` values;
+no new HTTP routes or request fields are added. Snapshot comparisons add
+`positionChanges` and citeable `comparison.scope` / `comparison.change.N` facts.
+Wallet snapshots add `current.overlap.scope` / `current.overlap.N` facts. These
+are deterministic calculations over submitted reports, not new verification.
+See [bounded change investigation](CHANGE_INVESTIGATION.md).
+
 Create a snapshot, start one consented run, then poll its ID with the same access
 identity. The reference is 48 lowercase hex characters and expires after ten
 minutes. It is not a public share link. The gateway retrieves eight facts per page.

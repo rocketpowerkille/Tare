@@ -27,6 +27,11 @@ function buildSnapshot(input: z.infer<typeof SnapshotInput>) {
   const current = investigationFacts(input.report);
   const facts = [...current.facts, ...(input.previous ? investigationFacts(input.previous, 'previous').facts : [])];
   const comparison = input.previous ? compareInvestigationReports(input.report, input.previous) : null;
+  if (comparison) {
+    const { changes, ...scope } = comparison.positionChanges;
+    facts.push({ id: 'comparison.scope', category: 'notVerified', field: 'Two-block comparison scope', value: scope });
+    changes.forEach((value, index) => facts.push({ id: `comparison.change.${index}`, category: 'derived', field: 'Two-block difference', value }));
+  }
   return { digest: digest(input), facts, comparison, sourceMode: current.context.sourceMode,
     instructions: current.context.agentInstructions,
     provenanceNotice: 'Exact browser-submitted report snapshot. Submission is not independent authentication of its source claims. No new chain check is performed by storing or explaining it.',

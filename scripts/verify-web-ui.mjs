@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import { checkWorkspace } from './web-workspace-checks.mjs';
 import { checkTheme } from './web-theme-checks.mjs';
 import { checkDocs } from './web-docs-checks.mjs';
+import { checkChanges } from './web-change-checks.mjs';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.TARE_PLAYWRIGHT_MODULE || 'playwright');
@@ -253,6 +254,7 @@ try {
   await fits('accepted session UI fixture at 320px');
   console.log('Sandbox guide and session evidence rendering passed using an isolated authorization fixture. No payment made.');
   await checkWorkspace({ page, origin, fixture, capabilities, fits });
+  await checkChanges({ page, origin, fixture, capabilities, fits });
   assert.deepEqual(errors, [], 'Uncaught browser exceptions');
   console.log('Web UI regression checks passed. Screenshots: tmp/ui-review');
 } finally {

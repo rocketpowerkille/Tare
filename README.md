@@ -312,6 +312,12 @@ These are logical modules under one root package, not separate pnpm workspaces.
 
 ## Testing and acceptance
 
+The explorer also provides [bounded change investigation and exposure overlap](docs/CHANGE_INVESTIGATION.md):
+two explicit block reads or saved-report comparisons, exact raw differences,
+market-identity matching and shared Morpho V1 dependencies. Bazantic can cite the
+derived facts after consent. This is not continuous monitoring; live acceptance
+of the new flow must be retained separately from fixture tests.
+
 Application verification for this documentation refresh
 (2026-09-13, Node 24.13.0) passed 211 core tests, 12 web tests and Chrome
 regressions across all four routes at widths from 320px to 1440px. These include

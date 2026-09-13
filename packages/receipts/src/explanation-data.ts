@@ -70,6 +70,8 @@ export const instructions = [
   'Market-priced values are estimates. Chainlink prices and Bazantic authorization are not backing evidence.',
   'Missing evidence does not prove missing assets. Recorded/replayed evidence is not a fresh check. Different blocks are not same-block agreement.',
   'Do not invent amounts, sources or confidence scores. Respect narrow metric scopes; do not upgrade incomplete or mismatched evidence.',
+  'For two-block investigations, use supplied comparison.change facts and comparison.scope. Delta values are signed raw integers in the stated units, not formatted token amounts, percentages or profit. No observed change establishes its cause or excludes intervening activity.',
+  'For overlap, cite the supplied overlap facts and scope. Shared collateral and oracle addresses are dependencies, not holdings. Never sum different blocks, incompatible units, missing values or nested parent/child positions.',
 ];
 export const plainLanguageTerms = [
   { term: 'vault shares', meaning: 'Contract-reported accounting units representing a claim on a vault.' },

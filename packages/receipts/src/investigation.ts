@@ -1,5 +1,7 @@
 import { explanationContext } from './explanation.js';
 import { object, array, address, code } from './explanation-data.js';
+import { investigateChanges } from './position-changes.js';
+import { exposureOverlap } from './exposure-overlap.js';
 
 export const answerSections = ['Short answer', 'What was directly observed', 'What was derived',
   'Which evidence sources were checked', 'What those checks support', 'What remains unknown',
@@ -27,6 +29,12 @@ export function investigationFacts(report: unknown, prefix = 'current') {
   } });
   const wallet = object(report);
   if (wallet.reportType === 'wallet-investigation') {
+    const overlap = exposureOverlap(wallet);
+    facts.push({ id: `${prefix}.overlap.scope`, category: 'notVerified', field: 'Overlap coverage and limitations', value: {
+      scope: overlap.scope, inspectedPositions: overlap.inspectedPositions, eligiblePositions: overlap.eligiblePositions,
+      excludedPositions: overlap.excludedPositions, omittedPositions: overlap.omittedPositions, limitations: overlap.limitations,
+    } });
+    overlap.overlaps.forEach((value, index) => facts.push({ id: `${prefix}.overlap.${index}`, category: 'derived', field: 'Shared market dependencies', value }));
     const discovery = object(wallet.discovery);
     facts.push({ id: `${prefix}.discovery`, category: 'observed', field: 'Bounded wallet discovery', value: {
       owner: address(wallet.owner), complete: discovery.complete === true, source: code(discovery.source),
@@ -59,7 +67,7 @@ export function compareInvestigationReports(current: unknown, previous: unknown)
     if (!before || JSON.stringify(before.value) === JSON.stringify(fact.value)) return [];
     return [{ field: fact.field, before: before.id, after: fact.id }];
   }) : [];
-  return { comparable, changes, limitation: comparable
+  return { comparable, changes, positionChanges: investigateChanges(current, previous), limitation: comparable
     ? 'Differences in returned evidence, not proof of a transaction, profit, loss or changed backing. Repeated allocations are not paired by array order.'
     : 'Network, wallet, vault or operation is missing or differs. These reports cannot be treated as the same position.' };
 }

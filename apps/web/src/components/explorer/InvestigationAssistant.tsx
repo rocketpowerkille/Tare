@@ -2,14 +2,15 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { api } from '../../lib/api';
 import type { JsonRecord } from '../../lib/types';
 import { record, text, list } from '../../lib/types';
+import { ChangeReport } from './ChangeReport';
 
 const questions = ['Explain my position', 'What remains unverified?', 'Why did these sources disagree?', 'What should I check next?'];
 
-export function InvestigationAssistant({ report, token }: { report: JsonRecord; token: string }) {
+export function InvestigationAssistant({ report, token, initialPrevious }: { report: JsonRecord; token: string; initialPrevious?: JsonRecord }) {
   const prefix = useId();
   const [options, setOptions] = useState<JsonRecord>();
-  const [question, setQuestion] = useState(questions[0]!);
-  const [previous, setPrevious] = useState<JsonRecord>();
+  const [question, setQuestion] = useState(initialPrevious ? 'What changed between these blocks? Cite the deterministic comparison and explain missing evidence without inventing causes.' : questions[0]!);
+  const [previous, setPrevious] = useState<JsonRecord | undefined>(initialPrevious);
   const [snapshot, setSnapshot] = useState<JsonRecord>();
   const [run, setRun] = useState<JsonRecord>();
   const [busy, setBusy] = useState(false);
@@ -25,10 +26,10 @@ export function InvestigationAssistant({ report, token }: { report: JsonRecord; 
   }, [token]);
   useEffect(() => {
     generation.current++;
-    setSnapshot(undefined); setRun(undefined); setPrevious(undefined); setError(''); setBusy(false);
+    setSnapshot(undefined); setRun(undefined); setPrevious(initialPrevious); setError(''); setBusy(false);
     pending.current = undefined; lock.current = false;
     return () => { generation.current++; };
-  }, [report, token]);
+  }, [report, token, initialPrevious]);
 
   async function ask() {
     if (lock.current || !consent || !question.trim()) return;
@@ -88,6 +89,7 @@ export function InvestigationAssistant({ report, token }: { report: JsonRecord; 
       <details><summary>Compare with a previous report</summary><p>Upload a report, not a capture. Tare compares matching position identities and exact facts; a difference is not proof of profit or loss.</p>
         <input aria-label="Previous report JSON" type="file" accept="application/json,.json" disabled={busy} onChange={event => void upload(event.target.files?.[0])} />
         {previous && <p>Previous report selected. It will be labeled separately from the current report. <button type="button" disabled={busy} onClick={() => { setPrevious(undefined); setSnapshot(undefined); setRun(undefined); pending.current = undefined; }}>Remove</button></p>}
+        {previous && !initialPrevious && <ChangeReport current={report} previous={previous} />}
       </details>
       <label className="assistant-consent"><input type="checkbox" checked={consent} disabled={busy} onChange={event => setConsent(event.target.checked)} />
         Send this report’s classified facts and my question to Bazantic. Do not include secrets. Temporary context expires after 10 minutes; Bazantic may retain execution data.</label>

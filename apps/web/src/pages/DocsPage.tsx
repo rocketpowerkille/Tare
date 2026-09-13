@@ -9,6 +9,7 @@ const sections = [
   ['graph-verification', 'Graph verification'],
   ['access', 'Access'],
   ['assistant', 'Ask about a report'],
+  ['changes', 'Changes and overlap'],
   ['limits', 'Limits and safety'],
   ['faq', 'Common questions'],
 ];
@@ -33,6 +34,14 @@ export function DocsPage() {
           <strong>A simple example</strong>
           <p>You deposit into Vault A. Vault A allocates to Vault B. Vault B supplies assets to several lending markets. To understand your position, you need to follow every supported layer and keep track of where the evidence came from.</p>
         </div>
+      </section>
+
+      <section className="doc-section" id="changes">
+        <p className="section-label">Changes and overlap</p><h2>What changed between two blocks?</h2>
+        <p>Open “Investigate changes between two blocks” in Explorer. Enter an Ethereum Morpho V1 wallet, vault and two increasing blocks, or compare two downloaded reports. Historical RPC and indexed Graph coverage are required for live acquisition; missing history is never replaced with latest data.</p>
+        <p>Tare compares share balances, accounting quotes, fees and supported market amounts using exact raw units and market identities. An endpoint difference does not establish its cause, an intervening transaction or profit. This is on-demand analysis, not a scheduled monitor.</p>
+        <p>The wallet investigation also shows shared Morpho V1 markets across its bounded results. Different-block amounts are never summed. Nested and unsupported positions remain coverage gaps; collateral and oracle dependencies are not directly owned assets. No overlap found does not prove diversification.</p>
+        <p>You can separately consent to a Bazantic explanation of the returned comparisons and limitations. The assistant adds interpretation, not a new blockchain check.</p>
       </section>
 
       <section className="doc-section" id="how-it-works">

@@ -15,6 +15,7 @@ import { SessionEvidence } from '../components/explorer/SessionEvidence';
 import { ConnectionTimeline } from '../components/explorer/ConnectionTimeline';
 import { PositionDiagram } from '../components/explorer/PositionDiagram';
 import { WalletInvestigation } from '../components/explorer/WalletInvestigation';
+import { ChangeInvestigator } from '../components/explorer/ChangeInvestigator';
 import type { StageStatus } from '../lib/progress';
 import type { AccessOptions, Capabilities, DiscoveryResult, JsonRecord, OperationId, PositionAnalyzeInput } from '../lib/types';
 
@@ -146,6 +147,7 @@ export function ExplorerPage() {
     {capabilities && <>
       {!authRequired && <SessionEvidence token={token} />}
       <WalletInvestigation token={token} disabled={busy || authRequired || connecting} />
+      <ChangeInvestigator token={token} capabilities={capabilities} disabled={busy || authRequired || connecting} />
       <div className="explorer-grid">
         <div className="control-stack">
           <OperationForm capabilities={capabilities} busy={busy || authRequired || connecting} operation={operation} onOperationChange={setOperation} onQueryChange={clearQueryResult} onDiscover={discover} onRun={analyze} />

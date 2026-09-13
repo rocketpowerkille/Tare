@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { api } from '../../lib/api';
 import { list, record, text, type JsonRecord } from '../../lib/types';
 import { InvestigationAssistant } from './InvestigationAssistant';
+import { ExposureOverlap } from './ExposureOverlap';
 
 export function WalletInvestigation({ token, disabled }: { token: string; disabled: boolean }) {
   const [owner, setOwner] = useState('');
@@ -31,6 +32,7 @@ export function WalletInvestigation({ token, disabled }: { token: string; disabl
     {result && <div><p className="source-caution">This is a bounded investigation, not a complete wallet inventory or proof of backing.</p>
       {list(result.results).length === 0 && <p>No analyzable position was returned within discovery coverage. This does not mean the wallet has no assets.</p>}
       {list(result.results).map(record).map((item, index) => <p key={index}>{text(item.vault)} · {text(item.status)}{text(item.reason) ? ` · ${text(item.reason)}` : ''}</p>)}
+      <ExposureOverlap report={result} />
       <InvestigationAssistant report={result} token={token} />
       <details><summary>Full wallet investigation JSON</summary><pre tabIndex={0}>{JSON.stringify(result, null, 2)}</pre></details>
     </div>}

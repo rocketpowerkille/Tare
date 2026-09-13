@@ -14,4 +14,12 @@
 .investigation-assistant details { margin-top: 16px; min-width: 0; }
 .investigation-assistant input[type=file] { width: 100%; min-width: 0; }
 .assistant-facts section:target { outline: 2px solid var(--green); outline-offset: 4px; }
+.change-investigator input:not([type=file]), .change-investigator select { width: 100%; min-width: 0; padding: 12px; margin-block: 8px 16px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface); color: var(--ink); font: inherit; }
+.change-inputs, .change-endpoints, .overlap-members { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.change-endpoints > section, .overlap-members > section { padding: 16px; background: var(--surface-subtle); border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
+.change-report, .exposure-overlap { margin-block: 24px; border-top: 1px solid var(--line); padding-top: 24px; overflow-wrap: anywhere; }
+.change-report li, .exposure-overlap li { margin-block: 8px; line-height: 1.65; }
+.change-timeline, .change-progress { border-left: 1px solid var(--line-strong); padding-left: 24px; margin-block: 24px; }
+.change-timeline summary, .exposure-overlap summary { overflow-wrap: anywhere; }
+@media (max-width: 700px) { .change-inputs, .change-endpoints, .overlap-members { grid-template-columns: 1fr; } }
 @media (max-width: 600px) { .investigation-assistant { padding: 16px; } .assistant-presets { display: grid; grid-template-columns: 1fr; } }

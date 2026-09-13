@@ -89,10 +89,13 @@ checks. It must distinguish supported accounting/price comparisons from backing
 claims for which Tare has no independent evidence. Repeating unavailable queries
 cannot establish backing.
 
-A previous report can be attached. Comparison requires matching network, wallet,
-vault and operation, and pairs only unique fact fields. Both values remain intact;
-no cross-unit arithmetic is performed. Repeated allocations are not paired by
-array order. Differences are not proof of profit, loss or a transaction.
+A previous report can be attached. The original unique-field comparison remains.
+An additive bounded comparison checks matching position identity, compatible units
+and increasing confirmed blocks, then calculates exact raw differences and matches
+markets by identity. `comparison.scope` and `comparison.change.N` facts are citeable.
+Wallet context also includes scoped shared-market overlap facts. Differences are
+not proof of cause, profit, loss or a transaction. See
+[change investigation and overlap](CHANGE_INVESTIGATION.md) for coverage and limits.
 
 ## Using it in Explorer
 
