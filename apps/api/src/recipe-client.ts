@@ -1,6 +1,7 @@
 import { z } from 'zod/v4';
 import { ServiceError } from '../../../packages/service/src/requests.js';
 import { RecipeError, recipeToolFailure, type RecipeStage } from './recipe-errors.js';
+import { extractRecipeOutput } from './recipe-output.js';
 
 const record = (value: unknown): Record<string, unknown> => value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
 export type RecipeExecution = { output: unknown; gateway: string; elapsedMs: number; payment: 'not-requested' };
@@ -85,12 +86,7 @@ export class PublicRecipeExecutor implements RecipeExecutor {
       const result = await call(url.href, 'tools/call', { name: handle, arguments: { question } });
       if (result.isError === true) throw recipeToolFailure(result, stage);
       stage = 'response';
-      const structured = record(result.structuredContent);
-      const texts = (Array.isArray(result.content) ? result.content : []).map(record).filter(item => item.type === 'text');
-      let output: unknown = structured.output ?? texts.map(item => String(item.text ?? '')).join('\n');
-      if (typeof output === 'string') {
-        try { const wrapper = record(JSON.parse(output)); output = wrapper.output ?? output; } catch { /* Plain text remains an unreviewed answer. */ }
-      }
+      const output = extractRecipeOutput(result);
       return { output, gateway: url.origin, elapsedMs: Date.now() - started, payment: 'not-requested' };
     } catch (error) {
       if (error instanceof ServiceError) throw error;

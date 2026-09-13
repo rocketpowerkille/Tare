@@ -62,6 +62,12 @@ and sensitive output remain separate failures. Rejected answer text and unknown
 citation values are not included in diagnostics. These diagnostics do not weaken
 the existing answer-validation rules or authorize a retry.
 
+The response adapter accepts a structured answer, bare JSON, or one explicit JSON
+code block surrounded by model narration. Narration is discarded, not rendered as
+evidence. Multiple code blocks, competing outside JSON objects and malformed JSON
+remain rejected. The exact seven-section schema, citation IDs, sensitive-output
+screening and all-page retrieval requirements still apply to the extracted answer.
+
 ## Wallet, gaps and comparison
 
 The in-page wallet pipeline reuses Tare discovery and analysis: up to ten

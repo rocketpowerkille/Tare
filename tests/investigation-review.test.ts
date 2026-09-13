@@ -52,3 +52,23 @@ test('answer review preserves sensitive-output and strict schema rejection', () 
   }
   assert.equal(reviewInvestigationAnswer({ ...answer(), extra: true }, ids, reference, coverage).sections, undefined);
 });
+
+test('Recipe narration surrounding one explicit JSON answer is excluded, not displayed', () => {
+  const preface = "Perfect. I have successfully retrieved all pages 0–7 of the report. The data shows 8 pages total, and I have collected all the facts across the retrieved pages. Now I'll compile the seven required JSON sections with appropriate citations.";
+  const result = reviewInvestigationAnswer(preface + '\n\n```json\n' + JSON.stringify(answer()) + '\n```\nEnd of answer.', ids, reference, coverage);
+  assert.deepEqual(result.sections, answer().sections);
+  assert.deepEqual(result.diagnostic.reasons, []);
+  assert.doesNotMatch(JSON.stringify(result), /Perfect|End of answer/);
+});
+
+test('fenced extraction rejects ambiguous or malformed output and does not weaken evidence checks', () => {
+  const json = JSON.stringify(answer());
+  const fenced = '```json\n' + json + '\n```';
+  for (const text of [fenced + '\n' + fenced, json + '\n' + fenced,
+    'Answer: ' + json, '```json\n{"sections": [}\n```', '```javascript\n' + json + '\n```']) {
+    assert.equal(reviewInvestigationAnswer(text, ids, reference, coverage).sections, undefined);
+  }
+  const narrated = 'Model narration\n' + fenced;
+  assert.deepEqual(reviewInvestigationAnswer(narrated, ids, reference, { expectedPages: 8, retrievedPages: 1 }).diagnostic.reasons, ['missing-context-pages']);
+  assert.deepEqual(reviewInvestigationAnswer(narrated, new Set(), reference, coverage).diagnostic.reasons, ['unknown-citations']);
+});

@@ -1,5 +1,6 @@
 import { z } from 'zod/v4';
 import { answerSections } from '../../../packages/receipts/src/investigation.js';
+import { parseRecipeAnswerJson } from './recipe-answer-json.js';
 
 const Answer = z.strictObject({ sections: z.array(z.strictObject({ title: z.enum(answerSections),
   text: z.string().min(1).max(4000), citations: z.array(z.string().max(120)).min(1).max(32) })).length(7) });
@@ -20,7 +21,7 @@ export function reviewInvestigationAnswer(output: unknown, factIds: Set<string>,
   coverage: { expectedPages: number; retrievedPages: number }) {
   const reasons: ReviewReason[] = [];
   if (typeof output === 'string') {
-    try { output = JSON.parse(output.replace(/^\s*```(?:json)?\s*/, '').replace(/\s*```\s*$/, '')); }
+    try { output = parseRecipeAnswerJson(output); }
     catch { reasons.push('invalid-json'); output = null; }
   }
   const parsed = Answer.safeParse(output);
