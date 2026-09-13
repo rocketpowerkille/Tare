@@ -17,9 +17,9 @@ export async function checkSession({ browser, origin, capabilities }) {
     await page.goto(origin + '/explore');
     await page.locator('#access-token').fill(token);
     await page.getByRole('button', { name: 'Connect', exact: true }).click();
-    await page.locator('#example').waitFor();
+    await page.locator('#owner').waitFor();
     await page.reload();
-    await page.locator('#example').waitFor();
+    await page.locator('#owner').waitFor();
     assert.equal(received, `Bearer ${token}`);
     assert.equal(await page.locator('#access-token').count(), 0);
     assert.ok(!(await page.locator('body').innerText()).includes(token));
@@ -55,14 +55,14 @@ export async function checkSession({ browser, origin, capabilities }) {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.getByRole('button', { name: 'Toggle navigation' }).click();
     await page.getByRole('navigation', { name: 'Mobile navigation' }).getByRole('link', { name: 'Explorer', exact: true }).click();
-    await page.locator('#example').waitFor();
+    await page.locator('#owner').waitFor();
 
     status = 503;
     await page.reload();
     await page.getByRole('button', { name: 'Retry connection' }).waitFor();
     status = 200;
     await page.getByRole('button', { name: 'Retry connection' }).click();
-    await page.locator('#example').waitFor();
+    await page.locator('#owner').waitFor();
     assert.equal(received, `Bearer ${token}`, 'Temporary outages retain the accepted session');
 
     await page.getByRole('button', { name: 'Disconnect session', exact: true }).click();
@@ -71,7 +71,7 @@ export async function checkSession({ browser, origin, capabilities }) {
     assert.equal(await page.evaluate(() => sessionStorage.getItem('tare-access-session')), null);
     await page.locator('#access-token').fill(token);
     await page.getByRole('button', { name: 'Connect', exact: true }).click();
-    await page.locator('#example').waitFor();
+    await page.locator('#owner').waitFor();
 
     status = 401;
     await page.reload();
@@ -88,7 +88,7 @@ export async function checkSession({ browser, origin, capabilities }) {
     });
     await page.locator('#access-token').fill(token);
     await page.getByRole('button', { name: 'Connect', exact: true }).click();
-    await page.locator('#example').waitFor();
+    await page.locator('#owner').waitFor();
     await page.getByRole('button', { name: 'Disconnect session', exact: true }).click();
     await page.locator('#access-token').waitFor();
     assert.equal(received, '', 'In-memory credentials are dropped when storage is disabled');

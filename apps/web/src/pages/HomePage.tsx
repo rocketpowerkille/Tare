@@ -17,7 +17,7 @@ export function HomePage() {
         <p className="lead">Trace a position through nested vaults. See what the evidence supports, and where it stops.</p>
         <div className="button-row">
           <AppLink href="/explore" className="button primary">Open explorer <ArrowRight size={16} /></AppLink>
-          <AppLink href="/explore#examples" className="button secondary">View example report</AppLink>
+          <AppLink href="/examples" className="button secondary">View example report</AppLink>
         </div>
         <p className="hero-note"><Eye size={15} /> Read-only analysis. No wallet connection needed to inspect a position.</p>
       </div>

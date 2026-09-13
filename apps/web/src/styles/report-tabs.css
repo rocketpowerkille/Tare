@@ -8,8 +8,14 @@
 .report-panels > [hidden] { display: none; }
 .report-panels > section > :first-child { margin-top: 0; }
 .report-panels .raw-report pre { max-height: 65vh; overflow: auto; }
-@media (max-width: 760px) {
+@container report (max-width: 700px) {
   .report-workspace { grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .report-sidebar { position: static; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 0 16px; border-right: 0; border-bottom: 1px solid var(--line); }
   .report-sidebar button { padding: 10px; }
 }
+@container report (max-width: 420px) {
+  .fact-grid { grid-template-columns: minmax(0, 1fr); }
+  .fact-grid > div { padding: 14px 0; border-right: 0; }
+  .fact-grid > div:nth-child(n) { padding-left: 0; border-right: 0; }
+}
+.report-view { container: report / inline-size; }

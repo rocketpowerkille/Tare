@@ -17,10 +17,18 @@ import { ConnectionTimeline } from '../components/explorer/ConnectionTimeline';
 import { PositionDiagram } from '../components/explorer/PositionDiagram';
 import { WalletInvestigation } from '../components/explorer/WalletInvestigation';
 import { ChangeInvestigator } from '../components/explorer/ChangeInvestigator';
+import { AppLink } from '../components/AppLink';
 import type { StageStatus } from '../lib/progress';
 import type { AccessOptions, Capabilities, DiscoveryResult, JsonRecord, OperationId, PositionAnalyzeInput } from '../lib/types';
 
-export function ExplorerPage({ mode = 'explore' }: { mode?: 'explore' | 'investigate' }) {
+const workspaceCopy = {
+  explore: { label: 'Position explorer', title: 'Start with a position.', description: 'Trace its path. Inspect the evidence. Keep the unknowns in view.' },
+  investigate: { label: 'Investigation workspace', title: 'Follow the evidence.', description: 'Explore a wallet’s positions or compare what changed between two blocks.' },
+  examples: { label: 'Recorded evidence', title: 'Explore a saved report.', description: 'Replay an example or upload a capture. Saved evidence keeps its original observation time.' },
+};
+
+export function ExplorerPage({ mode = 'explore' }: { mode?: keyof typeof workspaceCopy }) {
+  const copy = workspaceCopy[mode];
   const [token, setToken] = useState(readAccessSession);
   const [accessOptions, setAccessOptions] = useState<AccessOptions>();
   const [capabilities, setCapabilities] = useState<Capabilities>();
@@ -35,7 +43,7 @@ export function ExplorerPage({ mode = 'explore' }: { mode?: 'explore' | 'investi
   const [reportAccess, setReportAccess] = useState<ReportAccess>();
   const [stages, setStages] = useState<EvidenceStage[]>([]);
   const [operation, setOperation] = useState<OperationId>('resolve-v1');
-  const [activity, setActivity] = useState('Enter a wallet address to find supported vaults.');
+  const [activity, setActivity] = useState(mode === 'examples' ? 'Choose a saved example or upload a capture.' : 'Enter a wallet address to find supported vaults.');
 
   function disconnectSession() {
     saveAccessSession('');
@@ -74,14 +82,6 @@ export function ExplorerPage({ mode = 'explore' }: { mode?: 'explore' | 'investi
     void api.accessOptions().then(options => { setAccessOptions(options); setOptionsState('complete'); }).catch(() => setOptionsState('unavailable'));
     void connect(token);
   }, []);
-  useEffect(() => {
-    const focusExamples = () => {
-      if (window.location.hash === '#examples') document.getElementById('examples')?.focus();
-    };
-    focusExamples();
-    window.addEventListener('popstate', focusExamples);
-    return () => window.removeEventListener('popstate', focusExamples);
-  }, [capabilities]);
   useEffect(() => {
     if (report && window.matchMedia('(max-width: 800px)').matches) document.getElementById('report-result')?.focus();
   }, [report]);
@@ -145,7 +145,7 @@ export function ExplorerPage({ mode = 'explore' }: { mode?: 'explore' | 'investi
 
   return <div className="explorer-page page-width">
     <header className="page-intro explorer-intro">
-      <div><p className="kicker">{mode === 'investigate' ? 'Investigation workspace' : 'Position explorer'}</p><h1>{mode === 'investigate' ? 'Follow the evidence.' : 'Start with a position.'}</h1><p className="lead">{mode === 'investigate' ? 'Explore a wallet’s positions or compare what changed between two blocks.' : 'Trace its path. Inspect the evidence. Keep the unknowns in view.'}</p></div>
+      <div><p className="kicker">{copy.label}</p><h1>{copy.title}</h1><p className="lead">{copy.description}</p></div>
       <div className="service-state">
         <span className={capabilities ? 'network-dot' : 'network-dot offline'} />
         <div>
@@ -170,15 +170,21 @@ export function ExplorerPage({ mode = 'explore' }: { mode?: 'explore' | 'investi
         <ChangeInvestigator token={token} capabilities={capabilities} disabled={busy || authRequired || connecting} />
       </> : <div className="explorer-grid">
         <div className="control-stack">
-          <OperationForm capabilities={capabilities} busy={busy || authRequired || connecting} operation={operation} onOperationChange={setOperation} onQueryChange={clearQueryResult} onDiscover={discover} onRun={analyze} />
+          {mode === 'explore' ? <OperationForm capabilities={capabilities} busy={busy || authRequired || connecting} operation={operation} onOperationChange={setOperation} onQueryChange={clearQueryResult} onDiscover={discover} onRun={analyze} /> : <>
           <ExamplePanel examples={capabilities.examples} busy={busy || authRequired || connecting} onRun={id => void run('Replaying saved evidence, with no live blockchain query.', () => api.example(token, id), false, true, id)} />
-          <ReplayPanel operation={operation} busy={busy || authRequired || connecting} onReplay={capture => void run('Recalculating the uploaded capture.', () => api.replay(token, operation, capture), false, true)} onError={setError} />
+          <ReplayPanel operation={operation} onOperationChange={setOperation} busy={busy || authRequired || connecting} onReplay={capture => void run('Recalculating the uploaded capture.', () => api.replay(token, operation, capture), false, true)} onError={setError} />
+          </>}
         </div>
         <section className="result-panel" id="report-result" tabIndex={-1} aria-label="Evidence result">
           <div className="activity-line" role="status" aria-live="polite">{busy ? <LoaderCircle className="spin" size={16} /> : <Radio size={16} />}<span>{activity}</span></div>
           <EvidenceTimeline stages={stages} busy={busy} />
           {busy && partial && <section className="partial-evidence"><p className="section-label">Position response received</p><p>Inspect the returned path while remaining evidence checks finish. This is not the final report.</p><PositionDiagram report={partial} /></section>}
-          {report ? (report.reportType === 'comprehensive-position-check' ? <ComprehensiveReportView report={report} access={reportAccess} token={token} /> : <ReportView report={report} access={reportAccess} token={token} />) : busy ? <div className="skeleton-stack" aria-hidden="true"><div className="skeleton" /><div className="skeleton short" /><div className="skeleton" /></div> : <div className="result-empty"><div className="empty-symbol"><FileSearch size={31} /></div><p className="section-label">Your evidence report</p><h2>An answer you can inspect.</h2><p>Run a check to see the position path, observed amounts and missing evidence. Or begin with a saved report.</p><button className="text-button" type="button" onClick={() => document.getElementById('example')?.focus()}>Try a saved example <ArrowRight size={16} /></button></div>}
+          {report ? (report.reportType === 'comprehensive-position-check' ? <ComprehensiveReportView report={report} access={reportAccess} token={token} /> : <ReportView report={report} access={reportAccess} token={token} />) : busy ? <div className="skeleton-stack" aria-hidden="true"><div className="skeleton" /><div className="skeleton short" /><div className="skeleton" /></div> : <div className="result-empty">
+            <div className="empty-symbol"><FileSearch size={31} /></div><p className="section-label">Your evidence report</p><h2>An answer you can inspect.</h2>
+            <p>{mode === 'examples' ? 'Choose an example or upload a capture to inspect its recorded amounts, evidence path and limitations.' : 'Run a check to see the position path, observed amounts and missing evidence.'}</p>
+            {mode === 'examples' ? <button className="text-button" type="button" onClick={() => document.getElementById('example')?.focus()}>Choose a saved example <ArrowRight size={16} /></button>
+              : <AppLink className="text-button" href="/examples">Try a saved example <ArrowRight size={16} /></AppLink>}
+          </div>}
         </section>
       </div>}
     </>}
