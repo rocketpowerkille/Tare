@@ -49,6 +49,19 @@ Execution records show the local run ID, Recipe handle, snapshot digest,
 timestamps, elapsed time and returned gateway. Cost, settlement, model usage and
 internal tool traces are not invented when the upstream omits them.
 
+Failed runs include a safe diagnostic stage (discovery, catalog, execution or
+response), local error code, and HTTP/MCP numeric status or an allowlisted upstream
+tool-error code when available. Remote error prose and arbitrary error data are
+never exposed. `no_tool_calls` means Bazantic reported no tool calls, not that the
+vault evidence failed or that payment settled. A diagnostic run without a report
+reference cannot establish why a different, report-backed execution failed.
+
+Answers withheld for review include fixed reasons and expected/retrieved context
+page counts. Invalid JSON, schema, section order, unknown citations, unread pages
+and sensitive output remain separate failures. Rejected answer text and unknown
+citation values are not included in diagnostics. These diagnostics do not weaken
+the existing answer-validation rules or authorize a retry.
+
 ## Wallet, gaps and comparison
 
 The in-page wallet pipeline reuses Tare discovery and analysis: up to ten

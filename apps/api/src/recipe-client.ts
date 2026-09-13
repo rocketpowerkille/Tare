@@ -1,5 +1,6 @@
 import { z } from 'zod/v4';
 import { ServiceError } from '../../../packages/service/src/requests.js';
+import { RecipeError, recipeToolFailure, type RecipeStage } from './recipe-errors.js';
 
 const record = (value: unknown): Record<string, unknown> => value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
 export type RecipeExecution = { output: unknown; gateway: string; elapsedMs: number; payment: 'not-requested' };
@@ -46,14 +47,20 @@ export class PublicRecipeExecutor implements RecipeExecutor {
     z.string().min(1).max(4000).parse(question);
     const started = Date.now();
     const signal = AbortSignal.timeout(120_000);
+    let stage: RecipeStage = 'discovery';
     const call = async (url: string, method: string, params: unknown) => {
       const response = await this.send(url, { method: 'POST', redirect: 'error', signal,
         headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream' },
         body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }) });
       if (response.status === 402) throw new ServiceError(402, 'recipe-payment-required', 'Bazantic requires payment for this Recipe. No payment was authorized or retried. Use the external Recipe or ask the operator to configure a reviewed payment path.');
-      if (!response.ok) throw new ServiceError(502, 'recipe-unavailable', 'The Bazantic Recipe service could not complete this request. It was not retried.');
+      if (!response.ok) throw new RecipeError(502, 'recipe-http-error', `Bazantic could not complete ${stage}: HTTP ${response.status}. No automatic retry was made.`,
+        { stage, code: 'recipe-http-error', httpStatus: response.status });
       const message = parseMcp(await boundedText(response));
-      if (message.error) throw new Error('MCP error');
+      if (message.error) {
+        const rpcCode = record(message.error).code;
+        throw new RecipeError(502, 'recipe-mcp-error', `Bazantic returned an MCP error during ${stage}. No automatic retry was made.`,
+          { stage, code: 'recipe-mcp-error', ...(typeof rpcCode === 'number' && Number.isSafeInteger(rpcCode) ? { rpcCode } : {}) });
+      }
       return record(message.result);
     };
     try {
@@ -65,6 +72,7 @@ export class PublicRecipeExecutor implements RecipeExecutor {
       const url = new URL(endpoint);
       if (url.protocol !== 'https:' || !/^[a-z0-9]+\.bazgateway\.com$/.test(url.hostname)
         || url.port || url.username || url.password || url.search || url.hash || url.pathname !== '/recipe-mcp') throw new Error('Untrusted execution endpoint');
+      stage = 'catalog';
       const catalog = await call('https://api.bazantic.com/mcp', 'tools/list', {});
       const tool = (Array.isArray(catalog.tools) ? catalog.tools : []).map(record).find(item => item.name === handle);
       if (!tool) throw new ServiceError(503, 'recipe-not-published', 'The configured investigation Recipe is not present in the public tool catalog.');
@@ -73,8 +81,10 @@ export class PublicRecipeExecutor implements RecipeExecutor {
       if (schema.type !== 'object' || questionSchema.type !== 'string'
         || (typeof questionSchema.maxLength === 'number' && question.length > questionSchema.maxLength)
         || (Array.isArray(schema.required) && schema.required.some(key => key !== 'question'))) throw new Error('Incompatible Recipe schema');
+      stage = 'execution';
       const result = await call(url.href, 'tools/call', { name: handle, arguments: { question } });
-      if (result.isError === true) throw new Error('Recipe tool failed');
+      if (result.isError === true) throw recipeToolFailure(result, stage);
+      stage = 'response';
       const structured = record(result.structuredContent);
       const texts = (Array.isArray(result.content) ? result.content : []).map(record).filter(item => item.type === 'text');
       let output: unknown = structured.output ?? texts.map(item => String(item.text ?? '')).join('\n');
@@ -84,8 +94,10 @@ export class PublicRecipeExecutor implements RecipeExecutor {
       return { output, gateway: url.origin, elapsedMs: Date.now() - started, payment: 'not-requested' };
     } catch (error) {
       if (error instanceof ServiceError) throw error;
-      throw new ServiceError(502, signal.aborted ? 'recipe-timeout' : 'recipe-unavailable',
-        signal.aborted ? 'Recipe execution timed out. It may still finish remotely; Tare will not automatically retry.' : 'The Recipe response was unavailable or incompatible. No automatic retry was made.');
+      const code = signal.aborted ? 'recipe-timeout' : 'recipe-unavailable';
+      throw new RecipeError(502, code,
+        signal.aborted ? `Recipe ${stage} timed out. Execution may still finish remotely; Tare will not automatically retry.` : `The Recipe response was unavailable or incompatible during ${stage}. No automatic retry was made.`,
+        { stage, code });
     }
   }
 }

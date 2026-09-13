@@ -73,8 +73,13 @@ export class InvestigationStore {
   }
 
   allPagesRead(reference: string) {
+    const coverage = this.readCoverage(reference);
+    return coverage.retrievedPages === coverage.expectedPages;
+  }
+
+  readCoverage(reference: string) {
     const entry = this.entry(reference);
-    return entry.readPages.size === Math.ceil(entry.snapshot.facts.length / 8);
+    return { expectedPages: Math.ceil(entry.snapshot.facts.length / 8), retrievedPages: entry.readPages.size };
   }
 
   resetReads(reference: string) { this.entry(reference).readPages.clear(); }

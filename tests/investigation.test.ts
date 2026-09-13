@@ -3,6 +3,7 @@ import test from 'node:test';
 import { randomUUID } from 'node:crypto';
 import { InvestigationStore } from '../apps/api/src/investigation-store.js';
 import { InvestigationRunner } from '../apps/api/src/investigation-runner.js';
+import { RecipeError } from '../apps/api/src/recipe-errors.js';
 import { investigationFacts, compareInvestigationReports, answerSections } from '../packages/receipts/src/investigation.js';
 import { ServiceError } from '../packages/service/src/requests.js';
 import { investigationFromEnv } from '../apps/api/src/investigation-routes.js';
@@ -107,7 +108,24 @@ test('missing context fetch or invented citation withholds the answer', async ()
     const result = await finish(runner, run.id);
     assert.equal(result.status, 'review-required');
     assert.equal(result.sections, undefined);
+    assert.deepEqual(result.review?.reasons, [readPages ? 'unknown-citations' : 'missing-context-pages']);
+    assert.equal(result.review?.retrievedPages, readPages ? result.review.expectedPages : 0);
   }
+});
+
+test('failed execution records retain safe diagnostics without inventing a receipt', async () => {
+  const store = new InvestigationStore();
+  const saved = store.create('alice', { report });
+  const diagnostic = { stage: 'execution' as const, code: 'recipe-tool-error', upstreamCode: 'no_tool_calls' };
+  const runner = new InvestigationRunner(store, { async execute() {
+    throw new RecipeError(502, diagnostic.code, 'No tool calls occurred.', diagnostic);
+  } }, 'test');
+  const run = runner.start('alice', { reference: saved.reference, requestId: randomUUID(), question: 'Explain', consent: true });
+  const result = await finish(runner, run.id);
+  assert.deepEqual(result.diagnostic, diagnostic);
+  assert.equal(result.status, 'unavailable');
+  assert.equal(result.sections, undefined);
+  assert.equal(result.receipt, undefined);
 });
 
 test('payment challenge stops run, retains no fabricated receipt and does not retry', async () => {

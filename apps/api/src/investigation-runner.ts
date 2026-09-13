@@ -4,14 +4,15 @@ import { answerSections } from '../../../packages/receipts/src/investigation.js'
 import { ServiceError } from '../../../packages/service/src/requests.js';
 import { InvestigationStore } from './investigation-store.js';
 import type { RecipeExecutor } from './recipe-client.js';
+import { RecipeError, type RecipeDiagnostic } from './recipe-errors.js';
+import { reviewInvestigationAnswer, type AnswerSection } from './investigation-review.js';
 
 export const RunInput = z.strictObject({ reference: z.string().regex(/^[a-f0-9]{48}$/),
   requestId: z.uuid(), question: z.string().trim().min(1).max(1500), consent: z.literal(true) });
-const Answer = z.strictObject({ sections: z.array(z.strictObject({ title: z.enum(answerSections),
-  text: z.string().min(1).max(4000), citations: z.array(z.string().max(120)).min(1).max(32) })).length(7) });
 
 type Run = { id: string; status: 'running' | 'complete' | 'review-required' | 'unavailable'; recipe: string;
-  startedAt: string; finishedAt?: string; reportDigest: string; sections?: z.infer<typeof Answer>['sections'];
+  startedAt: string; finishedAt?: string; reportDigest: string; sections?: AnswerSection[]; diagnostic?: RecipeDiagnostic;
+  review?: ReturnType<typeof reviewInvestigationAnswer>['diagnostic'];
   warning?: string; receipt?: { gateway: string; elapsedMs: number; payment: 'not-requested'; settlement: 'not-confirmed'; cost: null } };
 
 /** One attempt per key and per same snapshot/question. No implicit paid or failed-run retries. */
@@ -60,28 +61,22 @@ export class InvestigationRunner {
     try {
       const result = await this.executor.execute(run.recipe, question);
       run.receipt = { gateway: result.gateway, elapsedMs: result.elapsedMs, payment: result.payment, settlement: 'not-confirmed', cost: null };
-      let output = result.output;
-      if (typeof output === 'string') {
-        try { output = JSON.parse(output.replace(/^\s*```(?:json)?\s*/, '').replace(/\s*```\s*$/, '')); } catch { output = null; }
-      }
-      const parsed = Answer.safeParse(output);
       const snapshot = [...this.runs.values()].find(item => item.run.id === run.id)!;
       const facts = this.store.get(reference, snapshot.owner).facts;
       const ids = new Set(facts.map(fact => fact.id));
-      if (!parsed.success || !this.store.allPagesRead(reference)
-        || parsed.data.sections.some((section, index) => section.title !== answerSections[index]
-          || section.citations.some(id => !ids.has(id))
-          || section.text.includes(reference)
-          || /tare_sandbox_v1\.|Bearer\s|-----BEGIN .*PRIVATE KEY-----/i.test(section.text))) {
+      const review = reviewInvestigationAnswer(result.output, ids, reference, this.store.readCoverage(reference));
+      run.review = review.diagnostic;
+      if (!review.sections) {
         run.status = 'review-required';
-        run.warning = 'The Recipe did not return the required cited answer or did not retrieve all context pages. Its answer is withheld. Review the Recipe definition; your technical report is unchanged.';
+        run.warning = `${review.explanation} Its answer is withheld; your technical report is unchanged.`;
       } else {
         run.status = 'complete';
-        run.sections = parsed.data.sections;
+        run.sections = review.sections;
         run.warning = 'AI interpretation, not new verification. Citation IDs and context retrieval were checked; factual correctness still requires review against the linked evidence.';
       }
     } catch (error) {
       run.status = 'unavailable';
+      if (error instanceof RecipeError) run.diagnostic = error.diagnostic;
       run.warning = error instanceof ServiceError ? error.message : 'Recipe execution could not be confirmed. It will not be retried automatically.';
     } finally { run.finishedAt = new Date(this.now()).toISOString(); }
   }
