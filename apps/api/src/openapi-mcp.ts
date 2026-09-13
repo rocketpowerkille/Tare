@@ -67,8 +67,8 @@ export const mcpOpenapi = {
     '/api/discover': {
       post: {
         operationId: 'tare_discover_vaults',
-        summary: 'Find multi-chain Morpho and registered ERC-4626 positions for a public wallet address.',
-        description: 'Morpho discovery covers V1 and V2 on Ethereum, Base and Arbitrum. Configured registries add other ERC-4626 protocols and Base Sepolia. Confirm a supported result with tare_analyze_compact.',
+        summary: 'Find multi-chain Morpho, enabled Euler and registered ERC-4626 supply positions.',
+        description: 'Indexed Morpho and enabled Euler discovery cover Ethereum, Base and Arbitrum. Euler subaccounts and debt analysis are not supported. Configured registries add other ERC-4626 vaults and Base Sepolia. Discovery is bounded and may be incomplete. Confirm a supported result with tare_analyze_compact on its returned chain.',
         requestBody: {
           required: true,
           content: {

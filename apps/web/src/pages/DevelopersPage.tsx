@@ -34,7 +34,7 @@ export function DevelopersPage() {
     <header className="page-intro compact-intro">
       <p className="kicker">Developer guide</p>
       <h1>Use Tare through HTTP, MCP, or the command line.</h1>
-      <p className="lead">Every interface uses the same validated service layer and preserves the same evidence boundaries.</p>
+      <p className="lead">The interfaces share evidence calculations and preserve the same evidence boundaries. Their available commands and tools differ.</p>
       <div className="developer-links"><a href="/openapi.json">OpenAPI 3.0 <ExternalLink size={15} /></a><a href="/openapi-mcp-v3.json">Tare gateway contract <ExternalLink size={15} /></a><a href="/openapi-graph.json">Graph gateway contract <ExternalLink size={15} /></a></div>
     </header>
 
@@ -42,6 +42,8 @@ export function DevelopersPage() {
       <div className="section-heading"><p className="kicker">HTTP API</p><h2>Start with a reproducible saved report</h2><p>Set TARE_API_TOKEN privately in your shell to a configured Tare code or valid Explorer session. This direct API example performs no payment or fresh blockchain query. Provider URLs and credentials stay on the server.</p></div>
       <CodeBlock code={curlExample} label="Git Bash / macOS / Linux" />
       <p className="developer-note">Run GET /api/status with the same bearer token before choosing a live operation. A single /api/analyze call does not run the browser's whole Graph and Chainlink pipeline. Local setup uses Node 24 or later and pnpm 11.19.0: install dependencies, run pnpm build, then pnpm serve. Default URL: http://127.0.0.1:4318. The server does not load .env automatically.</p>
+      <p>Web/API discovery combines Morpho, enabled Euler and configured ERC-4626 vaults. Inspect discoveryProtocols and networks in /api/status. Euler supply analysis uses resolve-erc4626 with the returned chainId; its debt and subaccounts remain outside this check. CLI live discover is Morpho-only.</p>
+      <a className="text-link" href="https://github.com/rocketpowerkille/ETHOnline/blob/main/docs/OPERATIONS.md">Local configuration, CLI commands and verification <ExternalLink size={15} /></a>
     </section>
 
     <section className="developer-section" id="bazantic-sandbox">

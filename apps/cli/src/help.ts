@@ -7,9 +7,9 @@ export const help = `Tare 0.1.0 — exposure CLI with offline replay and read-on
   tare verify accounting-replay <capture.json> [--json]
   tare verify graph-products --address <owner> --vault <V1-vault>
        [--rpc-url <url>] [--graph-url <url>] [--graph-deployment <CID>]
-       [--token-api-url <url>] [--json] [--out <capture.json>]
+       [--json] [--out <capture.json>]
        Requires GRAPH_MARKET_API_TOKEN. Composes live Token API and Studio data,
-       then checks both against RPC at the Studio accounting block.
+       then checks both against RPC at the Studio accounting block. Endpoint: TARE_GRAPH_TOKEN_API_URL.
   tare verify graph-replay <capture.json> [--json]
   tare verify custody --address <holder> [--rpc-url <url>] [--secondary-rpc-url <url>]
        [--block-number <n>] [--json] [--out <capture.json>]
@@ -25,11 +25,13 @@ export const help = `Tare 0.1.0 — exposure CLI with offline replay and read-on
   tare replay <recording.json> [--wallet <name>] [--json] [--out <receipt.json>]
   tare snapshot normalize <recording.json> --out <snapshot.json>
   tare snapshot validate <snapshot.json>
-  tare live discover [--address <0x...>] [--vault <0x...>] [--max-positions <1..500>] [--json]
-  tare live resolve --address <0x...> --vault <0x...> --rpc-url <https://...> [--json]
+  tare live discover [--address <0x...>] [--vault <0x...>] [--chain-id <1|8453|42161>] [--max-positions <1..500>] [--json]
+  tare live resolve --address <0x...> --vault <0x...> [--chain-id <1|8453|42161>] [--rpc-url <https://...>] [--json]
   tare live example --rpc-url <https://...> [--out <receipt.json>] [--capture-out <capture.json>]
   tare live replay <capture.json> [--json]
-       Live reads: Ethereum USDC MetaMorpho V1 only; --wallet may replace --address.
+       V1 reads: Ethereum, Base and Arbitrum; --wallet may replace --address.
+       CLI discovery is Morpho-only; Euler discovery and generic ERC-4626 analysis use the HTTP API.
+       Nested V2 traversal remains limited to supported Ethereum USDC vaults.
        Optional: --block-number, --max-markets, --max-calls, --deadline-ms, --graphql-url.
   tare verify shares --address <0x...> --vault <0x...> --rpc-url <url> --graph-url <url>
        [--block-number <number>] [--graph-deployment <CID>] [--json] [--out <report.json>]
@@ -52,7 +54,7 @@ export const help = `Tare 0.1.0 — exposure CLI with offline replay and read-on
 Wallet commands accept --home <directory>; resolve --wallet does too.
 Default profile directory: TARE_HOME or .tare in the current directory.
 Watch-only profiles store public addresses only. Balance reads are opt-in and never sign.
-RPC URLs may also be supplied through TARE_RPC_URL instead of --rpc-url.
+V1 RPC defaults: TARE_RPC_URL (Ethereum), TARE_BASE_MAINNET_RPC_URL (Base), TARE_ARBITRUM_RPC_URL (Arbitrum).
 Legacy snapshots and demo cases are synthetic. Live captures retain RPC observations.
 Complete live accounting is not independently verified backing or valuation.
 Exit codes: 0 success; 1 invalid input/I/O; 2 partial resolution.

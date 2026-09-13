@@ -20,7 +20,7 @@ Web UI / HTTP client / CLI / MCP client
 | `apps/api` | HTTP routes, generated OpenAPI, hosted authentication, origins, and quotas. |
 | `apps/cli` | Input/output coordination, bounded file operations, live commands, and replay. |
 | `apps/mcp` | Local stdio MCP transport over shared service operations. |
-| `packages/service` | Request schemas, configuration, dispatch, and named examples. |
+| `packages/service` | Request schemas, configuration, dispatch, multi-protocol discovery, and named examples. |
 
 Provider URLs, credentials, and arbitrary filesystem paths are not accepted as
 evidence-operation request parameters. Local HTTP serving defaults to loopback;
@@ -31,8 +31,12 @@ explicit local provider configuration.
 
 `packages/sources` acquires public discovery metadata, RPC reads, Graph data, and
 eligible Chainlink price rounds. Requests have identity, size, and time bounds.
-Morpho's GraphQL API provides discovery; it is not The Graph and discovery does
-not verify a position.
+Morpho's GraphQL API and the optional Euler API provide indexed candidates.
+Neither is The Graph, and discovery does not verify a position. Web/API discovery
+in `packages/service/src/discovery.ts` merges them with configured ERC-4626 reads,
+deduplicates by chain/vault and interleaves sources before applying the result
+limit. Source omissions remain explicit. CLI discovery separately queries Morpho
+on one selected chain; it does not use the Euler discovery source.
 
 `packages/adapters` implements supported protocol rules.
 `packages/resolver` traverses positions and attributes amounts using integer
@@ -44,6 +48,23 @@ V1 lending traversal and bounded Ethereum USDC V2-to-V1 traversal have different
 eligibility rules. Generic ERC-4626 reads describe the contract's accounting
 without claiming arbitrary downstream composition. The synthetic fixture model
 is separate from live protocol accounting.
+
+Morpho V1 and generic ERC-4626 acquisition support Ethereum, Base and Arbitrum;
+generic ERC-4626 also supports Base Sepolia. Euler EVK/EulerEarn direct supply
+positions use the generic reader, not a debt, collateral or liquidation adapter.
+Yearn discovery is not implemented. RPC configuration determines which discovered
+networks can be analyzed. See [configuration and interfaces](OPERATIONS.md).
+
+## Browser state
+
+Explorer, Investigate and Examples are separate routes. Report sidebar tabs and
+Investigation tool tabs retain their mounted state while switching within a page.
+Navigating to another workspace or refreshing clears current reports and inputs;
+download evidence before leaving. Only accepted access credentials are restored
+from tab-scoped session storage and revalidated on reload. Disconnect removes
+that credential locally; it does not revoke an API key or gateway grant.
+Dark mode is the default; the selected theme is retained in local storage.
+Storage-disabled browsers can still use the page without persistence.
 
 ## Verification and provenance
 

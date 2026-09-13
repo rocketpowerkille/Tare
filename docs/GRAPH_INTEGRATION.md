@@ -77,7 +77,7 @@ creation-block ledger.
 
 The hosted notes are historical prose records. Raw hosted Graph/Token API responses
 and captures are not attached to those notes in this revision. Collect them for
-the demo instead of claiming this documentation review repeated live acceptance.
+the demo; the notes alone do not establish repeatable live acceptance.
 Zero findings means the tested observations agreed. It does not independently
 recompute every economic assumption, prove loan recoverability, or prove backing.
 
@@ -110,11 +110,10 @@ pnpm verify:hosted:graph
 pnpm verify:hosted:graph-products
 ```
 
-Those commands query real providers and require working access. They were
-source-checked, not rerun during the documentation pass. For actual local mapping
+Those commands query real providers and require working access. For actual local mapping
 execution, `pnpm test:graph` requires Docker Linux containers; follow the
 [Graph Node runbook](../graph/integration/README.md). Local results are not hosted
-Graph product acceptance. No deployment is required for documentation review.
+Graph product acceptance.
 
 ## Why Graph changes the result
 

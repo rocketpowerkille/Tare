@@ -105,8 +105,7 @@ variants: for example, its discovery `vault` hint is not accepted by the current
 HTTP discovery schema. Omit it. The full replay schema also lists
 `value-position`, but runtime replay does not support it. The tables here follow
 [runtime request validation](../packages/service/src/requests.ts); OpenAPI is not
-permission to send unsupported combinations. No contracts were changed by this
-documentation update.
+permission to send unsupported combinations.
 
 ## Reproducible HTTP example
 

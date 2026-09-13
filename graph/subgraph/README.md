@@ -83,8 +83,8 @@ note, not a claim that a later query reproduces the same block or current health
 Graph Studio version `0.1.0` is deployed at
 `tare-steakhouse-usdc-ethereum` with manifest CID
 `QmZrGd5mh9V5x57J4ETN9sWVP2P3VMVpRgQ7p5XK9CW1hw`. Full historical share
-acceptance is not established in this repository. Current sync progress and its
-completion time were not checked in the documentation review. The separate
+acceptance is not established in this repository. A current sync percentage alone
+does not establish historical acceptance. The separate
 `tare-live-accounting` endpoint and its historical 56/56 comparison cover bounded current
 accounting agreement, not historical share reconstruction. `GRAPH_API_KEY` is
 optional when the endpoint does not require one. Keep any key local. See the

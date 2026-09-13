@@ -4,6 +4,7 @@ import { AppLink } from '../components/AppLink';
 const sections = [
   ['overview', 'Overview'],
   ['workspaces', 'Choose a workspace'],
+  ['coverage', 'Vault and network coverage'],
   ['how-it-works', 'How it works'],
   ['reading-a-report', 'Read a report'],
   ['using-the-explorer', 'Use the explorer'],
@@ -45,6 +46,19 @@ export function DocsPage() {
           <article><h3><AppLink href="/examples">Examples</AppLink></h3><p>How do I read or reproduce a report? Replay saved examples or upload a compatible capture. This does not acquire fresh blockchain evidence.</p></article>
         </div>
         <p>Explorer and Investigate reuse the same evidence engine. Investigate adds comparisons, not stronger verification: it is neither a complete wallet inventory nor continuous monitoring. Shared markets do not predict losses; changed values do not establish their cause. Bazantic can explain the returned facts after consent, but does not add verification.</p>
+        <p>Investigate opens Wallet overview immediately; select Changes over time for comparisons. Switching tool tabs preserves inputs and results. Report sidebar tabs show one section at a time and support arrow keys, Home and End. Navigating to another workspace or refreshing clears reports and inputs, so download anything you want to keep. An accepted access code is restored separately.</p>
+        <p>Use the theme button in the header to switch between dark and light. Dark is the default; your preference is remembered when browser storage is available.</p>
+      </section>
+
+      <section className="doc-section" id="coverage">
+        <p className="section-label">Vault and network coverage</p><h2>What can Tare analyze?</h2>
+        <div className="definition-list">
+          <div><strong>Morpho V1 · Ethereum, Base, Arbitrum</strong><p>Wallet shares, conversion quotes and supported Morpho market exposure. The deployment needs a working RPC for the selected network.</p></div>
+          <div><strong>Morpho V2 · supported Ethereum USDC vaults</strong><p>Bounded nested V2-to-V1 traversal. Finding a V2 position elsewhere does not mean its nested analysis is supported.</p></div>
+          <div><strong>Euler EVK / EulerEarn · Ethereum, Base, Arbitrum</strong><p>Enabled discovery finds direct supply candidates; analysis checks ERC-4626 shares and conversion quotes. It does not assess debt, subaccounts, liquidation risk or downstream backing.</p></div>
+          <div><strong>Other ERC-4626 vaults</strong><p>Enter a compatible contract address on those three networks or Base Sepolia, or use a configured registry entry. Generic accounting does not trace arbitrary strategies. Yearn discovery is not yet integrated.</p></div>
+        </div>
+        <p>Discovery considers at most 100 Euler entries; omissions and source failures stay visible. The wallet investigation analyzes at most 3 of its 10 discovery candidates. Source checks have narrower coverage: Graph composition and Chainlink reference valuation are Ethereum-only, and Studio accounting is specific to its configured vault. The two-block live comparison currently supports Ethereum Morpho V1.</p>
       </section>
 
       <section className="doc-section" id="changes">

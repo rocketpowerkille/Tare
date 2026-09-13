@@ -6,7 +6,7 @@ payments. Their implementation and fixture tests are not live-provider acceptanc
 
 ## Compare two blocks
 
-In `/investigate`, open **Investigate changes between two blocks**. Supply one
+In `/investigate`, select **Changes over time**. Supply one
 Ethereum Morpho V1 wallet/vault pair and two increasing decimal block numbers.
 The browser performs at most four operations through existing `/api/analyze`:
 
@@ -62,10 +62,14 @@ or silently truncate facts to force an answer.
 
 ## Exposure overlap
 
-On `/investigate`, **Investigate a wallet across supported vaults** shows shared Morpho V1
+On `/investigate`, **Wallet overview** shows shared Morpho V1
 markets from the same existing, at-most-three-position investigation. This is a
 pure calculation over returned reports, not a new provider query. The view shows
 each vault's attributed raw amount, asset/decimals, source block and dependencies.
+Discovery can also return Euler or registered ERC-4626 supply positions; their
+generic accounting reports do not receive invented Morpho market overlap.
+The two tool tabs retain forms and results while switching. Reloading or leaving
+the workspace clears that work; use report downloads before doing so.
 
 A sum is available only for the same chain, market parameters, asset units and
 block hash, with every amount present. Different-block relationships remain

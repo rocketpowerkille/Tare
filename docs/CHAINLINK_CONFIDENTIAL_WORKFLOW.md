@@ -97,7 +97,7 @@ delivery. The hosted record above is the separate Chainlink-forwarder experiment
 `00fe0024badc88b0518ca30fa44d6b0911dd338282ae5a75eadc460e4c140a48`
 as `PAUSED`, with `executionEnabled: false`. It points to the Render API and
 records incomplete evidence for the already-consumed control. Current registry
-state was not queried during this documentation review.
+state must be checked separately; this is a retained record, not a live status probe.
 
 That retained Render URL is historical. The current application uses
 `https://tare.visk404.dev`; do not edit the old execution record to imply it used
@@ -112,7 +112,7 @@ today. Pausing CRE does not disable Explorer's separate price-feed reads.
 ## Reproduction and test levels
 
 Use the locked dependencies and Bun on `PATH`. CI specifies Bun 1.3.10; the current
-local review used Bun 1.4.2. CRE SDK version is pinned to 1.20.1.
+retained local verification used Bun 1.4.2. CRE SDK version is pinned to 1.20.1.
 
 ```sh
 npm ci --prefix workflows/cre --ignore-scripts --no-audit --no-fund

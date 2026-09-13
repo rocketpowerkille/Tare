@@ -65,7 +65,7 @@ position-specific interpretation and comparison layer, not a replacement.
 Not every report performs every check. Coverage depends on the operation,
 configured providers, supported adapter, and available evidence.
 
-Wallet discovery combines Morpho with Euler EVK/EulerEarn supply candidates on
+Web/API wallet discovery combines Morpho with Euler EVK/EulerEarn supply candidates on
 Ethereum, Base and Arbitrum. Euler candidates use the generic ERC-4626 reader for
 fresh share/conversion accounting; Euler borrowing, subaccounts, collateral risk
 and downstream strategy tracing are not implemented. Yearn discovery is not yet
@@ -75,6 +75,7 @@ locally for analysis on the corresponding networks. Euler discovery defaults to
 its public API; `TARE_EULER_DISCOVERY=false` disables it. No wallet secrets are needed.
 The first 100 indexed Euler positions are considered; metadata gaps, omitted
 subaccounts and result limits remain explicit. Discovery is not a full inventory.
+CLI `live discover` remains Morpho-only and selects one chain at a time.
 
 ## A reproducible example
 
@@ -306,7 +307,8 @@ pnpm mcp
 ```
 
 The browser suite requires Playwright, an installed browser, and the running local
-server. Graph builds, CRE compilation, and container test prerequisites are in
+server. See [local operations](docs/OPERATIONS.md) for configuration, CLI command
+coverage, export formats and browser-test setup. Graph builds, CRE compilation, and container test prerequisites are in
 the [Graph guide](docs/GRAPH_INTEGRATION.md),
 [CRE guide](docs/CHAINLINK_CONFIDENTIAL_WORKFLOW.md), and
 [CI configuration](.github/workflows/ci.yml).
@@ -315,7 +317,7 @@ the [Graph guide](docs/GRAPH_INTEGRATION.md),
 
 | Interface | Entry point |
 | --- | --- |
-| Web | `/`, `/explore`, `/docs`, `/developers`. |
+| Web | `/`, `/explore`, `/investigate`, `/examples`, `/docs`, `/developers`. |
 | Public service metadata | `GET /healthz`, `/api/access-options`, `/openapi.json`, `/openapi-mcp.json`, `/openapi-mcp-v2.json`, `/openapi-mcp-v3.json`, `/openapi-graph.json`. |
 | HTTP evidence operations | Protected `GET /api/status`; JSON `POST /api/analyze`, `/api/discover`, `/api/example`, `/api/replay`, `/api/compose`. |
 | Compact agent operations | JSON `POST /api/agent-analyze`, `/api/agent-example`. |
@@ -361,8 +363,8 @@ Recipe response parsing, citation/page validation, session setup and terminal
 token extraction, documentation links/anchors, and the HTTP/tool inventories.
 Test counts describe that run, not a fixed product capability.
 An earlier same-day pass recorded 12 CRE tests, both Graph mapping builds and CRE
-WASM compilation. Those separate suites, Docker Graph Node and Foundry were not
-rerun by this documentation verification. See [CI](.github/workflows/ci.yml) for commands.
+WASM compilation. CRE, Docker Graph Node and Foundry remain separate from
+application verification. See [CI](.github/workflows/ci.yml) for commands.
 
 Tests exercise malformed input, source
 disagreement, incomplete evidence, replay, authentication, exact unit display, and

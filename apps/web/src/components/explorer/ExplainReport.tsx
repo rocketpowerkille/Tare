@@ -55,7 +55,7 @@ export function ExplainReport({ report, modules, access, token = '', evidence: o
     <div className="explanation-modes">
       <section className="explanation-mode" aria-label="External AI assistant workflow">
         <p className="section-label">For users with an AI assistant</p><h3>Explain with an AI assistant</h3>
-        <p>Copy the structured evidence into ChatGPT, Claude, Cursor or another assistant. This convenience path does not call Bazantic or an AI service.</p>
+        <p>Copy the structured evidence into your preferred assistant. This convenience path does not call Bazantic or an AI service.</p>
         <button className="button secondary" type="button" aria-label="Copy explanation context" onClick={() => void copy()}>
           <span role="status">{copied ? 'Copied explanation context' : 'Copy explanation context'}</span>
         </button>

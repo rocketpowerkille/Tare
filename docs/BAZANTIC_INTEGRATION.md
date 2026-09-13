@@ -170,7 +170,7 @@ example; do not paste that illustration, quotes, or the whole JSON response.
 Historical notes report successful sandbox payment and session issuance. The
 redacted raw paid response should still be retained for submission. Operator
 Recipe tests use the operator credential and make no payment. Neither path proves
-custody or solvency. No paid request was repeated for this documentation task.
+custody or solvency.
 
 ## Domain and gateway maintenance
 
