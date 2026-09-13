@@ -113,7 +113,9 @@ export function OperationForm({ capabilities, busy, operation, onOperationChange
             className={`${vault === position.vault && chainId === position.chainId ? 'vault-option selected' : 'vault-option'} ${position.support.status === 'unsupported' ? 'unsupported' : ''}`}
             type="button" key={`${position.chainId}:${position.vault}`} disabled={position.support.status === 'unsupported'} onClick={() => selectPosition(position)}>
             <span className="vault-option-main"><strong>{position.name || 'Unnamed vault'}</strong><small>{position.network} · {position.protocol} · {position.asset.symbol} · {position.version.toUpperCase()}</small></span>
-            <span className={`support-label ${position.support.status}`}><strong>{position.support.status === 'supported' ? 'Supported now' : 'Position found, analysis not supported yet'}</strong><small>{position.support.status === 'supported' ? position.support.checkType : position.support.reason}</small></span>
+            <span className={`support-label ${position.support.status}`}><strong>{position.support.status === 'supported'
+              ? position.version === 'v2' && position.support.operation === 'resolve-erc4626' ? 'Accounting only' : 'Supported now'
+              : 'Position found, analysis not supported yet'}</strong><small>{position.support.status === 'supported' ? position.support.checkType : position.support.reason}</small></span>
             <code>{position.vault.slice(0, 8)}...{position.vault.slice(-6)}</code>
           </button>)}
           <p>{discovery.positions.length ? 'Choose a supported result to fill the network, vault, and check type automatically.' : 'This does not prove the wallet has no positions. You can still paste a vault address below.'}</p>

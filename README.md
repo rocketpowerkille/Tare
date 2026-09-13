@@ -269,6 +269,10 @@ The public integration guides describe each path and its evidence boundaries.
 
 - Morpho V1 traversal covers Ethereum, Base, and Arbitrum when RPC is configured.
   Nested V2 traversal is limited to supported Ethereum USDC V1 adapters.
+  Other discovered V2 positions offer an explicitly labeled accounting-only
+  ERC-4626 check on configured Ethereum, Base and Arbitrum RPCs. This reads shares
+  and the conversion quote, not downstream strategies; eligible Chainlink prices
+  do not add nested-allocation or backing verification.
 - Generic ERC-4626 analysis reports contract accounting, not arbitrary downstream
   composition. Discovery is not verification or an exhaustive vault registry.
 - Graph composition is Ethereum-only. The custom accounting subgraph covers one

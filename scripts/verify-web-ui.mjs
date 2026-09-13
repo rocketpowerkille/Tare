@@ -9,6 +9,7 @@ import { checkSession } from './web-session-checks.mjs';
 import { checkDocs } from './web-docs-checks.mjs';
 import { checkChanges, checkHistorical } from './web-change-checks.mjs';
 import { checkMultichainValuation } from './web-valuation-checks.mjs';
+import { checkV2Accounting } from './web-v2-accounting-checks.mjs';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.TARE_PLAYWRIGHT_MODULE || 'playwright');
@@ -282,6 +283,7 @@ try {
   await checkSession({ browser, origin, capabilities });
   await checkEulerDiscovery({ page, origin, fixture, capabilities, fits });
   await checkMultichainValuation({ page, origin, fixture, capabilities, fits });
+  await checkV2Accounting({ page, origin, fixture, capabilities, fits });
   assert.deepEqual(errors, [], 'Uncaught browser exceptions');
   console.log('Web UI regression checks passed. Screenshots: tmp/ui-review');
 } finally {

@@ -19,13 +19,18 @@ export async function discoverPositions(input: unknown, config: Readonly<Service
     const v1Ready = position.version === 'v1' && network.resolveV1;
     const v2Ready = position.version === 'v2' && position.chainId === 1
       && position.asset.address === '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' && Boolean(config.rpcUrl);
+    // V2 exposes ERC-4626 reads even where its strategy adapters cannot be traced.
+    // Offer that narrower operation explicitly, without changing nested support.
+    const v2AccountingReady = position.version === 'v2' && network.erc4626;
     return { ...position, network: network.name, support: v1Ready
       ? { status: 'supported' as const, operation: 'resolve-v1' as const, checkType: 'Vault shares and Morpho market exposure' }
       : v2Ready
         ? { status: 'supported' as const, operation: 'resolve-v2' as const, checkType: 'Nested V2 to V1 market exposure' }
-        : { status: 'unsupported' as const, reason: position.version === 'v2'
-          ? 'Position found, but this V2 asset or network does not have a safe nested adapter yet.'
-          : `${network.name} discovery works, but its RPC is not configured on this deployment.` },
+        : v2AccountingReady
+          ? { status: 'supported' as const, operation: 'resolve-erc4626' as const,
+            checkType: 'Accounting only: wallet shares and asset conversion quote. V2 strategy allocations are not traced.' }
+          : { status: 'unsupported' as const,
+            reason: `${network.name} discovery works, but its RPC is not configured on this deployment.` },
     };
   });
   const registryChecks = await Promise.allSettled((config.erc4626Registry ?? []).map(async entry => {

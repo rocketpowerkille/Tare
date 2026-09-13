@@ -54,7 +54,7 @@ export function DocsPage() {
         <p className="section-label">Vault and network coverage</p><h2>What can Tare analyze?</h2>
         <div className="definition-list">
           <div><strong>Morpho V1 · Ethereum, Base, Arbitrum</strong><p>Wallet shares, conversion quotes and supported Morpho market exposure. The deployment needs a working RPC for the selected network.</p></div>
-          <div><strong>Morpho V2 · supported Ethereum USDC vaults</strong><p>Bounded nested V2-to-V1 traversal. Finding a V2 position elsewhere does not mean its nested analysis is supported.</p></div>
+          <div><strong>Morpho V2 · nested tracing or accounting only</strong><p>Supported Ethereum USDC V1 adapters use bounded nested V2-to-V1 traversal. Other discovered V2 positions on Ethereum, Base and Arbitrum offer an Accounting only check when RPC is configured: wallet shares and the contract's asset conversion quote, without tracing strategy allocations. Eligible USDC/WETH quotes can receive a separate Chainlink reference price; this does not expand nested coverage.</p></div>
           <div><strong>Euler EVK / EulerEarn · Ethereum, Base, Arbitrum</strong><p>Enabled discovery finds direct supply candidates; analysis checks ERC-4626 shares and conversion quotes. It does not assess debt, subaccounts, liquidation risk or downstream backing.</p></div>
           <div><strong>Other ERC-4626 vaults</strong><p>Enter a compatible contract address on those three networks or Base Sepolia, or use a configured registry entry. Generic accounting does not trace arbitrary strategies. Yearn discovery is not yet integrated.</p></div>
         </div>

@@ -65,6 +65,10 @@ configuration checked per chain. The indexed debt field may be null (unknown)
 and is not assessed by this supply-only operation. Provider outages, pagination,
 metadata gaps and omitted subaccounts appear in `issues`; `complete` refers only
 to the bounded discovery coverage, never wallet completeness or backing.
+Morpho V2 candidates outside the Ethereum USDC nested-adapter path select
+`resolve-erc4626` when their network RPC is configured. Their `checkType` explicitly
+states accounting only: shares and conversion, not V2 strategy tracing. The web
+badge says **Accounting only**. Existing `resolve-v2` behavior is unchanged.
 The [official Euler API](https://docs.euler.finance/build/data-querying/euler-v3-api/)
 and [metadata reference](https://docs.euler.finance/build/data-querying/perspectives/)
 define the source contracts. Tare reads one account page (100 rows) and at most
