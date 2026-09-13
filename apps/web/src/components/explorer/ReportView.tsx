@@ -10,6 +10,7 @@ import { displayBlock } from '../../lib/report-display';
 import { ReportTabs } from './ReportTabs';
 import { ExplainReport } from './ExplainReport';
 import type { ReportAccess } from '../../lib/agent-handoff';
+import { HistoricalEvidence } from './HistoricalEvidence';
 
 function readable(value: string) {
   return value.replaceAll('-', ' ').replaceAll('_', ' ');
@@ -90,6 +91,7 @@ export function ReportView({ report, modules = noModules, access, token = '', ev
   const sourceMode = text(report.sourceMode) ?? 'unknown source';
   const status = text(report.status) ?? text(report.kind) ?? 'unknown';
   const reportType = text(report.reportType) ?? text(report.protocol) ?? 'Position evidence';
+  const historical = reportType === 'historical-graph-verification';
   const capturedAt = text(capture.capturedAt) ?? text(report.capturedAt);
   const chainId = capture.chainId ?? report.chainId;
   const network = chainId === 84532 ? 'Base Sepolia' : chainId === 8453 ? 'Base' : chainId === 42161 ? 'Arbitrum' : chainId === 1 ? 'Ethereum' : 'Network unavailable';
@@ -101,11 +103,11 @@ export function ReportView({ report, modules = noModules, access, token = '', ev
   const facts = [
     ['Network', network],
     ['Wallet', text(capture.owner) ?? text(report.owner)],
-    ['Vault', text(capture.vault ?? record(capture.deployment).outerVault)],
+    ['Vault', text(capture.vault ?? report.vault ?? record(capture.deployment).outerVault)],
     ['Observed at block', block],
     ['Capture timestamp', capturedAt],
     ['Evidence ID', text(report.captureDigest) ?? 'Not included in this report'],
-    ['Evidence', sourceMode.startsWith('live') ? 'Fresh public data' : sourceMode.startsWith('recorded') ? 'Recorded evidence' : readable(sourceMode)],
+    ['Evidence', sourceMode.startsWith('recorded') ? 'Recorded evidence' : historical ? 'Historical public data queried now' : sourceMode.startsWith('live') ? 'Fresh public data' : readable(sourceMode)],
   ].filter((item): item is [string, string] => item[1] !== undefined);
   const technicalFacts = [
     ['Report type', readable(reportType)],
@@ -118,7 +120,7 @@ export function ReportView({ report, modules = noModules, access, token = '', ev
 
   return <article className="report-view">
     <header className="report-header">
-      <div><p className="section-label">Evidence report</p><div className="report-meta"><StatusBadge tone={sourceMode.startsWith('live') ? 'success' : 'info'}>{sourceMode.startsWith('live') ? 'Fresh check' : 'Saved example'}</StatusBadge><span>{readable(reportType)}</span></div><h2>{result.title}</h2></div>
+      <div><p className="section-label">Evidence report</p><div className="report-meta"><StatusBadge tone={sourceMode.startsWith('live') ? 'success' : 'info'}>{sourceMode.startsWith('recorded') ? 'Saved example' : historical ? 'Historical check' : 'Fresh check'}</StatusBadge><span>{readable(reportType)}</span></div><h2>{result.title}</h2></div>
       <span className={`verdict-icon verdict-${result.tone}`}><VerdictIcon size={25} /></span>
     </header>
     <ReportTabs sections={[
@@ -131,14 +133,15 @@ export function ReportView({ report, modules = noModules, access, token = '', ev
     <dl className="fact-grid">{facts.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{['Wallet', 'Vault', 'Observed at block', 'Evidence ID'].includes(label) && value !== 'Not included in this report' ? <CopyValue value={value} label={label} /> : value}</dd></div>)}</dl>
     <ValueConversion report={report} modules={modules} />
     <PositionOverview report={report} />
+    {historical && <HistoricalEvidence report={report} />}
 
     {Object.keys(view).length > 0 && <section className="report-section"><p className="section-label">Observed position</p><div className="position-grid">
       {Object.entries(view).filter(([, value]) => typeof value === 'string').map(([key, value]) => <div key={key}><span>{readable(key)}</span><strong title={String(value)}>{address(value)}</strong></div>)}
     </div></section>}
       </> },
-      { label: 'Evidence path', content: <PositionDiagram report={report} /> },
+      ...(!historical ? [{ label: 'Evidence path', content: <PositionDiagram report={report} /> }] : []),
       ...(modules.length ? [{ label: 'Source checks', content: <EvidenceSources report={report} modules={modules} /> }] : []),
-      { label: 'Ask about this report', content: <ExplainReport report={report} modules={modules} access={access} token={token} evidence={evidence} /> },
+      ...(!historical ? [{ label: 'Ask about this report', content: <ExplainReport report={report} modules={modules} access={access} token={token} evidence={evidence} /> }] : []),
       { label: 'Limitations', content: <>
     <section className="report-section metric-section">
       <div><p className="section-label">Measured result</p><h3>{metric.kind === 'available' ? formatMetric(metric) : 'No reliable backing measure yet'}</h3></div>

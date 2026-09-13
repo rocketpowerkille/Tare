@@ -18,12 +18,15 @@ import { AnalyzeSchema, ReplaySchema, ExampleSchema, MAX_INPUT_BYTES, ServiceErr
 import { composePosition } from './composition.js';
 import { valuePositionWithChainlink } from '../../verification/src/valuation.js';
 import { verifySuppliedAccounting } from '../../verification/src/supplied-accounting.js';
+import { verifyHistoricalGraph, replayHistoricalGraph } from '../../verification/src/historical-graph.js';
 
 export interface ServiceConfig {
   rpcUrl?: string;
   secondaryRpcUrl?: string;
   graphUrl?: string;
   expectedDeployment?: string;
+  historicalGraphUrl?: string;
+  historicalGraphDeployment?: string;
   graphApiKey?: string;
   graphMarketToken?: string;
   tokenApiUrl?: string;
@@ -51,6 +54,8 @@ export function configFromEnv(env: NodeJS.ProcessEnv = process.env): ServiceConf
   const config: ServiceConfig = Object.fromEntries(Object.entries({
     rpcUrl: env.TARE_RPC_URL, secondaryRpcUrl: env.TARE_SECONDARY_RPC_URL,
     graphUrl: env.TARE_GRAPH_URL, expectedDeployment: env.TARE_GRAPH_DEPLOYMENT,
+    historicalGraphUrl: env.TARE_GRAPH_HISTORICAL_URL,
+    historicalGraphDeployment: env.TARE_GRAPH_HISTORICAL_DEPLOYMENT,
     graphApiKey: env.GRAPH_API_KEY,
     graphMarketToken: env.GRAPH_MARKET_API_TOKEN,
     tokenApiUrl: env.TARE_GRAPH_TOKEN_API_URL,
@@ -95,6 +100,7 @@ export class TareService {
       live: { 'resolve-v1': rpc || Boolean(this.config.baseMainnetRpcUrl || this.config.arbitrumRpcUrl), 'resolve-v2': rpc,
         'resolve-erc4626': rpc || Boolean(this.config.baseMainnetRpcUrl || this.config.arbitrumRpcUrl || this.config.baseRpcUrl), 'verify-shares': graph,
         'verify-accounting': graph, 'verify-graph-composition': graph && Boolean(this.config.graphMarketToken),
+        'verify-historical-graph': rpc && Boolean(this.config.historicalGraphUrl && this.config.historicalGraphDeployment),
         'verify-weth': rpc && Boolean(this.config.secondaryRpcUrl),
         'value-position': rpc,
         'verify-base-custody': Boolean(this.config.baseRpcUrl && this.config.baseSecondaryRpcUrl
@@ -140,6 +146,7 @@ export class TareService {
       case 'verify-shares': return replayShareVerification(request.capture);
       case 'verify-accounting': return replayAccounting(request.capture);
       case 'verify-graph-composition': return replayGraphComposition(request.capture);
+      case 'verify-historical-graph': return replayHistoricalGraph(request.capture);
       case 'verify-weth': return replayCustody(request.capture);
       case 'verify-base-custody': return replayBaseSepoliaCustody(request.capture);
     }
@@ -168,6 +175,8 @@ export class TareService {
           ...(request.blockNumber === undefined ? {} : { blockNumber: request.blockNumber }) });
       }
       case 'verify-shares': return verifyShares({ ...graph, owner: request.owner, vault: request.vault }, graphApiKey);
+      case 'verify-historical-graph': return verifyHistoricalGraph({ ...rpc, owner: request.owner, vault: request.vault,
+        graphUrl: this.config.historicalGraphUrl!, expectedDeployment: this.config.historicalGraphDeployment! }, graphApiKey);
       case 'verify-accounting': return verifyAccounting({ ...graph, vault: request.vault }, graphApiKey);
       case 'verify-graph-composition': return verifyGraphComposition({
         ...graph, owner: request.owner, vault: request.vault,

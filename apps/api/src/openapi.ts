@@ -12,7 +12,7 @@ const blockNumber = {
 } as const;
 const operations = [
   'resolve-v1', 'resolve-v2', 'resolve-erc4626', 'verify-shares', 'verify-accounting',
-  'verify-graph-composition', 'verify-weth', 'verify-base-custody',
+  'verify-graph-composition', 'verify-historical-graph', 'verify-weth', 'verify-base-custody',
   'value-position',
 ] as const;
 const genericObject = { type: 'object', additionalProperties: true } as const;

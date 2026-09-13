@@ -7,7 +7,7 @@ import { checkWorkspace, checkEulerDiscovery } from './web-workspace-checks.mjs'
 import { checkTheme } from './web-theme-checks.mjs';
 import { checkSession } from './web-session-checks.mjs';
 import { checkDocs } from './web-docs-checks.mjs';
-import { checkChanges } from './web-change-checks.mjs';
+import { checkChanges, checkHistorical } from './web-change-checks.mjs';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.TARE_PLAYWRIGHT_MODULE || 'playwright');
@@ -276,6 +276,7 @@ try {
   console.log('Sandbox guide and session evidence rendering passed using an isolated authorization fixture. No payment made.');
   await checkWorkspace({ page, origin, fixture, capabilities, fits });
   await checkChanges({ page, origin, fixture, capabilities, fits });
+  await checkHistorical({ page, origin, fixture, capabilities, fits });
   await checkSession({ browser, origin, capabilities });
   await checkEulerDiscovery({ page, origin, fixture, capabilities, fits });
   assert.deepEqual(errors, [], 'Uncaught browser exceptions');

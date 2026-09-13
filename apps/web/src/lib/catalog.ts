@@ -2,6 +2,11 @@ import type { OperationDefinition, OperationId } from './types';
 
 export const operations: OperationDefinition[] = [
   {
+    id: 'verify-historical-graph', label: 'Verify historical shares and accounting', shortLabel: 'Historical Graph',
+    description: 'Compare the Steakhouse USDC creation-block share ledger and accounting with RPC at one indexed Ethereum block. Historical, non-executable evidence.',
+    network: 'Ethereum', owner: true, vault: true,
+  },
+  {
     id: 'verify-base-custody',
     label: 'Check Base Sepolia custody',
     shortLabel: 'Base custody',

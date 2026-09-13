@@ -93,6 +93,7 @@ Do not send fields from another operation: runtime schemas reject extra fields.
 | `resolve-erc4626` | `owner`, `vault` | `chainId` 1/8453/42161/84532 (default 1); `blockNumber`. Contract accounting only. |
 | `verify-shares` | `owner`, `vault` | `blockNumber`; Ethereum historical share ledger. |
 | `verify-accounting` | `vault` | `blockNumber`; configured Ethereum accounting read set. |
+| `verify-historical-graph` | `owner`, `vault` | Optional `blockNumber`; Steakhouse USDC Ethereum only. Uses the separately configured historical indexed head when omitted; combines shares and accounting at that block. Requires archive RPC. Historical, non-executable evidence. |
 | `verify-graph-composition` | `owner`, `vault` | No additional fields; Ethereum Token API plus eligible Studio comparison. |
 | `verify-weth` | `owner` | `blockNumber`; canonical Ethereum WETH wrapper scope only. |
 | `verify-base-custody` | `owner` | `blockNumber`; configured Base Sepolia custody control only. |

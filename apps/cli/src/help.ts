@@ -5,6 +5,11 @@ export const help = `Tare 0.1.0 — exposure CLI with offline replay and read-on
   tare verify accounting --vault <V1-vault> [--rpc-url <url>] [--graph-url <url>]
        [--graph-deployment <CID>] [--block-number <n>] [--json] [--out <capture.json>]
   tare verify accounting-replay <capture.json> [--json]
+  tare verify historical --address <owner> [--block-number <n>] [--timeout-ms <n>]
+       [--json] [--out <capture.json>]
+       Steakhouse USDC historical shares + accounting at the same indexed block.
+       Requires archive TARE_RPC_URL, TARE_GRAPH_HISTORICAL_URL and TARE_GRAPH_HISTORICAL_DEPLOYMENT.
+  tare verify historical-replay <capture.json> [--json]
   tare verify graph-products --address <owner> --vault <V1-vault>
        [--rpc-url <url>] [--graph-url <url>] [--graph-deployment <CID>]
        [--json] [--out <capture.json>]

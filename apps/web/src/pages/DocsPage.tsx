@@ -110,6 +110,7 @@ export function DocsPage() {
 
       <section className="doc-section" id="graph-verification">
         <p className="section-label">Graph verification</p><h2>One check, two Graph products, one blockchain reference</h2>
+        <p>For a historical cross-check, open <AppLink href="/investigate">Investigate</AppLink> and select <strong>Historical verification</strong>. This separately compares Steakhouse USDC’s transfer-derived shares and accounting with RPC at one indexed Ethereum block. Full sync is not required. The report shows block time and coverage; it does not represent current wallet state or executable evidence. Missing archive RPC or historical Graph configuration keeps the check unavailable or incomplete.</p>
         <p>When configured, The Graph composition runs alongside supported Ethereum MetaMorpho V1 analysis. It can also run from Advanced options. The Token API and Studio provide distinct observations; Studio accounting coverage is specific to the configured vault, not every discovered vault.</p>
         <ol className="numbered-steps">
           <li><span>1</span><div><strong>Token API reads the position</strong><p>The Graph Token API reports the wallet's current balance of vault-share tokens.</p></div></li>

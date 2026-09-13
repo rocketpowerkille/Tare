@@ -14,7 +14,7 @@ export function formatAmount(raw: unknown, decimals: unknown, digits = 6): strin
 export function displayBlock(report: JsonRecord): string | undefined {
   const capture = record(report.capture);
   const witness = record(list(capture.witnesses)[0]);
-  const block = record(capture.block ?? record(capture.rpc).block ?? record(witness.rpc).block);
+  const block = record(capture.block ?? record(capture.rpc).block ?? record(record(capture.accounting).rpc).block ?? record(witness.rpc).block);
   try { return block.number === undefined ? undefined : BigInt(String(block.number)).toString(); }
   catch { return undefined; }
 }

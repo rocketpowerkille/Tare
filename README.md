@@ -21,7 +21,7 @@ verifier, proof-of-reserves system, or solvency oracle.
 | Page | Question | Scope |
 | --- | --- | --- |
 | Explorer (`/explore`) | What does this position rest on? | One selected wallet–vault position, its trace and eligible evidence checks. |
-| Investigate (`/investigate`) | What do my positions share, or what changed? | At most three supported positions and shared-market dependencies, or one position compared at two explicit blocks. |
+| Investigate (`/investigate`) | What do my positions share, or what changed? | At most three supported positions and shared-market dependencies, two-block comparisons, or Steakhouse USDC historical share/accounting verification. |
 | Examples (`/examples`) | How can I read or reproduce a report? | Saved examples and compatible capture uploads; no fresh source acquisition. |
 
 Explorer and Investigate reuse the same evidence engine. The added value is the
@@ -154,6 +154,11 @@ submission-evidence gap.
 
 The separate creation-block share ledger has no completed historical acceptance
 in this repository. The accounting-only deployment does not substitute for it.
+The implemented **Historical verification** tab, `verify-historical-graph` API
+operation and `verify historical` CLI command compare both shares and accounting
+at one already indexed block. They do not require full sync or replace the recent
+endpoint. Live acceptance awaits an archive-capable RPC; historical reports retain
+their checked block/time and cannot become executable evidence.
 See [Graph integration and reproduction](docs/GRAPH_INTEGRATION.md).
 
 ## Chainlink integration

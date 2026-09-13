@@ -82,6 +82,10 @@ export function compactEvidenceReport(value: unknown): Record<string, unknown> {
   const { capture: _capture, markets, analysis, backing, checks, ...report } = value as Record<string, unknown>;
   return {
     ...report,
+    ...(report.reportType === 'historical-graph-verification' ? {
+      accounting: compactEvidenceReport(report.accounting),
+      shares: report.shares ? compactEvidenceReport(report.shares) : null,
+    } : {}),
     ...(markets === undefined ? {} : { markets: summarizeMarkets(markets) }),
     ...(analysis === undefined ? {} : { analysis: summarizeAnalysis(analysis) }),
     ...(backing === undefined ? {} : { backing: summarizeBacking(backing) }),

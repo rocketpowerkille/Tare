@@ -1,5 +1,49 @@
 import assert from 'node:assert/strict';
 
+export async function checkHistorical({ page, origin, fixture, capabilities, fits }) {
+  await page.unroute('**/api/status');
+  await page.route('**/api/status', route => route.fulfill({ json: { ...capabilities,
+    live: { ...capabilities.live, 'verify-historical-graph': true } } }));
+  await page.unroute('**/api/analyze');
+  const calls = [];
+  const report = { reportType: 'historical-graph-verification', sourceMode: 'live-historical-graph-rpc',
+    status: 'matched', chainId: 1, owner: fixture.owner, vault: fixture.vault.address,
+    checkedBlock: '25940000', checkedAt: '2026-09-09T12:00:00.000Z',
+    coverage: { shareStartBlock: '18928285', accountingStartBlock: '25937756', executable: false, currentStateVerified: false },
+    capture: { owner: fixture.owner, accounting: { rpc: { block: { number: '25940000' } } } },
+    accounting: { status: 'matched', checks: Array.from({ length: 56 }, () => ({ status: 'matched' })) },
+    shares: { status: 'matched', checks: [{ field: 'owner-shares', status: 'matched', rpc: '100', graph: '100' }] },
+    metric: { kind: 'unavailable' } };
+  await page.route('**/api/analyze', route => {
+    calls.push(route.request().postDataJSON());
+    return route.fulfill({ json: report });
+  });
+  await page.goto(origin + '/investigate');
+  const tools = page.getByRole('tablist', { name: 'Choose an investigation' });
+  await tools.getByRole('tab', { name: /Wallet overview/ }).focus();
+  await page.keyboard.press('ArrowLeft');
+  assert.equal(await tools.getByRole('tab', { name: /Historical verification/ }).getAttribute('aria-selected'), 'true');
+  assert.equal(calls.length, 0);
+  await page.getByLabel('Historical wallet address', { exact: true }).fill(fixture.owner);
+  await page.getByRole('button', { name: 'Verify historical position', exact: true }).click();
+  const panel = page.locator('.historical-investigator');
+  await panel.locator('.report-view').waitFor();
+  assert.deepEqual(calls, [{ operation: 'verify-historical-graph', owner: fixture.owner, vault: fixture.vault.address }]);
+  assert.match(await panel.locator('.report-meta').innerText(), /Historical check/i);
+  assert.match(await panel.innerText(), /2026-09-09T12:00:00.000Z/);
+  assert.match(await panel.innerText(), /does not verify current wallet state/);
+  assert.equal(await panel.getByRole('tab', { name: 'Ask about this report', exact: true }).count(), 0);
+  for (const width of [1440, 768, 390, 320]) {
+    await page.setViewportSize({ width, height: 1000 }); await fits(`historical verification ${width}`);
+  }
+  await tools.getByRole('tab', { name: /Changes over time/ }).click();
+  await tools.getByRole('tab', { name: /Historical verification/ }).click();
+  assert.equal(await page.getByLabel('Historical wallet address', { exact: true }).inputValue(), fixture.owner);
+  assert.equal(calls.length, 1);
+  await panel.screenshot({ path: new URL('../tmp/ui-review/historical-mobile.png', import.meta.url).pathname.replace(/^\/(?=[A-Z]:)/, '') });
+  console.log('Historical UI: on-demand request, block time, non-executable scope, keyboard, preserved state and responsive layout passed (fixtures only).');
+}
+
 // UI-only fixtures. No provider or Bazantic execution is performed.
 export async function checkChanges({ page, origin, fixture, capabilities, fits }) {
   await page.unroute('**/api/status');

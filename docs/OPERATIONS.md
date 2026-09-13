@@ -38,6 +38,7 @@ setup. Never put actual provider credentials, API tokens or wallet keys in Git.
 | Additional ERC-4626 vaults | `TARE_ERC4626_REGISTRY`: JSON array of at most 25 `{chainId,vault,name,protocol}` entries. Reads require that chain's RPC. Missing or incomplete registry reads make discovery incomplete. |
 | Graph accounting / shares | `TARE_GRAPH_URL`, `TARE_GRAPH_DEPLOYMENT`, Ethereum RPC; `GRAPH_API_KEY` when required. Choose the appropriate accounting or share-ledger deployment. |
 | Graph product composition | Also requires `GRAPH_MARKET_API_TOKEN`; endpoint override `TARE_GRAPH_TOKEN_API_URL`. Studio coverage remains vault-specific. |
+| Historical shares + accounting | `TARE_GRAPH_HISTORICAL_URL`, `TARE_GRAPH_HISTORICAL_DEPLOYMENT` and archive-capable `TARE_RPC_URL`. Uses the historical deployment for both comparisons; leaves the recent endpoint unchanged. See [setup and acceptance](GRAPH_INTEGRATION.md#historical-verification-without-waiting-for-sync). |
 | Hosted HTTP | `TARE_PUBLIC_ORIGIN` plus JSON `TARE_API_KEYS`; `TARE_REQUESTS_PER_MINUTE` defaults to 60, range 1–600. Use unique 32–128 character base64url tokens. |
 | Listen address | `TARE_BIND_HOST` defaults to `127.0.0.1`; `0.0.0.0` requires hosted access. `TARE_PORT` overrides platform `PORT`, otherwise 4318. TLS terminates at the configured ingress. |
 | Render origin fallback | Platform `RENDER=true` and `RENDER_EXTERNAL_URL` supply the origin only when `TARE_PUBLIC_ORIGIN` is absent. |
@@ -98,7 +99,7 @@ Implemented recovery logic does not establish a running hosted monitor.
 - A **capture** stores source observations for compatible replay. A **report**
   stores interpreted results. Synthetic snapshots/recordings are separate formats.
 - `live resolve/example/replay --out` writes a report; `--capture-out` writes its
-  capture. The two paths must differ. Nested, accounting, Graph-product and custody
+  capture. The two paths must differ. Nested, accounting, historical, Graph-product and custody
   `--out` options write captures. Share verification `--out` writes its report.
 - Ordinary CLI outputs use exclusive creation and refuse to overwrite a file.
   Monitor checkpoints are deliberately replaced atomically under the store lock.

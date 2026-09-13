@@ -3,10 +3,12 @@ import { ArrowRight, FileClock, ScanSearch } from '../Icons';
 import type { Capabilities } from '../../lib/types';
 import { ChangeInvestigator } from './ChangeInvestigator';
 import { WalletInvestigation } from './WalletInvestigation';
+import { HistoricalInvestigation } from './HistoricalInvestigation';
 
 const tools = [
   { title: 'Wallet overview', description: 'Find supported positions and the dependencies they share.', Icon: ScanSearch },
   { title: 'Changes over time', description: 'Compare a position at two blocks or use saved reports.', Icon: FileClock },
+  { title: 'Historical verification', description: 'Compare indexed shares and accounting at one block.', Icon: FileClock },
 ];
 
 export function InvestigationWorkspace({ token, capabilities, disabled }: { token: string; capabilities: Capabilities; disabled: boolean }) {
@@ -21,7 +23,8 @@ export function InvestigationWorkspace({ token, capabilities, disabled }: { toke
         tabIndex={active === index ? 0 : -1} ref={element => { buttons.current[index] = element; }}
         onClick={() => setActive(index)} onKeyDown={event => {
           const next = event.key === 'Home' ? 0 : event.key === 'End' ? tools.length - 1
-            : ['ArrowLeft', 'ArrowRight'].includes(event.key) ? (index + 1) % tools.length : undefined;
+            : event.key === 'ArrowRight' ? (index + 1) % tools.length
+              : event.key === 'ArrowLeft' ? (index + tools.length - 1) % tools.length : undefined;
           if (next === undefined) return;
           event.preventDefault();
           setActive(next);
@@ -32,12 +35,15 @@ export function InvestigationWorkspace({ token, capabilities, disabled }: { toke
         <ArrowRight size={18} />
       </button>)}
     </div>
-    {/* Keep both tools mounted so switching preserves inputs and completed work. */}
+    {/* Keep tools mounted so switching preserves inputs and completed work. */}
     <div role="tabpanel" id={`${id}-panel-0`} aria-labelledby={`${id}-tab-0`} hidden={active !== 0}>
       <WalletInvestigation token={token} disabled={disabled} />
     </div>
     <div role="tabpanel" id={`${id}-panel-1`} aria-labelledby={`${id}-tab-1`} hidden={active !== 1}>
       <ChangeInvestigator token={token} capabilities={capabilities} disabled={disabled} />
+    </div>
+    <div role="tabpanel" id={`${id}-panel-2`} aria-labelledby={`${id}-tab-2`} hidden={active !== 2}>
+      <HistoricalInvestigation token={token} capabilities={capabilities} disabled={disabled} />
     </div>
   </section>;
 }

@@ -7,12 +7,14 @@ import { runAccountingCommand } from './accounting.js';
 import { runCustodyCommand } from './custody.js';
 import { runBaseCustodyCommand } from './base-custody.js';
 import { runGraphCompositionCommand } from './graph-composition.js';
+import { runHistoricalGraphCommand } from './historical-graph.js';
 
 function required(input: string | undefined, name: string): string {
   if (!input) throw new Error(`Missing ${name}`); return input;
 }
 export async function runVerifyCommand(positionals: string[], values: Values): Promise<number> {
   const action = positionals[1];
+  if (action === 'historical' || action === 'historical-replay') return runHistoricalGraphCommand(positionals, values);
   if (action === 'accounting' || action === 'accounting-replay') return runAccountingCommand(positionals, values);
   if (action === 'custody' || action === 'custody-replay') return runCustodyCommand(positionals, values);
   if (action === 'base-custody' || action === 'base-custody-replay') return runBaseCustodyCommand(positionals, values);

@@ -44,7 +44,52 @@ balance. A last-update block newer than the comparison block is unaligned. An
 older update is not proof that the Token API offers a historical snapshot.
 Source blocks and coverage remain explicit.
 
-## Deployment references
+## Historical verification without waiting for sync
+
+`verify-historical-graph` queries both the share ledger and accounting from the
+historical deployment. It does not use the recent accounting-only deployment for
+older blocks. Leave `blockNumber` absent to select the historical indexed head,
+or pin an explicit covered block. Both comparisons must agree on the block number,
+hash, timestamp, position and pinned deployment. The share ledger must declare
+indexing from creation block `18928285`; combined accounting coverage starts at
+`25937756`. Indexing errors and missing history produce incomplete evidence.
+
+The API, stdio MCP, CLI and **Investigate → Historical verification** support this
+operation. It runs on demand, so normal Explorer checks do not wait for the extra
+historical RPC calls. The result shows block time, separate share/accounting
+statuses, and non-executable historical scope. Its creation-block coverage is for
+this vault through the checked block, not all vaults or the latest chain state.
+Replay recomputes the comparisons and preserves a recorded source label. The
+historical report is not yet an input to the in-page Recipe explanation flow.
+
+Configure the following in the server environment alongside existing Graph settings:
+
+```text
+TARE_GRAPH_HISTORICAL_URL=https://api.studio.thegraph.com/query/1760123/tare-steakhouse-usdc-ethereum/0.1.0
+TARE_GRAPH_HISTORICAL_DEPLOYMENT=QmZrGd5mh9V5x57J4ETN9sWVP2P3VMVpRgQ7p5XK9CW1hw
+```
+
+`TARE_RPC_URL` must support archive `eth_call` using a canonical block hash.
+`GRAPH_API_KEY` remains optional if the configured Graph endpoint requires it.
+Never place keyed provider URLs in Git or command examples. The CLI requires
+these variables in its process environment; it does not load `.env` automatically.
+
+```sh
+pnpm cli verify historical --address <public-wallet> --out historical.capture.json
+pnpm cli verify historical-replay historical.capture.json --json
+```
+
+Canonical API input: `{"operation":"verify-historical-graph","owner":"<public-wallet>","vault":"0xbeef01735c132ada46aa9aa4c54623caa92a64cb"}`.
+Other vaults are rejected. Explicit blocks beyond indexed coverage are not
+replaced with latest. Configure both historical environment variables and restart
+the server to enable the capability. Hosted API deployment/configuration remains
+an operator step; updating code does not change the running server.
+
+The initial public-RPC attempt on 2026-09-13 reached a historical block but
+`eth_call` reported pruned state. Combined live acceptance remains pending an
+archive provider; local HTTP fixtures are not hosted acceptance evidence.
+
+## Deployment identifiers
 
 These public identifiers are retained references, not an uptime claim.
 

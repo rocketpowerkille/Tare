@@ -70,6 +70,7 @@ export type OperationId =
   | 'verify-shares'
   | 'verify-accounting'
   | 'verify-graph-composition'
+  | 'verify-historical-graph'
   | 'verify-weth'
   | 'verify-base-custody';
 
