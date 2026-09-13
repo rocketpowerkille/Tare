@@ -4,10 +4,13 @@ import { api } from '../../lib/api';
 import type { Capabilities, JsonRecord } from '../../lib/types';
 import { ChangeReport } from './ChangeReport';
 import { InvestigationAssistant } from './InvestigationAssistant';
+import { useWalletAddress } from '../../lib/wallet-address';
 
 export function ChangeInvestigator({ token, capabilities, disabled }: { token: string; capabilities: Capabilities; disabled: boolean }) {
   const id = useId();
-  const [input, setInput] = useState({ owner: '', vault: '', beforeBlock: '', afterBlock: '' });
+  const [owner, setOwner] = useWalletAddress();
+  const [fields, setFields] = useState({ vault: '', beforeBlock: '', afterBlock: '' });
+  const input = { owner, ...fields };
   const [mode, setMode] = useState('live');
   const [reports, setReports] = useState<{ current?: JsonRecord; previous?: JsonRecord }>({});
   const [stages, setStages] = useState<AcquisitionStage[]>([]);
@@ -19,7 +22,7 @@ export function ChangeInvestigator({ token, capabilities, disabled }: { token: s
   useEffect(() => {
     generation.current++; locked.current = false; setBusy(false); setReports({}); setStages([]); setError('');
     return () => { generation.current++; };
-  }, [token]);
+  }, [token, owner]);
   async function run() {
     if (locked.current || disabled) return;
     try { validateChangeInput(input); } catch (failure) { setError((failure as Error).message); return; }
@@ -62,7 +65,12 @@ export function ChangeInvestigator({ token, capabilities, disabled }: { token: s
     {mode === 'live' ? <form onSubmit={event => { event.preventDefault(); void run(); }}>
       <div className="change-inputs">{(['owner', 'vault', 'beforeBlock', 'afterBlock'] as const).map(field => <div key={field}>
         <label htmlFor={`${id}-${field}`}>{{ owner: 'Change investigation wallet', vault: 'Change investigation vault', beforeBlock: 'Previous block', afterBlock: 'Current block' }[field]}</label>
-        <input id={`${id}-${field}`} value={input[field]} required disabled={busy || disabled} inputMode={field.endsWith('Block') ? 'numeric' : 'text'} onChange={event => { setInput(previous => ({ ...previous, [field]: event.target.value.trim() })); setReports({}); setStages([]); }} />
+        <input id={`${id}-${field}`} value={input[field]} required disabled={busy || disabled} inputMode={field.endsWith('Block') ? 'numeric' : 'text'} onChange={event => {
+          const value = event.target.value.trim();
+          if (field === 'owner') setOwner(value);
+          else setFields(previous => ({ ...previous, [field]: value }));
+          setReports({}); setStages([]);
+        }} />
       </div>)}</div>
       <p>Up to four API operations: two position reads and two indexed-accounting comparisons. Historical RPC and Graph coverage are required. A missing block stays unavailable; Tare never substitutes latest.</p>
       {!capabilities.live['resolve-v1'] && <p>Ethereum position reads are not configured. You can still compare saved reports.</p>}

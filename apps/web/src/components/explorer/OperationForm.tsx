@@ -4,6 +4,7 @@ import { operationById, operations } from '../../lib/catalog';
 import type { Capabilities, DiscoveryResult, OperationId } from '../../lib/types';
 import { StatusBadge } from '../StatusBadge';
 import { Term } from '../Term';
+import { useWalletAddress } from '../../lib/wallet-address';
 
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
 
@@ -24,7 +25,7 @@ export function OperationForm({ capabilities, busy, operation, onOperationChange
   onDiscover: (owner: string) => Promise<DiscoveryResult>;
   onRun: (input: AnalyzeInput) => void;
 }) {
-  const [owner, setOwner] = useState('');
+  const [owner, setOwner] = useWalletAddress();
   const [vault, setVault] = useState('');
   const [blockNumber, setBlockNumber] = useState('');
   const [chainId, setChainId] = useState(1);
@@ -43,7 +44,7 @@ export function OperationForm({ capabilities, busy, operation, onOperationChange
     && (!definition.vault || ADDRESS.test(vault.trim()));
 
   function updateOwner(value: string) {
-    setOwner(value);
+    setOwner(value.trim());
     setVault('');
     setDiscovery(undefined);
     setDiscoveryError('');

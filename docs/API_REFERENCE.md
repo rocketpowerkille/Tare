@@ -73,6 +73,10 @@ three chain metadata batches, without requesting a paid or forced refresh.
 Explorer checks one selected position; Investigate performs bounded wallet or
 two-block comparisons; Examples replays saved evidence and uploaded captures.
 All three workspaces share tab-scoped credentials, revalidated on reload.
+The public wallet input is shared in memory between Explorer and all Investigate
+tools, including browser back/forward navigation. Changing it clears investigation
+results and ignores pending responses for the previous wallet. Navigation clears
+reports and other form inputs; refresh or disconnect also clears the wallet input.
 **Disconnect session** clears this tab's credential and workspace locally;
 there is no logout/revocation API route and no grant revocation from this action.
 Public JSON contracts are `/openapi.json`, `/openapi-mcp.json`,

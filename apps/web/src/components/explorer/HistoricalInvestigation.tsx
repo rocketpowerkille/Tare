@@ -2,12 +2,13 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { api } from '../../lib/api';
 import type { Capabilities, JsonRecord } from '../../lib/types';
 import { ReportView } from './ReportView';
+import { useWalletAddress } from '../../lib/wallet-address';
 
 const vault = '0xbeef01735c132ada46aa9aa4c54623caa92a64cb';
 
 export function HistoricalInvestigation({ token, capabilities, disabled }: { token: string; capabilities: Capabilities; disabled: boolean }) {
   const id = useId();
-  const [owner, setOwner] = useState('');
+  const [owner, setOwner] = useWalletAddress();
   const [block, setBlock] = useState('');
   const [report, setReport] = useState<JsonRecord>();
   const [error, setError] = useState('');
@@ -18,7 +19,7 @@ export function HistoricalInvestigation({ token, capabilities, disabled }: { tok
   useEffect(() => {
     generation.current++; locked.current = false; setBusy(false); setReport(undefined); setError('');
     return () => { generation.current++; };
-  }, [token]);
+  }, [token, owner]);
 
   async function run() {
     if (locked.current || disabled || !enabled) return;

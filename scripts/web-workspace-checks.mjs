@@ -1,5 +1,54 @@
 import assert from 'node:assert/strict';
 
+export async function checkWalletNavigation({ page, origin, fixture, capabilities }) {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.unroute('**/api/status');
+  await page.route('**/api/status', route => route.fulfill({ json: capabilities }));
+  await page.unroute('**/api/discover');
+  await page.route('**/api/discover', route => route.fulfill({ json: { source: 'multi-protocol', complete: true, issues: [], positions: [{
+    owner: fixture.owner, vault: fixture.vault.address, chainId: 1, name: 'Navigation fixture vault', protocol: 'morpho', version: 'v1',
+    network: 'Ethereum', asset: { symbol: 'USDC' }, support: { status: 'supported', operation: 'resolve-v1', checkType: 'Fixture only' },
+  }] } }));
+  await page.goto(origin + '/explore');
+  await page.locator('#owner').fill(fixture.owner);
+  await page.getByRole('button', { name: 'Find my vaults', exact: true }).click();
+  await page.getByRole('button', { name: /Navigation fixture vault/ }).waitFor();
+  await page.getByRole('link', { name: 'Investigate', exact: true }).first().click();
+  assert.equal(await page.getByLabel('Public wallet address', { exact: true }).inputValue(), fixture.owner);
+  const tools = page.getByRole('tablist', { name: 'Choose an investigation' });
+  await tools.getByRole('tab', { name: /Changes over time/ }).click();
+  assert.equal(await page.getByLabel('Change investigation wallet', { exact: true }).inputValue(), fixture.owner);
+  await tools.getByRole('tab', { name: /Historical verification/ }).click();
+  assert.equal(await page.getByLabel('Historical wallet address', { exact: true }).inputValue(), fixture.owner);
+  const changed = `0x${'8'.repeat(40)}`;
+  await page.getByLabel('Historical wallet address', { exact: true }).fill(changed);
+  await tools.getByRole('tab', { name: /Wallet overview/ }).click();
+  assert.equal(await page.getByLabel('Public wallet address', { exact: true }).inputValue(), changed);
+  let release;
+  const gate = new Promise(resolve => { release = resolve; });
+  await page.route('**/api/investigation/wallet', async route => {
+    await gate;
+    await route.fulfill({ json: { reportType: 'wallet-investigation', owner: changed, results: [] } });
+  });
+  const request = page.waitForRequest('**/api/investigation/wallet');
+  await page.getByRole('button', { name: 'Investigate wallet', exact: true }).click();
+  await request;
+  await tools.getByRole('tab', { name: /Changes over time/ }).click();
+  await page.getByLabel('Change investigation wallet', { exact: true }).fill(fixture.owner);
+  const response = page.waitForResponse('**/api/investigation/wallet');
+  release(); await response;
+  await tools.getByRole('tab', { name: /Wallet overview/ }).click();
+  assert.equal(await page.getByText('Full wallet investigation JSON', { exact: true }).count(), 0);
+  await page.goBack();
+  assert.equal(await page.locator('#owner').inputValue(), fixture.owner);
+  await page.goForward();
+  assert.equal(await page.getByLabel('Public wallet address', { exact: true }).inputValue(), fixture.owner);
+  await page.reload();
+  assert.equal(await page.getByLabel('Public wallet address', { exact: true }).inputValue(), '');
+  await page.unroute('**/api/investigation/wallet');
+  console.log('Wallet carries from discovery to all investigation tools and browser history; changed-wallet responses are discarded and refresh clears the draft. Fixtures only.');
+}
+
 export async function checkEulerDiscovery({ page, origin, fixture, capabilities, fits }) {
   const eulerCapabilities = { ...capabilities, discoveryProtocols: ['morpho', 'euler'],
     networks: capabilities.networks.map(network => ({ ...network, erc4626: true })) };

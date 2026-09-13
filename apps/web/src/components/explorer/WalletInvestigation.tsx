@@ -3,9 +3,10 @@ import { api } from '../../lib/api';
 import { list, record, text, type JsonRecord } from '../../lib/types';
 import { InvestigationAssistant } from './InvestigationAssistant';
 import { ExposureOverlap } from './ExposureOverlap';
+import { useWalletAddress } from '../../lib/wallet-address';
 
 export function WalletInvestigation({ token, disabled }: { token: string; disabled: boolean }) {
-  const [owner, setOwner] = useState('');
+  const [owner, setOwner] = useWalletAddress();
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<JsonRecord>();
   const [error, setError] = useState('');
@@ -14,7 +15,7 @@ export function WalletInvestigation({ token, disabled }: { token: string; disabl
   useEffect(() => {
     generation.current++; setResult(undefined); setError(''); setBusy(false); lock.current = false;
     return () => { generation.current++; };
-  }, [token]);
+  }, [token, owner]);
   async function investigate() {
     if (disabled || lock.current || !/^0x[0-9a-fA-F]{40}$/.test(owner)) return;
     lock.current = true; setBusy(true); setError(''); setResult(undefined);

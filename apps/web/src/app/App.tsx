@@ -4,6 +4,7 @@ import { DevelopersPage } from '../pages/DevelopersPage';
 import { DocsPage } from '../pages/DocsPage';
 import { ExplorerPage } from '../pages/ExplorerPage';
 import { HomePage } from '../pages/HomePage';
+import { WalletAddressProvider } from '../lib/wallet-address';
 
 const routeMetadata: Record<string, { title: string; description: string }> = {
   '/': {
@@ -52,5 +53,5 @@ export function App() {
     : path === '/docs' ? <DocsPage />
       : path === '/developers' ? <DevelopersPage />
         : <HomePage />;
-  return <AppShell path={path}>{page}</AppShell>;
+  return <WalletAddressProvider><AppShell path={path}>{page}</AppShell></WalletAddressProvider>;
 }
